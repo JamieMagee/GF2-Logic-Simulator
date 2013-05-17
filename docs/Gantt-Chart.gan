@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Untitled Gantt Project" company="" webLink="http://" view-date="2013-05-12" view-index="0" gantt-divider-location="315" resource-divider-location="300" version="2.0">
+    <description/>
+    <view zooming-state="default:0"/>
+    <!-- -->
+    <calendars>
+        <day-types>
+            <day-type id="0"/>
+            <day-type id="1"/>
+            <calendar id="1" name="default">
+                <default-week sun="1" mon="0" tue="0" wed="0" thu="0" fri="0" sat="1"/>
+                <overriden-day-types/>
+                <days/>
+            </calendar>
+        </day-types>
+    </calendars>
+    <tasks>
+        <taskproperties>
+            <taskproperty id="tpd0" name="type" type="default" valuetype="icon"/>
+            <taskproperty id="tpd1" name="priority" type="default" valuetype="icon"/>
+            <taskproperty id="tpd2" name="info" type="default" valuetype="icon"/>
+            <taskproperty id="tpd3" name="name" type="default" valuetype="text"/>
+            <taskproperty id="tpd4" name="begindate" type="default" valuetype="date"/>
+            <taskproperty id="tpd5" name="enddate" type="default" valuetype="date"/>
+            <taskproperty id="tpd6" name="duration" type="default" valuetype="int"/>
+            <taskproperty id="tpd7" name="completion" type="default" valuetype="int"/>
+            <taskproperty id="tpd8" name="coordinator" type="default" valuetype="text"/>
+            <taskproperty id="tpd9" name="predecessorsr" type="default" valuetype="text"/>
+        </taskproperties>
+        <task id="1" name="EBNF syntax" meeting="false" start="2013-05-14" duration="1" complete="0" priority="1" expand="true">
+            <depend id="2" type="2" difference="0" hardness="Strong"/>
+            <depend id="4" type="2" difference="0" hardness="Strong"/>
+            <depend id="17" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="2" name="Semantics description" meeting="false" start="2013-05-15" duration="2" complete="0" priority="1" expand="true">
+            <depend id="3" type="2" difference="0" hardness="Strong"/>
+            <depend id="5" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="4" name="Definition files" meeting="false" start="2013-05-15" duration="2" complete="0" priority="1" expand="true">
+            <depend id="3" type="2" difference="0" hardness="Strong"/>
+            <depend id="6" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="17" name="Project planning" meeting="false" start="2013-05-15" duration="2" complete="0" priority="1" expand="true">
+            <depend id="3" type="2" difference="0" hardness="Strong"/>
+            <depend id="7" type="2" difference="0" hardness="Strong"/>
+            <depend id="8" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="3" name="Error handling description" meeting="false" start="2013-05-17" duration="1" complete="0" priority="1" expand="true"/>
+        <task id="5" name="Design scanner" meeting="false" start="2013-05-17" duration="2" complete="0" priority="1" expand="true">
+            <depend id="9" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="6" name="Design names" meeting="false" start="2013-05-17" duration="2" complete="0" priority="1" expand="true">
+            <depend id="10" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="7" name="Design parser" meeting="false" start="2013-05-17" duration="2" complete="0" priority="1" expand="true">
+            <depend id="11" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="8" name="Design gui" meeting="false" start="2013-05-17" duration="2" complete="0" priority="1" expand="true">
+            <depend id="11" type="2" difference="0" hardness="Strong"/>
+            <depend id="12" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="10" name="Implement scanner" meeting="false" start="2013-05-21" duration="5" complete="0" priority="1" expand="true">
+            <depend id="13" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="9" name="Implement names" meeting="false" start="2013-05-21" duration="5" complete="0" priority="1" expand="true">
+            <depend id="13" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="11" name="Implement parser" meeting="false" start="2013-05-21" duration="5" complete="0" priority="1" expand="true">
+            <depend id="13" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="12" name="Implement gui" meeting="false" start="2013-05-21" duration="5" complete="0" priority="1" expand="true">
+            <depend id="13" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="13" name="Integration and Final Testing" meeting="false" start="2013-05-28" duration="3" complete="0" priority="1" expand="true">
+            <depend id="15" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="15" name="Maintenance" meeting="false" start="2013-05-31" duration="2" complete="0" priority="1" expand="true"/>
+    </tasks>
+    <resources>
+        <resource id="0" name="T Hillel" function="Default:1" contacts="th389" phone=""/>
+        <resource id="1" name="J Magee" function="0" contacts="jam96" phone=""/>
+        <resource id="2" name="M Jackson" function="1" contacts="mj380" phone=""/>
+    </resources>
+    <allocations>
+        <allocation task-id="1" resource-id="2" function="1" responsible="false" load="100.0"/>
+        <allocation task-id="1" resource-id="0" function="Default:1" responsible="false" load="100.0"/>
+        <allocation task-id="1" resource-id="1" function="0" responsible="false" load="100.0"/>
+        <allocation task-id="2" resource-id="2" function="1" responsible="true" load="100.0"/>
+        <allocation task-id="4" resource-id="1" function="0" responsible="true" load="100.0"/>
+        <allocation task-id="17" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="3" resource-id="0" function="Default:1" responsible="false" load="100.0"/>
+        <allocation task-id="3" resource-id="2" function="1" responsible="false" load="100.0"/>
+        <allocation task-id="3" resource-id="1" function="0" responsible="true" load="100.0"/>
+        <allocation task-id="5" resource-id="1" function="0" responsible="true" load="50.0"/>
+        <allocation task-id="6" resource-id="1" function="0" responsible="true" load="50.0"/>
+        <allocation task-id="7" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="8" resource-id="2" function="1" responsible="true" load="100.0"/>
+        <allocation task-id="10" resource-id="1" function="0" responsible="true" load="100.0"/>
+        <allocation task-id="9" resource-id="1" function="0" responsible="true" load="100.0"/>
+        <allocation task-id="11" resource-id="0" function="Default:1" responsible="true" load="100.0"/>
+        <allocation task-id="12" resource-id="2" function="1" responsible="true" load="100.0"/>
+        <allocation task-id="13" resource-id="2" function="1" responsible="true" load="100.0"/>
+        <allocation task-id="13" resource-id="0" function="Default:1" responsible="false" load="100.0"/>
+        <allocation task-id="13" resource-id="1" function="0" responsible="false" load="100.0"/>
+        <allocation task-id="15" resource-id="2" function="1" responsible="true" load="100.0"/>
+        <allocation task-id="15" resource-id="0" function="Default:1" responsible="false" load="100.0"/>
+        <allocation task-id="15" resource-id="1" function="0" responsible="false" load="100.0"/>
+    </allocations>
+    <vacations/>
+    <taskdisplaycolumns>
+        <displaycolumn property-id="tpd3" order="0" width="164"/>
+        <displaycolumn property-id="tpd4" order="1" width="31"/>
+        <displaycolumn property-id="tpd5" order="2" width="30"/>
+    </taskdisplaycolumns>
+    <previous/>
+    <roles roleset-name="Default"/>
+    <roles>
+        <role id="0" name="Programming Administrator"/>
+        <role id="1" name="Client"/>
+        <role id="6" name=""/>
+    </roles>
+</project>
