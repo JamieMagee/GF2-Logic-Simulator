@@ -1,0 +1,5 @@
+*.tex diff=tex
+*.cc diff=cpp
+*.h diff=cpp
+.gitattributes export-ignore
+.gitignore export-ignore
