@@ -9,27 +9,24 @@
 \usepackage{geometry}
 \geometry{verbose,tmargin=20mm,bmargin=20mm,lmargin=25mm,rmargin=25mm}
 
-% Indent verbatim environments
-\catcode`\@=11
-\let \saveverbatime \@xverbatim
-\def \@xverbatim {\leftskip = 1cm\relax\saveverbatime}
-\catcode`\@=12
-
 \usepackage{graphicx}
 \usepackage{listings}
 \usepackage{amsmath}
 \usepackage{verbatim}
+
+% Indent verbatim environments
+\makeatletter \def\verbatim@processline{\hspace*{2em}\the\verbatim@line\par}\makeatother
 
 \lstdefinelanguage{logicdef}
 {
   morekeywords={DEVICES, MONITORS, CONNECTIONS, END},
   sensitive=false,
   morecomment=[s]{/*}{*/},
-basicstyle=\small\ttfamily,
-keywordstyle=\pmb,
-frame=single,
-numbers=left,
-numberstyle=\tiny
+  basicstyle=\small\ttfamily,
+  keywordstyle=\pmb,
+  frame=single,
+  numbers=left,
+  numberstyle=\tiny
 }
 
 
@@ -48,22 +45,22 @@ numberstyle=\tiny
 
 This project aims to develop a logic simulation program, involving all five major phases of the software engineering life cycle: specification, design, implementation, testing and maintenance.
 
-This report focuses on the specification phase, providing the EBNF for syntax; an informal description of semantics and a description of the error handling, as well as example definition files.
+This report focuses on the specification phase, providing the EBNF for syntax, an informal description of semantics and a description of the error handling, as well as example definition files.
 Details of teamwork planning are also provided.
 
 \section{General approach}
 
 The project was broken into individual tasks within each phase of the software life cyle.
 The timeframe was then decided for each task and each task was assigned to either a team member or the whole team, depending on the nature of the task.
-This is shown in Figure 1 of Appendix A.
+This is shown in Figure~\ref{fig:ganttchart} of Appendix~\ref{appendix:gantt}.
 
 Each member of the team was also assigned a general project role as follows:
 
-\textbf{Project manager:} (T Hillel) - Responsible for project planning including delegation of tasks and ensuring project runs to set timescale.
+\textbf{Project manager:} (T Hillel) - Responsible for project planning including delegation of tasks and ensuring that the project runs to the set timescale.
 
-\textbf{Programming Administrator:} (J Magee) - Responsible for upkeep of project directory including performing builds and keeping legacy versions of the simulator.
+\textbf{Programming administrator:} (J Magee) - Responsible for upkeep of the project directory including performing builds and keeping legacy versions of the simulator.
 
-\textbf{Client:} (M Jackson) - Responsible for ensuring project meets client's requirements for logic simulator as defined in Appendix A of the GF2 Project Handout.
+\textbf{Client representative:} (M Jackson) - Responsible for ensuring that the project meets the client's requirements for the logic simulator as defined in Appendix A of the GF2 Project Handout.
 
 \section{Syntax and semantics}
 
@@ -74,7 +71,7 @@ connections = 'CONNECTIONS' [con] {';' con} 'END'
 monitors = 'MONITORS' [mon] {';' mon} 'END'
 \end{verbatim} 
 
-\textbf{Semantics:} An input file is composed of one of each of a devices, connections and monitors block, in that order. The devices block must contain at least one dev but the connections and monitors blocks may be empty. Each block is started with 'DEVICES', 'CONNECTIONS' and 'MONITORS' respectively, and each block is terminated with 'END'.
+\textbf{Semantics:} An input file is composed of one devices, one connections and one monitors block, in that order. The devices block must contain at least one \texttt{dev}, but the connections and monitors blocks may be empty. Each block is started with `\texttt{DEVICES}', `\texttt{CONNECTIONS}' and `\texttt{MONITORS}' respectively, and each block is terminated with `\texttt{END}'.
 
 \begin{verbatim}
 dev = clock|switch|gate|dtype|xor
@@ -86,26 +83,25 @@ dtype = 'DTYPE' devicename
 xor = 'XOR' devicename
 \end{verbatim} 
 
-\textbf{Semantics:} These statements define a new device of the specified type. Each \texttt{devicename} must be unique, and must not be \texttt{DEVICES}, \texttt{CONNECTIONS}, \texttt{MONITORS}, \texttt{END}, \texttt{CLOCK}, \texttt{SWITCH}, \texttt{AND}, \texttt{NAND}, \texttt{OR}, \texttt{NOR}, \texttt{DTYPE} or \texttt{XOR} which are reserved words.
-Each \texttt{devicename} referred to in the connections or monitors block must first be defined in the devices block. \texttt{devicename} is case sensitive. For a \texttt{CLOCK}, the integer parameter must be greater than zero, and represents the number of simulation cycles before output changes. For \texttt{SWITCH} devices, the parameter is the initial state of the device (1 is on, 0 is off).
+\textbf{Semantics:} These statements define a new device of the specified type. Each \texttt{devicename} must be unique, and must not be \texttt{DEVICES}, \texttt{CONNECTIONS}, \texttt{MONITORS}, \texttt{END}, \texttt{CLOCK}, \texttt{SWITCH}, \texttt{AND}, \texttt{NAND}, \texttt{OR}, \texttt{NOR}, \texttt{DTYPE} or \texttt{XOR}, as these are reserved words.
+Each \texttt{devicename} referred to in the connections or monitors block must first be defined in the devices block. \texttt{devicename} is case sensitive. For a \texttt{CLOCK}, the integer parameter must be greater than zero, and represents the number of simulation cycles between output state changes. For \texttt{SWITCH} devices, the parameter is the initial state of the device (1 is on, 0 is off).
 For logic gates (\texttt{AND}, \texttt{NAND}, \texttt{OR}, \texttt{NOR}), the parameter is the number of inputs.
 
 \begin{verbatim}
 con = devicename'.'input '=' devicename['.'output]
 \end{verbatim} 
-\textbf{Semantics:} Connects the specified device input to the specified device output. Multiple inputs may be connected to the same output, but attempting to connect multiple outputs to the same input is a semantic error. Multiple definitions of the same connection \textbf{\huge will generate an error message}, and are treated as a single instance of the connection. All inputs must be connected.
-
-See below for semantics rules for \verb|devicename'.'input| and \verb|devicename['.'output]|.
+\textbf{Semantics:} Connects the specified device input to the specified device output. Multiple inputs may be connected to the same output, but attempting to connect multiple outputs to the same input is a semantic error. Multiple definitions of the same connection (i.e. the same input and output as an existing connection) will generate a warning, and are treated as a single instance of the connection. All inputs must be connected. See below for semantic rules for \verb|devicename'.'input| and \verb|devicename['.'output]|.
+% TODO: warning or error for multiple outputs to the same input?
 
 \begin{verbatim}
 mon = devicename['.'output]
 \end{verbatim} 
-\textbf{Semantics:} Adds an output signal to the list of signals to be monitored. Multiple monitor statements for the same output signal generate an error message but are allowed.
+\textbf{Semantics:} Adds an output signal to the list of signals to be monitored. Multiple monitor statements for the same output signal generate a warning, but are allowed.
 
 \begin{verbatim}
 devicename = letter {'_'|letter|digit}
 \end{verbatim}
-\textbf{Semantics:} Only punctuation allowed in \texttt{devicename} is an underscore. Other semantics described above.
+\textbf{Semantics:} The only punctuation allowed in \texttt{devicename} is an underscore. Semantics for \texttt{devicename} are described above, in the description of \texttt{dev} statements.
 
 \begin{verbatim}
 input = 'I'('1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'|'10'|'11'|'12'|'13'|'14'|
@@ -114,9 +110,9 @@ output = 'Q'['BAR']
 \end{verbatim} 
 
 \textbf{Semantics:} \verb|devicename'.'input| indicates an input pin on a device. The input pin must be valid according to the properties of the device that \texttt{devicename} refers to. For example, for a gate defined to have 4 inputs, only \texttt{I1}, \texttt{I2}, \texttt{I3}, and \texttt{I4} may be used; and \texttt{DATA}, \texttt{CLK}, \texttt{SET}, and \texttt{CLEAR} may only be used when \texttt{devicename} is a \texttt{DTYPE}.
-Note that this rule prevents attempting to input to a \texttt{CLOCK} or \texttt{SWITCH}.
+Note that this rule prevents input to a \texttt{CLOCK} or \texttt{SWITCH}, as there are no valid input pin names for those devices.
 
-\verb|devicename['.'output]| indicates an output pin on a device. \texttt{output} must be given when \texttt{devicename} is a \texttt{DTYPE}, otherwise \texttt{output} must be omitted. 
+\verb|devicename['.'output]| indicates an output pin on a device. \texttt{output} must be given when \texttt{devicename} is a \texttt{DTYPE} (the only device with more than one output), otherwise \texttt{output} must be omitted. 
 
 Comments start with \texttt{/*} and are terminated by the first \texttt{*/}. A \texttt{/*} inside a comment is ignored. 
 
@@ -126,8 +122,7 @@ Comments start with \texttt{/*} and are terminated by the first \texttt{*/}. A \
 
 BULK UP
 
-If a semicolon is omitted, an error message should be printed and text should be skipped until the next semicolon is found. Scanning should then continue as normal. 
-% how to check if a semicolon is omitted?
+If a semicolon is omitted, an error message should be printed and text should be skipped until the next semicolon is found. Scanning should then continue as normal. A missing semicolon will be detected by the occurrence of a syntax error. After reading as many symbols as are allowed by the syntax rules in a \texttt{dev}, \texttt{con} or \texttt{mon} statement, the next symbol expected is either \texttt{END} or a semicolon. If the next symbol is neither of these, then a semicolon has been omitted. 
 
 If a \texttt{dev}, \texttt{con}, or \texttt{mon} statement does not conform to the correct syntax, then it will be ignored, an error message will be printed, and scanning will continue after the next semicolon. 
 
@@ -137,10 +132,14 @@ If \texttt{DEVICES}, \texttt{CONNECTIONS}, or \texttt{MONITORS} keyword appears 
 
 If a comment is not terminated before the end of the file, then an error message will be printed. The contents of the comment will still be ignored.
 
-If a \texttt{*/} is detected without a \texttt{/*}, an error message will be generated. Scanning will then continue as normal. MAYBE IGNORE TEXT BEFORE \texttt{*/} DISCUSS?
+If an end comment symbol (\texttt{*/}) is detected without a preceding start comment symbol (\texttt{/*}), an error message will be generated. Scanning will then continue as normal after the end comment symbol. 
+%MAYBE IGNORE TEXT BEFORE \texttt{*/} DISCUSS? There's no particularly good way to determine where to start ignoring it though. The program will probably ignore far too much of the definition file.
+%Also, the scanner will already have passed the preceding symbols to the parser, so they can't be ignored. 
 
 For all syntax errors, the error message will include the line number and indicate the position on that line of the error, as well as stating which of the previous errors has occured. All syntax errors are fatal and will not allow the programme to run.
-
+% TODO: Fatal or non-fatal syntax errors? Is the point of error handling to recover from errors and still be able to run as much of the circuit as possible, or to detect and report as many of the errors present in the definition file as possible?
+% Looking at the handout (particularly section 8.2), my feeling is that as much error recovery as possible should be attempted
+% Maybe ask a demonstrator on Tuesday?
 
 \subsection{Semantic errors}
 
@@ -154,6 +153,7 @@ Semantic errors in a \texttt{dev}, \texttt{con}, or \texttt{mon} statement will 
 \appendix
 
 \section{Appendix: Gantt chart}
+\label{appendix:gantt}
 \begin{figure}[h]
  \centering
   \includegraphics[height=19cm]{Gantt-Chart.png}
