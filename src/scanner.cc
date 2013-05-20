@@ -5,7 +5,7 @@
 using namespace std;
 
 scanner::scanner(names* names_mod, const char* defname)
-}
+{
 
 }
 

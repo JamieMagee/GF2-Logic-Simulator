@@ -2,16 +2,16 @@
 #define scanner_h
 #include <string>
 #include <iostream>
+#include "names.h"
 
 using namespace std;
 
-typedef int name;
 typedef enum {namesym, numsym, devsym, consym, monsym, endsym, colon, semicol, equals, dot, badsym, eofsym} symbol;
 
 class scanner {
 	public:
 		scanner (names* names_mod,		//Pointer to names class
-				const char* defname)	//Name of file being read
+				const char* defname);	//Name of file being read
 				
 		~scanner();		//Destructor
 		
