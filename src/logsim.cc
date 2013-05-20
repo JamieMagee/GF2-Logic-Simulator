@@ -25,6 +25,46 @@ bool MyApp::OnInit()
   smz = new scanner(nmz, wxString(argv[1]).mb_str());
   pmz = new parser(netz, dmz, mmz, smz);
 
+	//TODO: remove this when the scanner and parser work
+	if (argc == 2 && wxString(argv[1]) == wxT("builtin-example"))
+	{
+		// A built-in example circuit, to give something more interesting to test the GUI with
+		// XOR gate built from NANDS, with a switch&clock and a clock as the inputs (S1 ANDed with C2, and C1)
+		name c1=nmz->lookup("C1"), c2=nmz->lookup("C2"), s1=nmz->lookup("S1"), g1=nmz->lookup("G1"), g2=nmz->lookup("G2"), g3=nmz->lookup("G3"), g4=nmz->lookup("G4"), gi1 = nmz->lookup("GI1");
+		name i1=nmz->lookup("I1"), i2=nmz->lookup("I2");
+		bool ok;
+		dmz->makedevice(nandgate, g1, 2, ok);
+		dmz->makedevice(nandgate, g2, 2, ok);
+		dmz->makedevice(nandgate, g3, 2, ok);
+		dmz->makedevice(nandgate, g4, 2, ok);
+		dmz->makedevice(andgate, gi1, 2, ok);
+		dmz->makedevice(aclock, c1, 3, ok);
+		dmz->makedevice(aclock, c2, 5, ok);
+		dmz->makedevice(aswitch, s1, 1, ok);
+
+		netz->makeconnection(gi1, i1, s1, blankname, ok);
+		netz->makeconnection(gi1, i2, c2, blankname, ok);
+		netz->makeconnection(g1, i1, gi1, blankname, ok);
+		netz->makeconnection(g1, i2, c1, blankname, ok);
+		netz->makeconnection(g2, i1, gi1, blankname, ok);
+		netz->makeconnection(g2, i2, g1, blankname, ok);
+		netz->makeconnection(g3, i1, g1, blankname, ok);
+		netz->makeconnection(g3, i2, c1, blankname, ok);
+		netz->makeconnection(g4, i1, g2, blankname, ok);
+		netz->makeconnection(g4, i2, g3, blankname, ok);
+
+		mmz->makemonitor(g4, blankname, ok);
+		mmz->makemonitor(c1, blankname, ok);
+		mmz->makemonitor(s1, blankname, ok);
+
+		netz->checknetwork(ok);
+		if (!ok)
+		{
+			cout << "Error: something went wrong with loading the example circuit" << endl;
+			exit(1);
+		}
+	}
+
 #ifdef USE_GUI
   // glutInit cannot cope with Unicode command line arguments, so we pass
   // it some fake ASCII ones instead
