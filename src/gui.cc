@@ -2,6 +2,8 @@
 #include <GL/glut.h>
 #include "wx_icon.xpm"
 #include <iostream>
+#include "scanner.h"
+#include "parser.h"
 
 using namespace std;
 
@@ -142,13 +144,14 @@ void MyGLCanvas::OnMouse(wxMouseEvent& event)
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_MENU(wxID_EXIT, MyFrame::OnExit)
   EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
+  EVT_MENU(wxID_OPEN, MyFrame::OnOpenFile)
   EVT_BUTTON(MY_BUTTON_ID, MyFrame::OnButton)
   EVT_SPINCTRL(MY_SPINCNTRL_ID, MyFrame::OnSpin)
   EVT_TEXT_ENTER(MY_TEXTCTRL_ID, MyFrame::OnText)
 END_EVENT_TABLE()
   
 MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, const wxSize& size,
-		 names *names_mod, devices *devices_mod, monitor *monitor_mod, long style):
+		 names *names_mod, devices *devices_mod, monitor *monitor_mod, network *net_mod, long style):
   wxFrame(parent, wxID_ANY, title, pos, size, style)
   // Constructor - initialises pointers to names, devices and monitor classes, lays out widgets
   // using sizers
@@ -158,12 +161,15 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
   nmz = names_mod;
   dmz = devices_mod;
   mmz = monitor_mod;
-  if (nmz == NULL || dmz == NULL || mmz == NULL) {
-    cout << "Cannot operate GUI without names, devices and monitor classes" << endl;
+  netz = net_mod;
+  if (nmz == NULL || dmz == NULL || mmz == NULL || netz == NULL) {
+    cout << "Cannot operate GUI without names, devices, network and monitor classes" << endl;
     exit(1);
   }
 
   wxMenu *fileMenu = new wxMenu;
+  fileMenu->Append(wxID_OPEN);
+  fileMenu->AppendSeparator();
   fileMenu->Append(wxID_ABOUT, wxT("&About"));
   fileMenu->Append(wxID_EXIT, wxT("&Quit"));
   wxMenuBar *menuBar = new wxMenuBar;
@@ -209,6 +215,37 @@ void MyFrame::OnAbout(wxCommandEvent &event)
 {
   wxMessageDialog about(this, wxT("Example wxWidgets GUI\nAndrew Gee\nFebruary 2011"), wxT("About Logsim"), wxICON_INFORMATION | wxOK);
   about.ShowModal();
+}
+
+void MyFrame::OnOpenFile(wxCommandEvent &event)
+  // Callback for the File -> Open menu item
+{
+	wxFileDialog openFileDialog(this, wxT("Open logic circuit"), wxT(""), wxT(""), wxT("*.*"), wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+	if (openFileDialog.ShowModal() == wxID_CANCEL)
+		return; // cancelled, don't open a file
+	loadFile(openFileDialog.GetPath().mb_str());
+}
+
+void MyFrame::clearCircuit()
+{
+	//TODO
+}
+
+bool MyFrame::loadFile(const char * filename)
+// load a file (can be called by menu File->Open or for the command line argument)
+{
+	cout << "Loading file " << filename << endl;
+
+	clearCircuit();
+	scanner *smz = new scanner(nmz, filename);
+	parser *pmz = new parser(netz, dmz, mmz, smz);
+	bool result = pmz->readin();
+
+	//TODO: maybe display a messagebox here or disable a few UI controls (like the Run button) if reading failed
+	if (!result)
+		cout << "Failed to load file" << endl;
+
+	return result;
 }
 
 void MyFrame::OnButton(wxCommandEvent &event)

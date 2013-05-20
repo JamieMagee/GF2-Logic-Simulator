@@ -8,6 +8,7 @@
 #include "names.h"
 #include "devices.h"
 #include "monitor.h"
+#include "network.h"
 
 enum { 
   MY_SPINCNTRL_ID = wxID_HIGHEST + 1,
@@ -22,9 +23,10 @@ class MyFrame: public wxFrame
 {
  public:
   MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, const wxSize& size, 
-	  names *names_mod = NULL, devices *devices_mod = NULL, monitor *monitor_mod = NULL, 
+	  names *names_mod = NULL, devices *devices_mod = NULL, monitor *monitor_mod = NULL, network *net_mod = NULL,
 	  long style = wxDEFAULT_FRAME_STYLE); // constructor
   virtual ~MyFrame();
+  bool loadFile(const char * filename);// loads the given file, returns true if successful
  private:
   MyGLCanvas *canvas;                     // GL drawing area widget to draw traces
   wxSpinCtrl *spin;                       // control widget to select the number of cycles
@@ -33,10 +35,15 @@ class MyFrame: public wxFrame
   names *nmz;                             // pointer to names class
   devices *dmz;                           // pointer to devices class
   monitor *mmz;                           // pointer to monitor class
+  network *netz;                          // pointer to network class
   int cyclescompleted;                    // how many simulation cycles have been completed
+
+  void clearCircuit();// clear all devices, connections, and monitors
+
   void runnetwork(int ncycles);           // function to run the logic network
   void OnExit(wxCommandEvent& event);     // callback for exit menu item
   void OnAbout(wxCommandEvent& event);    // callback for about menu item
+  void OnOpenFile(wxCommandEvent& event); // callback for open file menu item
   void OnButton(wxCommandEvent& event);   // callback for push button
   void OnSpin(wxSpinEvent& event);        // callback for spin control
   void OnText(wxCommandEvent& event);     // callback for text entry field
