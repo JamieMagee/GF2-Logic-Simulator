@@ -5,7 +5,6 @@
 
 using namespace std;
 
-
 /* Name storage and retrieval routines */
 
 names::names(void)  /* the constructor */
@@ -42,59 +41,42 @@ names::names(void)  /* the constructor */
 	namelist.push_back("DATA");
 	namelist.push_back("CLK");
 	namelist.push_back("SET");
-	namelist.push_back("CLR");
+	namelist.push_back("CLEAR");
 	namelist.push_back("Q");
 	namelist.push_back("QBAR"); 
 }
 
 name names::lookup (namestring str)
 {
-  /* over to you */
+	if (cvtname(str) == blankname) {
+		if (str.size() > maxlength) str.resize(maxlength);	//Truncate long string
+		if (str == "") return blankname;
+		else {
+			namelist.push_back(str);	//Insert new string
+			return namelist.size()-1;	//Return new strings internal name
+		}
+	} else {
+		return id;
+	}
 }
 
 name names::cvtname (namestring str)
 {
-  /* over to you */
+	for (name id=0; id<names.size(); id++) {
+		if (namelist[id] == str) return id;		//Linear search of namelist vector
+	}
+	return blankname;
 }
 
 void names::writename (name id)
 {
-  /* over to you */
+	if (id == blankname) cout << "blankname" << endl;
+	else if (id > blankname && id < namelist.size()) cout << namelist[id] << endl;
+	else cout << "Incorrect id" << endl;
 }
 
 int names::namelength (name id)
 {
-  /* over to you */
+	if (id > blankname && id < namelist.size()) return namelist[id].length();
+	else return blankname;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
