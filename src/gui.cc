@@ -171,8 +171,14 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
   SetMenuBar(menuBar);
 
   wxBoxSizer *topsizer = new wxBoxSizer(wxHORIZONTAL);
+
+  wxBoxSizer *leftsizer = new wxBoxSizer(wxVERTICAL);
   canvas = new MyGLCanvas(this, wxID_ANY, monitor_mod, names_mod);
-  topsizer->Add(canvas, 1, wxEXPAND | wxALL, 10);
+  leftsizer->Add(canvas, 3, wxEXPAND | wxALL, 10);
+  outputTextCtrl = new wxTextCtrl(this, OUTPUT_TEXTCTRL_ID, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
+  outputTextRedirect = new wxStreamToTextRedirector(outputTextCtrl);// Redirect all text sent to cout to the outputTextCtrl textbox
+  leftsizer->Add(outputTextCtrl, 1, wxEXPAND | wxALL, 10);
+  topsizer->Add(leftsizer, 1, wxEXPAND | wxALL, 10);
 
   wxBoxSizer *button_sizer = new wxBoxSizer(wxVERTICAL);
   button_sizer->Add(new wxButton(this, MY_BUTTON_ID, wxT("Run")), 0, wxALL, 10);
@@ -185,6 +191,11 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 
   SetSizeHints(400, 400);
   SetSizer(topsizer);
+}
+
+MyFrame::~MyFrame()
+{
+	delete outputTextRedirect;
 }
 
 void MyFrame::OnExit(wxCommandEvent &event)
@@ -209,6 +220,7 @@ void MyFrame::OnButton(wxCommandEvent &event)
   mmz->resetmonitor ();
   runnetwork(spin->GetValue());
   canvas->Render(wxT("Run button pressed"), cyclescompleted);
+  cout << "Run button pressed" << endl;// Testing cout redirection
 }
 
 void MyFrame::OnSpin(wxSpinEvent &event)

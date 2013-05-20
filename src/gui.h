@@ -13,6 +13,7 @@ enum {
   MY_SPINCNTRL_ID = wxID_HIGHEST + 1,
   MY_TEXTCTRL_ID,
   MY_BUTTON_ID,
+  OUTPUT_TEXTCTRL_ID
 }; // widget identifiers
 
 class MyGLCanvas;
@@ -23,9 +24,12 @@ class MyFrame: public wxFrame
   MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, const wxSize& size, 
 	  names *names_mod = NULL, devices *devices_mod = NULL, monitor *monitor_mod = NULL, 
 	  long style = wxDEFAULT_FRAME_STYLE); // constructor
+  virtual ~MyFrame();
  private:
   MyGLCanvas *canvas;                     // GL drawing area widget to draw traces
   wxSpinCtrl *spin;                       // control widget to select the number of cycles
+  wxTextCtrl *outputTextCtrl;             // textbox to display messages sent to cout (e.g. error messages from scanner and parser)
+  wxStreamToTextRedirector *outputTextRedirect;
   names *nmz;                             // pointer to names class
   devices *dmz;                           // pointer to devices class
   monitor *mmz;                           // pointer to monitor class
