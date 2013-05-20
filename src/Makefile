@@ -27,17 +27,20 @@ clean:
 	rm -f *.o logsim guitest
 
 depend:
-	makedepend $(SRC)
+	# -Y stops it adding files in /usr/include, just to keep the Makefile a bit tidier since those files won't change very often.
+	# Do "make clean" if /usr/include/* files change.
+	makedepend -Y $(SRC)
 
 # DO NOT DELETE
 
-logsim.o: logsim.h names.h devices.h network.h monitor.h parser.h userint.h
-logsim.o: gui.h 
+devices.o: devices.h names.h network.h
+gui.o: gui.h names.h devices.h network.h monitor.h wx_icon.xpm
+guitest.o: guitest.h names.h devices.h network.h monitor.h gui.h
+logsim.o: logsim.h names.h devices.h network.h monitor.h parser.h scanner.h
+logsim.o: userint.h gui.h
+monitor.o: monitor.h names.h network.h devices.h
 names.o: names.h
 network.o: network.h names.h
-parser.o: parser.h names.h network.h devices.h monitor.h
-monitor.o: monitor.h names.h network.h devices.h
-devices.o: devices.h names.h network.h
+parser.o: parser.h names.h scanner.h network.h devices.h monitor.h
+scanner.o: scanner.h names.h
 userint.o: userint.h names.h network.h devices.h monitor.h
-gui.o: gui.h names.h devices.h network.h monitor.h
-guitest.o: guitest.h names.h devices.h network.h monitor.h gui.h
