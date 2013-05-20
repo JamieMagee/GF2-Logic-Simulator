@@ -2,6 +2,7 @@
 #define names_h
 
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -11,11 +12,12 @@ const int blankname = -1;   /* special name                 */
 
 typedef int name;
 typedef string namestring;
+typedef unsigned int length;
 
 class names{
 
-  /* put stuff that the class uses internally here */
-
+private:
+	vector<namestring> namelist;	
 
 public:
   name lookup (namestring str);
@@ -41,6 +43,3 @@ public:
 };
 
 #endif /* names_h */
-
-
-
