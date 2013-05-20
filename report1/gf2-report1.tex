@@ -18,6 +18,7 @@
 \usepackage{graphicx}
 \usepackage{listings}
 \usepackage{amsmath}
+\usepackage{verbatim}
 
 \lstdefinelanguage{logicdef}
 {
@@ -45,22 +46,35 @@ numberstyle=\tiny
 
 \section{Introduction}
 
+This project aims to develop a logic simulation program, involving all five major phases of the software engineering life cycle: specification, design, implementation, testing and maintenance.
+
+This report focuses on the specification phase, providing the EBNF for syntax; an informal description of semantics and a description of the error handling, as well as example definition files.
+Details of teamwork planning are also provided.
 
 \section{General approach}
 
+The project was broken into individual tasks within each phase of the software life cyle.
+The timeframe was then decided for each task and each task was assigned to either a team member or the whole team, depending on the nature of the task.
+This is shown in Figure 1 of Appendix A.
 
+Each member of the team was also assigned a general project role as follows:
+
+\textbf{Project manager:} (T Hillel) - Responsible for project planning including delegation of tasks and ensuring project runs to set timescale.
+
+\textbf{Programming Administrator:} (J Magee) - Responsible for upkeep of project directory including performing builds and keeping legacy versions of the simulator.
+
+\textbf{Client:} (M Jackson) - Responsible for ensuring project meets client's requirements for logic simulator as defined in Appendix A of the GF2 Project Handout.
 
 \section{Syntax and semantics}
 
 \begin{verbatim}
-specfile = block {block}
-block = devices|connections|monitors
+specfile = devices connections monitors
 devices = 'DEVICES' dev {';' dev} 'END'
-connections = 'CONNECTIONS' con {';' con} 'END' 
-monitors = 'MONITORS' mon {';' mon} 'END'
+connections = 'CONNECTIONS' [con] {';' con} 'END' 
+monitors = 'MONITORS' [mon] {';' mon} 'END'
 \end{verbatim} 
 
-\textbf{Semantics:} An input file is composed of device, connection and monitor blocks. There must be at least one devices block in the input file. Connection and monitor blocks may be omitted. There may be more than one of each type of block. 
+\textbf{Semantics:} An input file is composed of one of each of a devices, connections and monitors block, in that order. The devices block must contain at least one dev but the connections and monitors blocks may be empty. Each block is started with 'DEVICES', 'CONNECTIONS' and 'MONITORS' respectively, and each block is terminated with 'END'.
 
 \begin{verbatim}
 dev = clock|switch|gate|dtype|xor
@@ -72,31 +86,37 @@ dtype = 'DTYPE' devicename
 xor = 'XOR' devicename
 \end{verbatim} 
 
-\textbf{Semantics:} These statements define a new device of the specified type. Multiple devices may not be defined with the same \texttt{devicename}. Each \texttt{devicename} must be defined in a devices block before being referred to in a connections or monitors block. \texttt{devicename} is case sensitive. For a \texttt{CLOCK}, the integer parameter must be greater than zero. For \texttt{SWITCH} devices, the parameter is the initial state of the device (1 is on, 0 is off). For logic gates (\texttt{AND}, \texttt{NAND}, \texttt{OR}, \texttt{NOR}), it is the number of inputs.
+\textbf{Semantics:} These statements define a new device of the specified type. Each \texttt{devicename} must be unique, and must not be \texttt{DEVICES}, \texttt{CONNECTIONS}, \texttt{MONITORS}, \texttt{END}, \texttt{CLOCK}, \texttt{SWITCH}, \texttt{AND}, \texttt{NAND}, \texttt{OR}, \texttt{NOR}, \texttt{DTYPE} or \texttt{XOR} which are reserved words.
+Each \texttt{devicename} referred to in the connections or monitors block must first be defined in the devices block. \texttt{devicename} is case sensitive. For a \texttt{CLOCK}, the integer parameter must be greater than zero, and represents the number of simulation cycles before output changes. For \texttt{SWITCH} devices, the parameter is the initial state of the device (1 is on, 0 is off).
+For logic gates (\texttt{AND}, \texttt{NAND}, \texttt{OR}, \texttt{NOR}), the parameter is the number of inputs.
 
 \begin{verbatim}
-con = devicename['.'input] '=' devicename['.'output]
+con = devicename'.'input '=' devicename['.'output]
 \end{verbatim} 
-\textbf{Semantics:} Connects the specified device input to the specified device output. Multiple inputs may be connected to the same output, but attempting to connect multiple outputs to the same input is a semantic error. All inputs must be connected. 
+\textbf{Semantics:} Connects the specified device input to the specified device output. Multiple inputs may be connected to the same output, but attempting to connect multiple outputs to the same input is a semantic error. Multiple definitions of the same connection \textbf{\huge will generate an error message}, and are treated as a single instance of the connection. All inputs must be connected.
+
+See below for semantics rules for \verb|devicename'.'input| and \verb|devicename['.'output]|.
 
 \begin{verbatim}
 mon = devicename['.'output]
 \end{verbatim} 
-\textbf{Semantics:} Adds an output signal to the list of signals to be monitored. Duplicate monitor statements for the same output signal are ignored. 
+\textbf{Semantics:} Adds an output signal to the list of signals to be monitored. Multiple monitor statements for the same output signal generate an error message but are allowed.
 
 \begin{verbatim}
-devicename = letter {letter|digit}
+devicename = letter {'_'|letter|digit}
+\end{verbatim}
+\textbf{Semantics:} Only punctuation allowed in \texttt{devicename} is an underscore. Other semantics described above.
+
+\begin{verbatim}
 input = 'I'('1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'|'10'|'11'|'12'|'13'|'14'|
         '15'|'16')|'DATA'|'CLK'|'SET'|'CLEAR'
 output = 'Q'['BAR']
 \end{verbatim} 
 
-\verb|devicename['.'input]| indicates an input pin on a device. If the device has multiple input pins, the input pin name must be given. If the device has a single input that has a name (such as a 1 input logic gate with input \texttt{I1}), then the input pin name is optional and defaults to the single input. If the inputs do not have names, the input pin name must be omitted.
-The input pin must be valid according to the properties of the device that \texttt{devicename} refers to. For example, for a gate defined to have 4 inputs, only \texttt{I1}, \texttt{I2}, \texttt{I3}, and \texttt{I4} may be used; and \texttt{DATA}, \texttt{CLK}, \texttt{SET}, and \texttt{CLEAR} may only be used when \texttt{devicename} is a \texttt{DTYPE}.
+\textbf{Semantics:} \verb|devicename'.'input| indicates an input pin on a device. The input pin must be valid according to the properties of the device that \texttt{devicename} refers to. For example, for a gate defined to have 4 inputs, only \texttt{I1}, \texttt{I2}, \texttt{I3}, and \texttt{I4} may be used; and \texttt{DATA}, \texttt{CLK}, \texttt{SET}, and \texttt{CLEAR} may only be used when \texttt{devicename} is a \texttt{DTYPE}.
+Note that this rule prevents attempting to input to a \texttt{CLOCK} or \texttt{SWITCH}.
 
-\verb|devicename['.'output]| indicates an output pin on a device. \texttt{output} must be a valid output for the type of device that \texttt{devicename} refers to. If the device has multiple outputs, \texttt{output} must be given, otherwise it must be omitted. 
-
-\texttt{DEVICES}, \texttt{CONNECTIONS}, \texttt{MONITORS}, and \texttt{END} are reserved words, and must not be used as device names.
+\verb|devicename['.'output]| indicates an output pin on a device. \texttt{output} must be given when \texttt{devicename} is a \texttt{DTYPE}, otherwise \texttt{output} must be omitted. 
 
 Comments start with \texttt{/*} and are terminated by the first \texttt{*/}. A \texttt{/*} inside a comment is ignored. 
 
@@ -104,7 +124,10 @@ Comments start with \texttt{/*} and are terminated by the first \texttt{*/}. A \
 
 \subsection{Syntax errors}
 
-If a semicolon is omitted, an error message should be printed and text should be skipped until the next semicolon is found. Scanning should then continue as normal.
+BULK UP
+
+If a semicolon is omitted, an error message should be printed and text should be skipped until the next semicolon is found. Scanning should then continue as normal. 
+% how to check if a semicolon is omitted?
 
 If a \texttt{dev}, \texttt{con}, or \texttt{mon} statement does not conform to the correct syntax, then it will be ignored, an error message will be printed, and scanning will continue after the next semicolon. 
 
@@ -112,12 +135,18 @@ If statements are present outside a devices, connections, or monitors block, the
 
 If \texttt{DEVICES}, \texttt{CONNECTIONS}, or \texttt{MONITORS} keyword appears without using \texttt{END} to terminate the previous block, an error message will be printed and scanning will continue as though the previous block was correctly terminated. 
 
-If a comment is not terminated before the end of the file, then an error message will be printed. The contents of the comment will still be ignored. 
+If a comment is not terminated before the end of the file, then an error message will be printed. The contents of the comment will still be ignored.
 
-For all syntax errors, the error message will include the line number and indicate the position on that line of the error.
+If a \texttt{*/} is detected without a \texttt{/*}, an error message will be generated. Scanning will then continue as normal. MAYBE IGNORE TEXT BEFORE \texttt{*/} DISCUSS?
+
+For all syntax errors, the error message will include the line number and indicate the position on that line of the error, as well as stating which of the previous errors has occured. All syntax errors are fatal and will not allow the programme to run.
 
 
 \subsection{Semantic errors}
+
+Duplicate connections or monitors result in warnings, programme still allowed to carry out.
+
+Other semantic errors result in fatal error, not allowed to carry out.
 
 Semantic errors in a \texttt{dev}, \texttt{con}, or \texttt{mon} statement will cause an error message to be printed with details about which semantic rule has been broken, and that statement will be ignored. 
 
@@ -157,6 +186,9 @@ Semantic errors in a \texttt{dev}, \texttt{con}, or \texttt{mon} statement will 
 
 \subsection{Example definition file for 4 bit adder circuit}
 \lstinputlisting[language=logicdef]{../examples/4bitadder.txt}
+
+\section{Appendix: EBNF}
+\verbatiminput{../docs/ebnf.txt}
 
 \end{document}
 
