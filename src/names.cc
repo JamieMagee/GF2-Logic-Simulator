@@ -60,7 +60,7 @@ name names::cvtname (namestring str)
 {
 	if (str == "") return blankname;
 	for (name id=0; id<namelist.size(); id++) {
-		if (namelist[id] == str.resize(maxlength)) return id;		//Linear search of namelist vector
+		if (namelist[id] == str) return id;		//Linear search of namelist vector
 	}
 	return blankname;
 }
@@ -76,4 +76,10 @@ int names::namelength (name id)
 {
 	if (id > blankname && id < namelist.size()) return namelist[id].length();
 	else return blankname;
+}
+
+namestring names::getnamestring(name id)
+{
+	if (id > blankname && id < namelist.size()) return namelist[id];
+	else return "";
 }

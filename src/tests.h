@@ -27,6 +27,8 @@ public:
 	bool colourPrint;
 	// Whether to produce verbose output about the values checked by the tests
 	bool debug;
+	// Whether to print descriptions of passed tests (automatically turned on by debug)
+	bool printSuccess;
 	// Abstract virtual function which should be overidden in a derived class and actually run the tests
 	virtual void tests() = 0;
 	// A wrapper for tests() which prints a title and summary, and returns a bool indicating whether all tests passed

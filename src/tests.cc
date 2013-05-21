@@ -5,7 +5,7 @@
 using namespace std;
 
 Tests::Tests() :
-	failCount(0), successCount(0), colourPrint(false), debug(true)
+	failCount(0), successCount(0), colourPrint(false), debug(false), printSuccess(false)
 {
 #ifdef __linux__
 	colourPrint = true;
@@ -29,7 +29,7 @@ void Tests::testFailed(string testDescription)
 void Tests::testSucceeded(string testDescription)
 {
 	successCount++;
-	cout << "Test passed: testing whether \"" << testDescription << endl;
+	if (printSuccess || debug) cout << "Test passed: testing whether \"" << testDescription << endl;
 }
 
 void Tests::printResultsSummary()
@@ -102,5 +102,13 @@ void NamesTests::tests()
 
 	testResult("names.namelength returns the correct name length for 'abce'", (nmz.namelength(n2) == 4));
 	testResult("names.namelength returns the correct name length for 'abcdefgi'", (nmz.namelength(n3) == 8));
+
+	namestring ns2 = nmz.getnamestring(n2);
+	if (debug) cout << "getnamestring(n2): " << ns2 << endl;
+	testResult("names.getnamestring returns the correct namestring for n2", (ns2 == "abce"));
+
+	namestring ns5 = nmz.getnamestring(n5);
+	if (debug) cout << "getnamestring(n5): " << ns5 << endl;
+	testResult("names.getnamestring returns the correct namestring for n5, which is longer than 8 characters", (ns5 == "abcdefghi"));
 
 }

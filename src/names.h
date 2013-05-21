@@ -36,6 +36,9 @@ public:
   int namelength (name id);
     /* Returns length ie number of characters in given name                */
 
+  namestring getnamestring(name id);
+    /* Returns the namestring for the given name                           */
+
   names (void);
     /* names initialises the name table.  This procedure is called at      */
     /* system initialisation before any of the above procedures/functions  */
