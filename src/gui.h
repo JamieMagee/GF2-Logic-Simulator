@@ -14,10 +14,13 @@ enum {
   MY_SPINCNTRL_ID = wxID_HIGHEST + 1,
   MY_TEXTCTRL_ID,
   MY_BUTTON_ID,
-  OUTPUT_TEXTCTRL_ID
+  OUTPUT_TEXTCTRL_ID,
+  SIMCTRL_BUTTON_RUN_ID,
+  SIMCTRL_BUTTON_CONT_ID
 }; // widget identifiers
 
 class MyGLCanvas;
+class SimCtrls;
 
 class MyFrame: public wxFrame
 {
@@ -36,7 +39,8 @@ class MyFrame: public wxFrame
   devices *dmz;                           // pointer to devices class
   monitor *mmz;                           // pointer to monitor class
   network *netz;                          // pointer to network class
-  int cyclescompleted;                    // how many simulation cycles have been completed
+  int continuedCycles;// how many simulation cycles were completed last time the run or continue button was used
+  int totalCycles;// how many simulation cycles have been completed
 
   void clearCircuit();// clear all devices, connections, and monitors
 
@@ -44,7 +48,8 @@ class MyFrame: public wxFrame
   void OnExit(wxCommandEvent& event);     // callback for exit menu item
   void OnAbout(wxCommandEvent& event);    // callback for about menu item
   void OnOpenFile(wxCommandEvent& event); // callback for open file menu item
-  void OnButton(wxCommandEvent& event);   // callback for push button
+  void OnButtonRun(wxCommandEvent& event);
+  void OnButtonContinue(wxCommandEvent& event);
   void OnSpin(wxSpinEvent& event);        // callback for spin control
   void OnText(wxCommandEvent& event);     // callback for text entry field
   DECLARE_EVENT_TABLE()
@@ -56,10 +61,12 @@ class MyGLCanvas: public wxGLCanvas
   MyGLCanvas(wxWindow *parent, wxWindowID id = wxID_ANY, monitor* monitor_mod = NULL, names* names_mod = NULL,
 	     const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = 0,
 	     const wxString& name = wxT("MyGLCanvas")); // constructor
-  void Render(wxString example_text = wxT(""), int cycles = -1); // function to draw canvas contents
+  void Render(wxString text=wxT("")); // function to draw canvas contents
+  void SimulationRun(int totalCycles_new, int continuedCycles_new);
  private:
   bool init;                         // has the GL context been initialised?
-  int cyclesdisplayed;               // how many simulation cycles have been displayed
+  int continuedCycles;// how many simulation cycles were completed last time the run or continue button was used
+  int totalCycles;// how many simulation cycles have been completed
   monitor *mmz;                      // pointer to monitor class, used to extract signal traces
   names *nmz;                        // pointer to names class, used to extract signal names
   void InitGL();                     // function to initialise GL context
@@ -71,5 +78,5 @@ class MyGLCanvas: public wxGLCanvas
   int GetTextWidth(wxString txt, void *font=NULL);
   DECLARE_EVENT_TABLE()
 };
-    
+
 #endif /* gui_h */

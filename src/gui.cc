@@ -26,7 +26,7 @@ MyGLCanvas::MyGLCanvas(wxWindow *parent, wxWindowID id, monitor* monitor_mod, na
   mmz = monitor_mod;
   nmz = names_mod;
   init = false;
-  cyclesdisplayed = -1;
+  continuedCycles = totalCycles = 0;
 }
 
 void MyGLCanvas::DrawSignalTrace(int xOffset, int yOffset, int xScale, int height, int padding, int mon, int cycles)
@@ -90,25 +90,31 @@ int MyGLCanvas::GetTextWidth(wxString txt, void *font)
 	return width;
 }
 
-void MyGLCanvas::Render(wxString example_text, int cycles)
+void MyGLCanvas::SimulationRun(int totalCycles_new, int continuedCycles_new)
+{
+	totalCycles = totalCycles_new;
+	continuedCycles = continuedCycles_new;
+	Render();
+}
+
+void MyGLCanvas::Render(wxString text)
   // Draws canvas contents - the following example writes the string "example text" onto the canvas
   // and draws a signal trace. The trace is artificial if the simulator has not yet been run.
   // When the simulator is run, the number of cycles is passed as a parameter and the first monitor
   // trace is displayed.
 {
-  float y;
-  unsigned int i;
-  asignal s;
+	float y;
+	unsigned int i;
+	asignal s;
 
-  if (cycles >= 0) cyclesdisplayed = cycles;
-
-  SetCurrent();
-  if (!init) {
-    InitGL();
-    init = true;
-  }
+	SetCurrent();
+	if (!init)
+	{
+		InitGL();
+		init = true;
+	}
 	glClear(GL_COLOR_BUFFER_BIT);
-	if ((cyclesdisplayed >= 0) && (mmz->moncount() > 0))
+	if ((totalCycles > 0) && (mmz->moncount() > 0))
 	{
 		int monCount = mmz->moncount();
 		int mon, height=20, xScale=5, spacing=30;
@@ -138,7 +144,7 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
 		{
 			// Draw the signal trace
 			glColor3f(0.0, 0.8, 0.0);
-			DrawSignalTrace(xOffset+5, canvasHeight-spacing/2-mon*spacing, xScale, height, spacing*0.075, mon, cyclesdisplayed);
+			DrawSignalTrace(xOffset+5, canvasHeight-spacing/2-mon*spacing, xScale, height, spacing*0.075, mon, totalCycles);
 
 			// Draw the monitor name
 			glColor3f(0.0, 0.0, 1.0);
@@ -156,14 +162,9 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
 		DrawText(5, 10, wxT("No simulation results to display"));
 	}
 
-  // Example of how to use GLUT to draw text on the canvas
-  /*glColor3f(0.0, 0.0, 1.0);
-  glRasterPos2f(10, 100);
-  for (i = 0; i < example_text.Len(); i++) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, example_text[i]);
-*/
-  // We've been drawing to the back buffer, flush the graphics pipeline and swap the back buffer to the front
-  glFlush();
-  SwapBuffers();
+	// We've been drawing to the back buffer, flush the graphics pipeline and swap the back buffer to the front
+	glFlush();
+	SwapBuffers();
 }
 
 void MyGLCanvas::InitGL()
@@ -221,6 +222,7 @@ void MyGLCanvas::OnMouse(wxMouseEvent& event)
   if (event.ButtonDown() || event.ButtonUp() || event.Dragging() || event.Leaving()) Render(text);
 }
 
+
 // MyFrame ///////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -228,7 +230,8 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_MENU(wxID_EXIT, MyFrame::OnExit)
   EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
   EVT_MENU(wxID_OPEN, MyFrame::OnOpenFile)
-  EVT_BUTTON(MY_BUTTON_ID, MyFrame::OnButton)
+  EVT_BUTTON(SIMCTRL_BUTTON_RUN_ID, MyFrame::OnButtonRun)
+  EVT_BUTTON(SIMCTRL_BUTTON_CONT_ID, MyFrame::OnButtonContinue)
   EVT_SPINCTRL(MY_SPINCNTRL_ID, MyFrame::OnSpin)
   EVT_TEXT_ENTER(MY_TEXTCTRL_ID, MyFrame::OnText)
 END_EVENT_TABLE()
@@ -267,19 +270,36 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
   outputTextCtrl = new wxTextCtrl(this, OUTPUT_TEXTCTRL_ID, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
   outputTextRedirect = new wxStreamToTextRedirector(outputTextCtrl);// Redirect all text sent to cout to the outputTextCtrl textbox
   leftsizer->Add(outputTextCtrl, 1, wxEXPAND | wxALL, 10);
-  topsizer->Add(leftsizer, 1, wxEXPAND | wxALL, 10);
+  topsizer->Add(leftsizer, 4, wxEXPAND | wxALL, 10);
 
-  wxBoxSizer *button_sizer = new wxBoxSizer(wxVERTICAL);
-  button_sizer->Add(new wxButton(this, MY_BUTTON_ID, wxT("Run")), 0, wxALL, 10);
-  button_sizer->Add(new wxStaticText(this, wxID_ANY, wxT("Cycles")), 0, wxTOP|wxLEFT|wxRIGHT, 10);
-  spin = new wxSpinCtrl(this, MY_SPINCNTRL_ID, wxString(wxT("31")));
-  button_sizer->Add(spin, 0 , wxALL, 10);
 
-  button_sizer->Add(new wxTextCtrl(this, MY_TEXTCTRL_ID, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER), 0 , wxALL, 10);
-  topsizer->Add(button_sizer, 0, wxALIGN_CENTER);
+	wxBoxSizer *sidesizer = new wxBoxSizer(wxVERTICAL);
+	wxStaticBoxSizer *simctrls_sizer = new wxStaticBoxSizer(wxVERTICAL, this, wxT("Simulation"));
+	wxBoxSizer *simctrls_cycles_sizer = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *simctrls_button_sizer = new wxBoxSizer(wxHORIZONTAL);
 
-  SetSizeHints(400, 400);
-  SetSizer(topsizer);
+	simctrls_button_sizer->Add(new wxButton(this, SIMCTRL_BUTTON_RUN_ID, wxT("Run")), 0, wxALL, 10);
+	simctrls_button_sizer->Add(new wxButton(this, SIMCTRL_BUTTON_CONT_ID, wxT("Continue")), 0, wxALL, 10);
+	simctrls_cycles_sizer->Add(new wxStaticText(this, wxID_ANY, wxT("Cycles")), 0, wxALL|wxALIGN_CENTER_VERTICAL, 10);
+	spin = new wxSpinCtrl(this, MY_SPINCNTRL_ID, wxString(wxT("31")));
+	simctrls_cycles_sizer->Add(spin, 0, wxALL, 10);
+
+	simctrls_sizer->Add(simctrls_cycles_sizer);
+	simctrls_sizer->Add(simctrls_button_sizer);
+
+	wxStaticBoxSizer *monitors_sizer = new wxStaticBoxSizer(wxVERTICAL, this, wxT("Monitors"));
+
+	wxStaticBoxSizer *switches_sizer = new wxStaticBoxSizer(wxVERTICAL, this, wxT("Switches"));
+
+
+	sidesizer->Add(simctrls_sizer, 0, wxALL, 10);
+	sidesizer->Add(monitors_sizer, 1, wxEXPAND | wxALL, 10);
+	sidesizer->Add(switches_sizer, 1, wxEXPAND | wxALL, 10);
+	//sidesizer->Add(new wxTextCtrl(this, MY_TEXTCTRL_ID, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER), 0 , wxALL, 10);
+	topsizer->Add(sidesizer, 0, wxEXPAND | wxALIGN_CENTER);
+
+	SetSizeHints(400, 400);
+	SetSizer(topsizer);
 }
 
 MyFrame::~MyFrame()
@@ -331,16 +351,22 @@ bool MyFrame::loadFile(const char * filename)
 	return result;
 }
 
-void MyFrame::OnButton(wxCommandEvent &event)
-  // Callback for the push button
+void MyFrame::OnButtonRun(wxCommandEvent &event)
+  // Callback for the run simulation button
 {
-  int n, ncycles;
+	int n, ncycles;
+	totalCycles = 0;
+	mmz->resetmonitor();
+	runnetwork(spin->GetValue());
+	canvas->SimulationRun(totalCycles, continuedCycles);
+}
 
-  cyclescompleted = 0;
-  mmz->resetmonitor ();
-  runnetwork(spin->GetValue());
-  canvas->Render(wxT("Run button pressed"), cyclescompleted);
-  cout << "Run button pressed" << endl;// Testing cout redirection
+void MyFrame::OnButtonContinue(wxCommandEvent &event)
+  // Callback for the run simulation button
+{
+	int n, ncycles;
+	runnetwork(spin->GetValue());
+	canvas->SimulationRun(totalCycles, continuedCycles);
 }
 
 void MyFrame::OnSpin(wxSpinEvent &event)
@@ -362,19 +388,27 @@ void MyFrame::OnText(wxCommandEvent &event)
 }
 
 void MyFrame::runnetwork(int ncycles)
-  // Function to run the network, derived from corresponding function in userint.cc
+  // Function to run the network
 {
-  bool ok = true;
-  int n = ncycles;
+	bool ok = true;
+	int n = ncycles;
+	continuedCycles = 0;
 
-  while ((n > 0) && ok) {
-    dmz->executedevices (ok);
-    if (ok) {
-      n--;
-      mmz->recordsignals ();
-    } else
-      cout << "Error: network is oscillating" << endl;
-  }
-  if (ok) cyclescompleted = cyclescompleted + ncycles;
-  else cyclescompleted = 0;
+	while ((n > 0) && ok)
+	{
+		dmz->executedevices (ok);
+		if (ok)
+		{
+			n--;
+			totalCycles++;
+			continuedCycles++;
+			mmz->recordsignals();
+		}
+		else
+		{
+			cout << "Error: network is oscillating" << endl;
+		}
+	}
+	/*if (ok) totalCycles = totalCycles + ncycles;
+	else totalCycles = 0;*/
 }
