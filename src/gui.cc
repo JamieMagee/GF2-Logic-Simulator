@@ -28,6 +28,48 @@ MyGLCanvas::MyGLCanvas(wxWindow *parent, wxWindowID id, monitor* monitor_mod, na
   cyclesdisplayed = -1;
 }
 
+void MyGLCanvas::DrawSignalTrace(int xOffset, int yOffset, int xScale, int height, int mon, int cycles)
+{
+	glBegin(GL_LINE_STRIP);
+	int y1, y2, i;
+	asignal s;
+	for (i=0; i<cycles; i++)
+	{
+		if (mmz->getsignaltrace(mon, i, s))
+		{
+			if (s==low || s==rising)
+				y1 = yOffset-height/2;
+			else
+				y1 = yOffset+height/2;
+			if (s==low || s==falling)
+				y2 = yOffset-height/2;
+			else
+				y2 = yOffset+height/2;
+			glVertex2f(xOffset+xScale*i, y1);
+			glVertex2f(xOffset+xScale*(i+1), y2);
+		}
+	}
+	glEnd();
+}
+
+void MyGLCanvas::DrawText(int x, int y, wxString txt, void *font)
+{
+	int width = 0;
+	if (!font) font = GLUT_BITMAP_HELVETICA_12;
+	glRasterPos2f(x, y);
+	for (int i = 0; i < txt.Len(); i++)
+		glutBitmapCharacter(font, txt[i]);
+}
+
+int MyGLCanvas::GetTextWidth(wxString txt, void *font)
+{
+	int width = 0;
+	if (!font) font = GLUT_BITMAP_HELVETICA_12;
+	for (int i = 0; i < txt.Len(); i++)
+		width += glutBitmapWidth(font, txt[i]);
+	return width;
+}
+
 void MyGLCanvas::Render(wxString example_text, int cycles)
   // Draws canvas contents - the following example writes the string "example text" onto the canvas
   // and draws a signal trace. The trace is artificial if the simulator has not yet been run.
@@ -47,33 +89,36 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
   }
   glClear(GL_COLOR_BUFFER_BIT);
 
-  if ((cyclesdisplayed >= 0) && (mmz->moncount() > 0)) { // draw the first monitor signal, get trace from monitor class
+	if ((cyclesdisplayed >= 0) && (mmz->moncount() > 0))
+	{
+		int monCount = mmz->moncount();
+		int mon, height=20, xScale=5, spacing=30;
+		name dev, outp;
+		for (mon=0; mon<monCount; mon++)
+		{
+			// Draw the signal trace
+			glColor3f(0.0, 0.8, 0.0);
+			DrawSignalTrace(30, 10+spacing/2+mon*spacing, xScale, height, mon, cyclesdisplayed);
 
-    glColor3f(1.0, 0.0, 0.0);
-    glBegin(GL_LINE_STRIP);
-    for (i=0; i<cyclesdisplayed; i++) {
-      if (mmz->getsignaltrace(0, i, s)) {
-	if (s==low) y = 10.0;
-	if (s==high) y = 30.0;
-	glVertex2f(20*i+10.0, y); 
-	glVertex2f(20*i+30.0, y);
-      }
-    }
-    glEnd();
-
-  } else { // draw an artificial trace
-
-    glColor3f(0.0, 1.0, 0.0);
-    glBegin(GL_LINE_STRIP);
-    for (i=0; i<5; i++) {
-      if (i%2) y = 10.0;
-      else y = 30.0;
-      glVertex2f(20*i+10.0, y); 
-      glVertex2f(20*i+30.0, y);
-    }
-    glEnd();
-    
-  }
+			// Draw the monitor name
+			mmz->getmonname(mon, dev, outp);
+			wxString monName(nmz->getnamestring(dev).c_str(), wxConvUTF8);
+			if (outp!=blankname)
+				monName += wxT(".") + wxString(nmz->getnamestring(outp).c_str(), wxConvUTF8);
+			glColor3f(0.0, 0.0, 1.0);
+			DrawText(1, 10+spacing/2+mon*spacing-12/2, monName);
+		}
+	}
+	else if (mmz->moncount()==0)
+	{
+		glColor3f(0.5, 0.0, 0.0);
+		DrawText(5, 10, wxT("No monitors"));
+	}
+	else
+	{
+		glColor3f(0.8, 0.0, 0.0);
+		DrawText(5, 10, wxT("No simulation results to display"));
+	}
 
   // Example of how to use GLUT to draw text on the canvas
   glColor3f(0.0, 0.0, 1.0);
@@ -189,7 +234,7 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
   wxBoxSizer *button_sizer = new wxBoxSizer(wxVERTICAL);
   button_sizer->Add(new wxButton(this, MY_BUTTON_ID, wxT("Run")), 0, wxALL, 10);
   button_sizer->Add(new wxStaticText(this, wxID_ANY, wxT("Cycles")), 0, wxTOP|wxLEFT|wxRIGHT, 10);
-  spin = new wxSpinCtrl(this, MY_SPINCNTRL_ID, wxString(wxT("10")));
+  spin = new wxSpinCtrl(this, MY_SPINCNTRL_ID, wxString(wxT("31")));
   button_sizer->Add(spin, 0 , wxALL, 10);
 
   button_sizer->Add(new wxTextCtrl(this, MY_TEXTCTRL_ID, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER), 0 , wxALL, 10);
