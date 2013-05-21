@@ -8,7 +8,43 @@ using namespace std;
 
 bool parser::readin (void)
 {
+    smz->getSymbol(cursym, curname, curint);
+    if (cursym == devsym){
+      deviceList();
+    }
+    else{
+      error();
+	}
+    smz->getSymbol(cursym, curname, curint);
+    if (cursym == consym){
+      connectionList();
+    }
+    else{
+      error();
+    }
+    smz->getSymbol(cursym, curname, curint);
+    if (cursym == monsym){
+      monitorList();
+    }
+    else{
+      error()
+	}
+  }
   /* over to you */
+}
+
+void parser::deviceList(){
+}
+
+void parser::connectionList(){
+}
+
+void parser::monitorList(){
+}
+
+void parser::error()
+{
+  cout << "PANIC" << endl;
 }
 
 parser::parser (network* network_mod, devices* devices_mod,
