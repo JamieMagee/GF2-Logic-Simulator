@@ -8,6 +8,8 @@ L_OBJECTS = logsim.o names.o scanner.o network.o parser.o monitor.o devices.o us
 
 G_OBJECTS = guitest.o names.o network.o monitor.o devices.o gui.o scanner.o parser.o
 
+T_OBJECTS = runtests.o tests.o names.o
+
 # implementation
 
 .SUFFIXES:	.o .cc
@@ -23,8 +25,11 @@ logsim:	$(L_OBJECTS)
 guitest: $(G_OBJECTS)
 	 $(CXX) -o guitest $(G_OBJECTS) `wx-config --libs --gl_libs` $(OPENGL_LIBS)
 
+runtests: $(T_OBJECTS)
+	$(CXX) -o runtests $(T_OBJECTS) `wx-config --libs --gl_libs` $(OPENGL_LIBS)
+
 clean: 
-	rm -f *.o logsim guitest
+	rm -f *.o logsim guitest runtests
 
 depend:
 	# -Y stops it adding files in /usr/include, just to keep the Makefile a bit tidier since those files won't change very often.
