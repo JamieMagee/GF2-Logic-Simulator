@@ -8,7 +8,7 @@ L_OBJECTS = logsim.o names.o scanner.o network.o parser.o monitor.o devices.o us
 
 G_OBJECTS = guitest.o names.o network.o monitor.o devices.o gui.o scanner.o parser.o
 
-T_OBJECTS = runtests.o tests.o names.o
+T_OBJECTS = runtests.o tests.o names.o scanner.o
 
 # implementation
 

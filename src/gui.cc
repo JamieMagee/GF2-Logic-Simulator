@@ -29,7 +29,7 @@ MyGLCanvas::MyGLCanvas(wxWindow *parent, wxWindowID id, monitor* monitor_mod, na
   continuedCycles = totalCycles = 0;
 }
 
-void MyGLCanvas::DrawSignalTrace(int xOffset, int yOffset, int xScale, int height, int padding, int mon, int cycles)
+void MyGLCanvas::DrawSignalTrace(int xOffset, int yOffset, float xScale, int height, int padding, int mon, int cycles)
 {
 	glBegin(GL_QUADS);
 	glColor4f(0.0, 0.5, 0.0, 0.05);
@@ -117,12 +117,13 @@ void MyGLCanvas::Render(wxString text)
 	if ((totalCycles > 0) && (mmz->moncount() > 0))
 	{
 		int monCount = mmz->moncount();
-		int mon, height=20, xScale=5, spacing=30;
+		int mon, height=20, spacing=30;
 		name dev, outp;
 		vector<wxString> monNames;
 		vector<int> monNameWidths;
 		int maxNameWidth = 1;
 		int canvasHeight = GetVirtualSize().GetHeight();
+		int canvasWidth = GetVirtualSize().GetWidth();
 		spacing = canvasHeight/monCount;
 		if (spacing>200) spacing = 200;
 		if (spacing<10) spacing = 10;
@@ -140,6 +141,9 @@ void MyGLCanvas::Render(wxString text)
 				maxNameWidth = w;
 		}
 		int xOffset = maxNameWidth+5;
+		float xScale = float(canvasWidth-xOffset-10)/totalCycles;
+		if (xScale<2) xScale = 2;
+		if (xScale>20) xScale = 20;
 		for (mon=0; mon<monCount; mon++)
 		{
 			// Draw the signal trace

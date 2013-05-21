@@ -1,6 +1,7 @@
 #ifndef tests_h
 #define tests_h
 
+#include "scanner.h"
 #include <string>
 
 using namespace std;
@@ -42,11 +43,28 @@ public:
 	virtual void tests();
 };
 
+
+const int SCANEXPECT_MATCH_TXT = 1;
+const int SCANEXPECT_MATCH_NUM = 2;
+class ScannerExpectSym
+{
+private:
+	int lineNum;//Line in tests.cc where this object was constructed, to make it easier to determine exactly which bit of the test is failing
+	symbol expectedSym;
+	string expectedTxt;
+	int expectedNum, flags;
+public:
+	ScannerExpectSym(int lineNum_in=0, symbol sym=badsym, string txt="", int num=0, int flags_in=0);
+	bool matches(names *nmz, symbol sym, name id, int num);
+	void write();
+};
+
 class ScannerTests : public Tests
 {
 public:
 	ScannerTests();
 	virtual void tests();
+	void checkSyms(string testDescription, string inputTxt, vector<ScannerExpectSym>& expected);
 };
 
 #endif /* tests_h */
