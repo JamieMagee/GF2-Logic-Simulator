@@ -27,7 +27,7 @@ class scanner {
 		ifstream inf;	//Input file
 		char curch;		//Current input character
 		bool eofile; 	//True for end of file
-		names defnames;
+		names *defnames;
 
 		void getch();	//Gets next input character
 		void getnumber(int& number);	//Reads number from file

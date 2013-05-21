@@ -9,7 +9,6 @@ scanner::scanner(names* names_mod, const char* defname)
 	inf.open(defname);	//Open file
 	if (!inf) {
 		cout << "Error: cannot open file for reading" << endl;
-		exit(1);
 	}
 	eofile = (inf.get(curch) == 0);	//Get first character
 }
@@ -83,7 +82,7 @@ void scanner::getname(name& id)
 		str.push_back(curch);
 		getch();	
 	}
-	id = defnames.lookup(str);
+	id = defnames->lookup(str);
 }
 
 void scanner::skipspaces()
