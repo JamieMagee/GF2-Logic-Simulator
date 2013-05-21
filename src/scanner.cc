@@ -5,7 +5,6 @@ using namespace std;
 
 scanner::scanner(names* names_mod, const char* defname)
 {
-	defnames = names_mod;
 	inf.open(defname);	//Open file
 	if (!inf) {
 		cout << "Error: cannot open file for reading" << endl;
@@ -47,6 +46,7 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
 					case '.': s = dot; break;
 					default: s = badsym; break;
 				}
+				cursymlen = 1;
 				getch();
 			}
 		}
@@ -55,60 +55,91 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
 
 void scanner::getcurrentline()
 {
-
+	string errorptr;
+	for (int i = 0; i < (line.length()-cursymlen); i++) {
+	  errorptr.push_back(' ');
+	}
+	errorptr.pushback("^"); 
+	cout << "Line " << linenum << ":" << endl;	
+	cout << getline() << endl;		//Outputs current line
+	cout << errorptr << endl;	//Outputs a caret at the error
 }
 
 void scanner::getch()
 {
+	prevch = curch;
 	eofile = (inf.get(curch) == 0);	//get next character
+	if (curch == '\n') {
+		linenum++;
+		eoline = true;
+	}
+	if (eoline) {
+		line.clear();	// Clear string to start new line
+		skipspaces();
+		eoline = false;
+	}	
+	if(prevch != '\n'){
+		line.push_back(prevch);
+	}
+	
 }
 
 void scanner::getnumber(int& number)
 {
 	number=0;
-	
+	cursymlen = 0;
+
 	while (!isspace(curch)) {
 		number *= 10;
 		number += (int(curch)-int('0'));
-		eofile = (inf.get(curch) == 0);
+		cursymlen++;
+		getch();
 	}
 }
 
 void scanner::getname(name& id)
 {
 	namestring str;
+	cursymlen = 0;
 	
 	while (isalnum(curch)) { 
 		str.push_back(curch);
+		cursymlen++;
 		getch();	
 	}
-	id = defnames->lookup(str);
+	id = names_mod->lookup(str);
 }
 
 void scanner::skipspaces()
 {
 	while (isspace(curch)) {
-		eofile = (inf.get(curch) == 0);	//get next character
+		getch();
 		if (eofile) break;
 	}
  }
  
- void scanner::skipcomments()
- {
-	char prevch;
-	
+void scanner::skipcomments()
+{
+
 	if (curch == '/') {
-		prevch = curch;
-		eofile = (inf.get(curch) == 0);	//get next character
+		getch();
 		if (curch == '*') {
-			prevch = curch;
-			eofile = (inf.get(curch) == 0);	//get next character
+			getch();
 			while (prevch != '*' && curch != '/') {
-				prevch = curch;
-				eofile = (inf.get(curch) == 0);	//get next character
+				getch();
 				if (eofile) break;
 			}
 		}
 	}
-	
- }
+}
+
+string scanner::getline()
+{	
+	if(cursym != semicol){
+		while (curch !=';' && !eofile) {
+			getch(); 
+		}
+		line.push_back(curch);
+	}
+	return line;
+}

@@ -26,12 +26,18 @@ class scanner {
 	private:
 		ifstream inf;	//Input file
 		char curch;		//Current input character
+		char prevch;	//Previous input character. Used for finding line end
 		bool eofile; 	//True for end of file
-		names *defnames;
+		bool eoline;	//True for line end
+		int linenum;	//Number of lines in definition file
+		int cursymlen;	//Length of current symbol. Used for error printing
+		string line;	//Current line contents. Used for error printing
+		
 
 		void getch();	//Gets next input character
 		void getnumber(int& number);	//Reads number from file
 		void getname(name& id); //Reads name from file	
+		void getline();	//Reads the line
 		void skipspaces(); //Skips spaces
 		void skipcomments(); //Skips comments
 };
