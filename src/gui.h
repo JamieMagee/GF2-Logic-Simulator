@@ -73,7 +73,7 @@ class MyGLCanvas: public wxGLCanvas
   void OnSize(wxSizeEvent& event);   // callback for when canvas is resized
   void OnPaint(wxPaintEvent& event); // callback for when canvas is exposed
   void OnMouse(wxMouseEvent& event); // callback for mouse events inside canvas
-  void DrawSignalTrace(int xOffset, int yOffset, int xScale, int height, int padding, int mon, int cycles);
+  void DrawSignalTrace(int xOffset, int yOffset, float xScale, int height, int padding, int mon, int cycles);
   void DrawText(int x, int y, wxString txt, void *font=NULL);
   int GetTextWidth(wxString txt, void *font=NULL);
   DECLARE_EVENT_TABLE()
