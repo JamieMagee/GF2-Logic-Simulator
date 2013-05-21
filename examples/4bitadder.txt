@@ -32,7 +32,7 @@ OR OR4:2;
 END
 
 CONNECTIONS
-/*LSB adder*/
+/* LSB adder */
 XOR1.I1 = A0;
 XOR1.I2 = B0;
 AND1.I1 = XOR1;
@@ -66,7 +66,7 @@ XOR6.I2 = OR2;
 OR3.I1 = AND5;
 OR3.I2 = AND6;
 
-/* MSB Adder*/
+/* MSB Adder */
 XOR7.I1 = A3;
 XOR7.I2 = B3;
 AND7.I1 = XOR7;
