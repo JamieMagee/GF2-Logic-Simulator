@@ -42,5 +42,11 @@ public:
 	virtual void tests();
 };
 
+class ScannerTests : public Tests
+{
+public:
+	ScannerTests();
+	virtual void tests();
+};
 
 #endif /* tests_h */
