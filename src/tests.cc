@@ -112,3 +112,15 @@ void NamesTests::tests()
 	testResult("names.getnamestring returns the correct namestring for n5, which is longer than 8 characters", (ns5 == "abcdefghi"));
 
 }
+
+ScannerTests::ScannerTests()
+{
+	title = "scanner module";
+}
+
+void NamesTests::tests()
+{
+	scanner scanz;
+	
+	
+}
