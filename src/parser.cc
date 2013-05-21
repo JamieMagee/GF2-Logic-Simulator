@@ -5,7 +5,6 @@ using namespace std;
 
 /* The parser for the circuit definition files */
 
-
 bool parser::readin(void){
 	smz->getsymbol(cursym, curname, curint);
 	if(cursym == devsym){
@@ -35,22 +34,22 @@ void parser::deviceList(){
 	if(cursym==classsym){
 		newDevice(curname);
 	}
-	else{
-		if(cursym == endsym){
+	else if(cursym == endsym){
 			error(); //must have at least one device
 		}
-		else{
-			error();
-		}
+	else{
+		error(); //need a device type
 	}
+	smz->getsymbol(cursym, curname, curint);
 	while(cursym==semicol){
 		smz->getsymbol(cursym, curname, curint);
 		if(cursym==classsym){
 			newDevice(curname);
 		}
 		else{
-			error();
+			error();//new device must have a name or must end with END not semicolon
 		}
+		smz->getsymbol(cursym, curname, curint);
 	}
 	if(cursym==endsym){
 		return;
@@ -59,32 +58,6 @@ void parser::deviceList(){
 		error();//need semicolon or END
 	}
 }
-
-/*void parser::device(){
-	switch(curname){
-		case 4:
-			newClock();
-			break;
-		case 5:
-			newSwitch();
-			break;
-		case 6:
-		case 7:
-		case 8:
-		case 9:
-			newGate();
-			break;
-		case 10:
-			newDtype();
-			break;
-		case 11:
-			newXor();
-			break;
-		default:
-			cout << "Please do not deduct marks if this message is displayed" << endl;
-	}
-	return
-}*/
 
 void parser::newDevice(int deviceType){
 	smz->getsymbol(cursym, curname, curint);
@@ -171,39 +144,57 @@ void parser::newDevice(int deviceType){
 	}
 }
 
-
-/*void parser::newClock(){
+void parser::connectionList(){
 	smz->getsymbol(cursym, curname, curint);
-	if(cursym==namesym){
-		name clockName = curname;
-		smz->getsymbol(cursym, curname, curint);
-		if(cursym==colon){
-			smz->getsymbol(cursym, curname, curint);
-			if(cursym==numsym){
-				if(curint>0){
-					//create clock with curint and clockName
-					cout << "CLOCK " << clockName << ":" << curint << endl;
-				}
-				else{
-					error();//clock must have number greater than 0
-				}
-			}
-			else{
-				error();//clock needs clock cycle number
-			}
-		}
-		else{
-			error()//need colon after name
-		}
+	if(cursym==endsym){
+		return;
+	}
+	else if(cursym==namesym){
+		newConnection();
 	}
 	else{
-		error();//name must begin with name starting with letter and only containing letter number and _
+		error();//connection must start with the name of a device
+	}
+	smz->getsymbol(cursym, curname, curint);
+	while(cursym==semicol){
+		smz->getsymbol(cursym, curname, curint);
+		if(cursym==namesym){
+			newConnection();
+		}
+		else{
+			error();//connection must start with the name of a device or end of device list must be terminated with END (not semicolon)
+		}
+		smz->getsymbol(cursym, curname, curint);
+	}
+	if(cursym==endsym){
+		return;
+	}
+	else{
+		error();//need semicolon or END
 	}
 }
 
-*/
-
-void parser::connectionList(){
+void parser::newConnection(){
+	name connectionInName = curname;
+	smz->getsymbol(cursym, curname, curint);
+	if(cursym==dot){
+		smz->getsymbol(cursym, curname, curint);
+		if(cursym==iosym){
+			name inputGate=curname;
+			smz->getsymbol(cursym, curname, curint);
+			if(cursym==equals){//SEARCH - you have got to here
+			}
+			else{
+				error();//SEARCH - you have got to here
+			}
+		}
+		else{
+			error();//specify input gate after dot
+		}
+	}
+	else{
+		error();//need to seperate connection input with a '.' (or need to specify input)
+	}
 }
 
 void parser::monitorList(){
