@@ -49,12 +49,8 @@ names::names(void)  /* the constructor */
 name names::lookup (namestring str)
 {
 	if (cvtname(str) == blankname) {
-		if (str.size() > maxlength) str.resize(maxlength);	//Truncate long string
-		if (str == "") return blankname;
-		else {
-			namelist.push_back(str);	//Insert new string
-			return namelist.size()-1;	//Return new strings internal name
-		}
+		namelist.push_back(str);	//Insert new string
+		return namelist.size()-1;	//Return new strings internal name
 	} else {
 		return cvtname(str);
 	}
@@ -62,8 +58,9 @@ name names::lookup (namestring str)
 
 name names::cvtname (namestring str)
 {
+	if (str == "") return blankname;
 	for (name id=0; id<namelist.size(); id++) {
-		if (namelist[id] == str) return id;		//Linear search of namelist vector
+		if (namelist[id] == str.resize(maxlength)) return id;		//Linear search of namelist vector
 	}
 	return blankname;
 }
