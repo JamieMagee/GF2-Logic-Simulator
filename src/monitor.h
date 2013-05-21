@@ -4,27 +4,27 @@
 #include "names.h"
 #include "network.h"
 #include "devices.h"
+#include <vector>
+using namespace std;
 
 const int maxmonitors = 10;      /* max number of monitor points */
 const int maxcycles = 50;        /* max number of cycles per run */
 
+typedef vector<asignal> signaltrace;
+
 struct moninfo {
   name devid;
   outplink op;
+  signaltrace disp;
 };
-struct monitortable {
-  int used;
-  moninfo sigs[maxmonitors];
-};
-typedef asignal signaltrace[maxcycles];
+typedef vector<moninfo> montable;
 
 class monitor {
   names*   nmz;     // version of names class to use.
   network* netz;    // version of the network class to use.
 
-  monitortable mtab;                 // table of monitored signals
+  vector<moninfo> mtab;                 // table of monitored signals
   int cycles;                        // counts clock cycles
-  signaltrace disp[maxmonitors]; 
 
  public:
   void makemonitor (name dev, name outp, bool& ok);

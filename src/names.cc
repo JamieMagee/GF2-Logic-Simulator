@@ -67,9 +67,9 @@ name names::cvtname (namestring str)
 
 void names::writename (name id)
 {
-	if (id == blankname) cout << "blankname" << endl;
-	else if (id > blankname && id < namelist.size()) cout << namelist[id] << endl;
-	else cout << "Incorrect id" << endl;
+	if (id == blankname) cout << "blankname";
+	else if (id > blankname && id < namelist.size()) cout << namelist[id];
+	else cout << "Incorrect id";
 }
 
 int names::namelength (name id)
