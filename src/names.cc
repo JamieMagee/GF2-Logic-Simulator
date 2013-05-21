@@ -56,13 +56,13 @@ name names::lookup (namestring str)
 			return namelist.size()-1;	//Return new strings internal name
 		}
 	} else {
-		return id;
+		return cvtname(str);
 	}
 }
 
 name names::cvtname (namestring str)
 {
-	for (name id=0; id<names.size(); id++) {
+	for (name id=0; id<namelist.size(); id++) {
 		if (namelist[id] == str) return id;		//Linear search of namelist vector
 	}
 	return blankname;
