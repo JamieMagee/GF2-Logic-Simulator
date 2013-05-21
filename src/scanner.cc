@@ -5,6 +5,7 @@ using namespace std;
 
 scanner::scanner(names* names_mod, const char* defname)
 {
+	defnames = names_mod;
 	inf.open(defname);	//Open file
 	if (!inf) {
 		cout << "Error: cannot open file for reading" << endl;
@@ -53,13 +54,13 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
 	}
 }
 
-void scanner::getcurrentline()
+void scanner::writelineerror()
 {
 	string errorptr;
 	for (int i = 0; i < (line.length()-cursymlen); i++) {
 	  errorptr.push_back(' ');
 	}
-	errorptr.pushback("^"); 
+	errorptr.push_back('^'); 
 	cout << "Line " << linenum << ":" << endl;	
 	cout << getline() << endl;		//Outputs current line
 	cout << errorptr << endl;	//Outputs a caret at the error
@@ -107,7 +108,7 @@ void scanner::getname(name& id)
 		cursymlen++;
 		getch();	
 	}
-	id = names_mod->lookup(str);
+	id = defnames->lookup(str);
 }
 
 void scanner::skipspaces()
@@ -135,7 +136,7 @@ void scanner::skipcomments()
 
 string scanner::getline()
 {	
-	if(cursym != semicol){
+	if(s != semicol){
 		while (curch !=';' && !eofile) {
 			getch(); 
 		}

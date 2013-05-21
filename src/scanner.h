@@ -32,12 +32,14 @@ class scanner {
 		int linenum;	//Number of lines in definition file
 		int cursymlen;	//Length of current symbol. Used for error printing
 		string line;	//Current line contents. Used for error printing
+		names* defnames;//Pointer to instance of names class
 		
 
 		void getch();	//Gets next input character
 		void getnumber(int& number);	//Reads number from file
 		void getname(name& id); //Reads name from file	
-		void getline();	//Reads the line
+		string getline();	//Reads the line
+		void writelineerror();	//Writes out an error with a caret pointer
 		void skipspaces(); //Skips spaces
 		void skipcomments(); //Skips comments
 };
