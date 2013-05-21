@@ -30,15 +30,15 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
 			getnumber(num);
 		}
 		else {
-			if(isalpha(curch) {
-				getname(id)
+			if(isalpha(curch)) {
+				getname(id);
 				if (id == 0) s = devsym; else
 				if (id == 1) s = consym; else
 				if (id == 2) s = monsym; else
 				if (id == 3) s = endsym; else
 				if (id > 3 && id < 12) s = classsym; else
-				if (if > 11 && id < 34) s = iosym; else
-				s = namesym
+				if (id > 11 && id < 34) s = iosym; else
+				s = namesym;
 			}
 			else {
 				switch (curch) {
@@ -48,7 +48,7 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
 					case '.': s = dot; break;
 					default: s = badsym; break;
 				}
-			getch();
+				getch();
 			}
 		}
 	}
@@ -83,7 +83,7 @@ void scanner::getname(name& id)
 		str.push_back(curch);
 		getch();	
 	}
-	id = defnames->lookup(str);
+	id = defnames.lookup(str);
 }
 
 void scanner::skipspaces()
