@@ -71,7 +71,8 @@ connections = 'CONNECTIONS' [con] {';' con} 'END'
 monitors = 'MONITORS' [mon] {';' mon} 'END'
 \end{verbatim} 
 
-\textbf{Semantics:} An input file is composed of one devices, one connections and one monitors block, in that order. The devices block must contain at least one \texttt{dev}, but the connections and monitors blocks may be empty. Each block is started with `\texttt{DEVICES}', `\texttt{CONNECTIONS}' and `\texttt{MONITORS}' respectively, and each block is terminated with `\texttt{END}'.
+\textbf{Semantics:} None.
+%An input file is composed of one devices, one connections and one monitors block, in that order. The devices block must contain at least one \texttt{dev}, but the connections and monitors blocks may be empty. Each block is started with `\texttt{DEVICES}', `\texttt{CONNECTIONS}' and `\texttt{MONITORS}' respectively, and each block is terminated with `\texttt{END}'.
 
 \begin{verbatim}
 dev = clock|switch|gate|dtype|xor
@@ -90,8 +91,7 @@ For logic gates (\texttt{AND}, \texttt{NAND}, \texttt{OR}, \texttt{NOR}), the pa
 \begin{verbatim}
 con = devicename'.'input '=' devicename['.'output]
 \end{verbatim} 
-\textbf{Semantics:} Connects the specified device input to the specified device output. Multiple inputs may be connected to the same output, but attempting to connect multiple outputs to the same input is a semantic error. Multiple definitions of the same connection (i.e. the same input and output as an existing connection) will generate a warning, and are treated as a single instance of the connection. All inputs must be connected. See below for semantic rules for \verb|devicename'.'input| and \verb|devicename['.'output]|.
-% TODO: warning or error for multiple outputs to the same input?
+\textbf{Semantics:} Connects the specified device input to the specified device output. Multiple inputs may be connected to the same output, but attempting to connect multiple outputs to the same input is a semantic error. Multiple definitions of the same connection (i.e. the same input and output as an existing connection) will generate a warning, and are treated as a single instance of the connection. For an explanation of warnings and errors, see section~\ref{sec:error-handling}. All inputs must be connected. See below for semantic rules for \verb|devicename'.'input| and \verb|devicename['.'output]|.
 
 \begin{verbatim}
 mon = devicename['.'output]
@@ -101,7 +101,7 @@ mon = devicename['.'output]
 \begin{verbatim}
 devicename = letter {'_'|letter|digit}
 \end{verbatim}
-\textbf{Semantics:} The only punctuation allowed in \texttt{devicename} is an underscore. Semantics for \texttt{devicename} are described above, in the description of \texttt{dev} statements.
+\textbf{Semantics:} Semantics for \texttt{devicename} are described above, in the description of \texttt{dev} statements.
 
 \begin{verbatim}
 input = 'I'('1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9'|'10'|'11'|'12'|'13'|'14'|
@@ -117,10 +117,9 @@ Note that this rule prevents input to a \texttt{CLOCK} or \texttt{SWITCH}, as th
 Comments start with \texttt{/*} and are terminated by the first \texttt{*/}. A \texttt{/*} inside a comment is ignored. 
 
 \section{Error handling}
+\label{sec:error-handling}
 
-\subsection{Syntax errors}
-
-BULK UP
+For all errors, the definition file will continue to be read as far as possible and further errors will be reported. However, running the simulation is not allowed until the errors have been fixed and the file loaded again. Duplicate connections or monitors result in a warning. Warnings still allow the simulation to be run. 
 
 If a semicolon is omitted, an error message should be printed and text should be skipped until the next semicolon is found. Scanning should then continue as normal. A missing semicolon will be detected by the occurrence of a syntax error. After reading as many symbols as are allowed by the syntax rules in a \texttt{dev}, \texttt{con} or \texttt{mon} statement, the next symbol expected is either \texttt{END} or a semicolon. If the next symbol is neither of these, then a semicolon has been omitted. 
 
@@ -136,18 +135,7 @@ If an end comment symbol (\texttt{*/}) is detected without a preceding start com
 %MAYBE IGNORE TEXT BEFORE \texttt{*/} DISCUSS? There's no particularly good way to determine where to start ignoring it though. The program will probably ignore far too much of the definition file.
 %Also, the scanner will already have passed the preceding symbols to the parser, so they can't be ignored. 
 
-For all syntax errors, the error message will include the line number and indicate the position on that line of the error, as well as stating which of the previous errors has occured. All syntax errors are fatal and will not allow the programme to run.
-% TODO: Fatal or non-fatal syntax errors? Is the point of error handling to recover from errors and still be able to run as much of the circuit as possible, or to detect and report as many of the errors present in the definition file as possible?
-% Looking at the handout (particularly section 8.2), my feeling is that as much error recovery as possible should be attempted
-% Maybe ask a demonstrator on Tuesday?
-
-\subsection{Semantic errors}
-
-Duplicate connections or monitors result in warnings, programme still allowed to carry out.
-
-Other semantic errors result in fatal error, not allowed to carry out.
-
-Semantic errors in a \texttt{dev}, \texttt{con}, or \texttt{mon} statement will cause an error message to be printed with details about which semantic rule has been broken, and that statement will be ignored. 
+For all errors, the error message will include the line number and indicate the position on that line of the error, as well as a description of which error has occurred. 
 
 \clearpage
 \appendix
