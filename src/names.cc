@@ -10,40 +10,40 @@ using namespace std;
 names::names(void)  /* the constructor */
 {
 	//Populate namelist with reserved words
-	namelist.push_back("DEVICES");
-	namelist.push_back("CONNECTIONS");
-	namelist.push_back("MONITORS");
-	namelist.push_back("END");
-	namelist.push_back("CLOCK");
-	namelist.push_back("SWITCH");
-	namelist.push_back("AND");
-	namelist.push_back("NAND");
-	namelist.push_back("OR");
-	namelist.push_back("NOR");
-	namelist.push_back("DTYPE");
-	namelist.push_back("XOR");
-	namelist.push_back("I1");
-	namelist.push_back("I2");
-	namelist.push_back("I3");
-	namelist.push_back("I4");
-	namelist.push_back("I5");
-	namelist.push_back("I6");
-	namelist.push_back("I7");
-	namelist.push_back("I8");
-	namelist.push_back("I9");
-	namelist.push_back("I10");
-	namelist.push_back("I11");
-	namelist.push_back("I12");
-	namelist.push_back("I13");
-	namelist.push_back("I14");
-	namelist.push_back("I15");
-	namelist.push_back("I16");
-	namelist.push_back("DATA");
-	namelist.push_back("CLK");
-	namelist.push_back("SET");
-	namelist.push_back("CLEAR");
-	namelist.push_back("Q");
-	namelist.push_back("QBAR"); 
+	namelist.push_back("DEVICES"); //0
+	namelist.push_back("CONNECTIONS"); //1
+	namelist.push_back("MONITORS"); //2
+	namelist.push_back("END"); //3
+	namelist.push_back("CLOCK"); //4
+	namelist.push_back("SWITCH"); //5
+	namelist.push_back("AND"); //6
+	namelist.push_back("NAND"); //7
+	namelist.push_back("OR"); //8
+	namelist.push_back("NOR"); //9
+	namelist.push_back("DTYPE"); //10
+	namelist.push_back("XOR"); //11
+	namelist.push_back("I1"); //12
+	namelist.push_back("I2"); //13
+	namelist.push_back("I3"); //14
+	namelist.push_back("I4"); //15
+	namelist.push_back("I5"); //16
+	namelist.push_back("I6"); //17
+	namelist.push_back("I7"); //18
+	namelist.push_back("I8"); //19
+	namelist.push_back("I9"); //20
+	namelist.push_back("I10"); //21
+	namelist.push_back("I11"); //22
+	namelist.push_back("I12"); //23
+	namelist.push_back("I13"); //24
+	namelist.push_back("I14"); //25
+	namelist.push_back("I15"); //26
+	namelist.push_back("I16"); //27
+	namelist.push_back("DATA"); //28
+	namelist.push_back("CLK"); //29
+	namelist.push_back("SET"); //30
+	namelist.push_back("CLEAR"); //31
+	namelist.push_back("Q"); //32
+	namelist.push_back("QBAR"); //33
 }
 
 name names::lookup (namestring str)

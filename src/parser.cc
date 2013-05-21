@@ -34,6 +34,22 @@ bool parser::readin (void)
 }
 
 void parser::deviceList(){
+  smz->getSymbol(cursym, curname, curint);
+  if(cusym==classsym){
+	device()
+}
+else{
+	error()
+}
+	
+}
+
+void parser::device(){
+	// to do initiate device in devices class
+	switch(curname){
+		case 4:clock();
+		break
+		case 5:
 }
 
 void parser::connectionList(){
