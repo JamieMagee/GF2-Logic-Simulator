@@ -1,4 +1,7 @@
 #include <iostream>
+#include <fstream>
+#include <cstdio>
+#include <vector>
 #include "tests.h"
 #include "names.h"
 
@@ -23,13 +26,13 @@ void Tests::testFailed(string testDescription)
 	if (colourPrint) cout << "\033[31m";
 	cout << "Test failed:";
 	if (colourPrint) cout << "\033[0m";
-	cout << " testing whether " << testDescription << endl;
+	cout << " " << testDescription << endl;
 }
 
 void Tests::testSucceeded(string testDescription)
 {
 	successCount++;
-	if (printSuccess || debug) cout << "Test passed: testing whether \"" << testDescription << endl;
+	if (printSuccess || debug) cout << "Test passed: " << testDescription << endl;
 }
 
 void Tests::printResultsSummary()
@@ -118,9 +121,124 @@ ScannerTests::ScannerTests()
 	title = "scanner module";
 }
 
-void NamesTests::tests()
+void ScannerTests::tests()
 {
-	scanner scanz;
+	vector<ScannerExpectSym> expected;
+	string inputTxt;
 	
-	
+	inputTxt = "\
+DEVICES \n\
+SWITCH S1 : 0 ;\n\
+END \n\
+";
+	expected.resize(0);
+	expected.push_back(ScannerExpectSym(__LINE__, devsym));
+	expected.push_back(ScannerExpectSym(__LINE__, classsym, "SWITCH", 0, SCANEXPECT_MATCH_TXT));
+	expected.push_back(ScannerExpectSym(__LINE__, namesym, "S1", 0, SCANEXPECT_MATCH_TXT));
+	expected.push_back(ScannerExpectSym(__LINE__, colon));
+	expected.push_back(ScannerExpectSym(__LINE__, numsym, "", 0, SCANEXPECT_MATCH_NUM));
+	expected.push_back(ScannerExpectSym(__LINE__, semicol));
+	expected.push_back(ScannerExpectSym(__LINE__, endsym));
+	checkSyms("example passing test", inputTxt, expected);
+
+	inputTxt = "\
+DEVICES\n\
+SWITCH S1:0;\n\
+END \n\
+";
+	expected.resize(0);
+	expected.push_back(ScannerExpectSym(__LINE__, devsym));
+	expected.push_back(ScannerExpectSym(__LINE__, classsym, "SWITCH", 0, SCANEXPECT_MATCH_TXT));
+	expected.push_back(ScannerExpectSym(__LINE__, namesym, "S1", 0, SCANEXPECT_MATCH_TXT));
+	expected.push_back(ScannerExpectSym(__LINE__, colon));
+	expected.push_back(ScannerExpectSym(__LINE__, numsym, "", 0, SCANEXPECT_MATCH_NUM));
+	expected.push_back(ScannerExpectSym(__LINE__, semicol));
+	expected.push_back(ScannerExpectSym(__LINE__, endsym));
+	checkSyms("example failing test", inputTxt, expected);
+
+	inputTxt = "\
+DEVICES \n\
+SWITCH S1 : 0 ;\n\
+END\n\
+";
+	expected.resize(0);
+	expected.push_back(ScannerExpectSym(__LINE__, devsym));
+	expected.push_back(ScannerExpectSym(__LINE__, classsym, "SWITCH", 0, SCANEXPECT_MATCH_TXT));
+	expected.push_back(ScannerExpectSym(__LINE__, namesym, "S1", 0, SCANEXPECT_MATCH_TXT));
+	expected.push_back(ScannerExpectSym(__LINE__, colon));
+	expected.push_back(ScannerExpectSym(__LINE__, numsym, "", 0, SCANEXPECT_MATCH_NUM));
+	expected.push_back(ScannerExpectSym(__LINE__, semicol));
+	expected.push_back(ScannerExpectSym(__LINE__, endsym));
+	expected.push_back(ScannerExpectSym(__LINE__, eofsym));
+	checkSyms("example crashing test", inputTxt, expected);
+
+}
+
+void ScannerTests::checkSyms(string testDescription, string inputTxt, vector<ScannerExpectSym>& expected)
+{
+	string fileName = "scannertest.tmp.gf2";
+	ofstream f;
+	f.open(fileName.c_str(), ios::out | ios::trunc);
+	f << inputTxt;
+	f.close();
+	// TODO: check file was written correctly
+	names *nmz = new names();
+	scanner *smz = new scanner(nmz, fileName.c_str());
+	bool ok = true;
+	symbol sym;
+	name id;
+	int num;
+	for (int i=0; i<expected.size(); i++)
+	{
+		smz->getsymbol(sym, id, num);
+		if (!expected[i].matches(nmz, sym, id, num))
+		{
+			ok = false;
+			testFailed(testDescription);
+		}
+		if (debug || !ok)
+		{
+			expected[i].write();
+			cout << "Actual symbol " << sym << " " << nmz->getnamestring(id) << " " << num << endl;
+		}
+		if (!ok) break;
+	}
+	if (ok) testSucceeded(testDescription);
+
+	remove("scannertest.tmp.gf2");
+}
+
+ScannerExpectSym::ScannerExpectSym(int lineNum_in, symbol sym, string txt, int num, int flags_in) :
+	lineNum(lineNum_in), expectedSym(sym), expectedTxt(txt), expectedNum(num), flags(flags_in)
+{}
+
+bool ScannerExpectSym::matches(names *nmz, symbol sym, name id, int num)
+{
+	if (expectedSym!=sym)
+	{
+		return false;
+	}
+	if (flags & SCANEXPECT_MATCH_TXT)
+	{
+		if (nmz->cvtname(expectedTxt) != id)
+			return false;
+	}
+	if (flags & SCANEXPECT_MATCH_NUM)
+	{
+		if (expectedNum != num)
+			return false;
+	}
+	return true;
+}
+
+void ScannerExpectSym::write()
+{
+	cout << "from tests line " << lineNum << ": expected symbol ";
+	// TODO: strings instead of numbers?
+	cout << expectedSym;
+	if (flags & SCANEXPECT_MATCH_TXT)
+		cout << " with text '" << expectedTxt << "'";
+	if (flags & SCANEXPECT_MATCH_NUM)
+		cout << " with num " << expectedNum;
+	cout << endl;
 }

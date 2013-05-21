@@ -14,6 +14,8 @@ bool runTestSet(const string& testSetName, bool& testsAllPassed)
 	Tests *t;
 	if (testSetName=="names")
 		t = new NamesTests();
+	if (testSetName=="scanner")
+		t = new ScannerTests();
 	else
 		return false;
 	if (!t->runTests())
@@ -27,6 +29,7 @@ int main(int argc, char **argv)
 {
 	vector<string> validNames;
 	validNames.push_back("names");
+	validNames.push_back("scanner");
 	bool testsAllPassed = true;
 	if (argc <= 1 || (argv[1] && string(argv[1])=="all"))
 	{
