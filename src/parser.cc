@@ -5,94 +5,124 @@ using namespace std;
 
 /* The parser for the circuit definition files */
 
-bool parser::readin(void){
+bool parser::readin(void)
+{
+	//EBNF: specfile = devices connections monitors
 	smz->getsymbol(cursym, curname, curint);
-	if(cursym == devsym){
+	if (cursym == devsym)
+	{
 		deviceList();
 	}
-	else{
+	else
+	{
 		error(); //must have device list first
 	}
 	smz->getsymbol(cursym, curname, curint);
-	if(cursym == consym){
+	if (cursym == consym)
+	{
 		connectionList();
 	}
-	else{
+	else
+	{
 		error(); //must have connection list second
 	}
 	smz->getsymbol(cursym, curname, curint);
-	if(cursym == monsym){
-		monitorList(); 
+	if (cursym == monsym)
+	{
+		monitorList();
 	}
-	else{
+	else
+	{
 		error(); //must have monitor list last
 	}
 }
 
-void parser::deviceList(){
+void parser::deviceList()
+{
+	//EBNF: devices = 'DEVICES' dev {';' dev} 'END'
 	smz->getsymbol(cursym, curname, curint);
-	if(cursym==classsym){
+	if (cursym == classsym)
+	{
 		newDevice(curname);
 	}
-	else if(cursym == endsym){
-			error(); //must have at least one device
-		}
-	else{
+	else if (cursym == endsym)
+	{
+		error(); //must have at least one device
+	}
+	else
+	{
 		error(); //need a device type
 	}
 	smz->getsymbol(cursym, curname, curint);
-	while(cursym==semicol){
+	while (cursym == semicol)
+	{
 		smz->getsymbol(cursym, curname, curint);
-		if(cursym==classsym){
+		if (cursym == classsym)
+		{
 			newDevice(curname);
 		}
-		else{
+		else
+		{
 			error();//new device must have a name or must end with END not semicolon
 		}
 		smz->getsymbol(cursym, curname, curint);
 	}
-	if(cursym==endsym){
+	if (cursym == endsym)
+	{
 		return;
 	}
-	else{
+	else
+	{
 		error();//need semicolon or END
 	}
 }
 
-void parser::newDevice(int deviceType){
+void parser::newDevice(int deviceType)
+{
+	//EBNF: dev = clock|switch|gate|dtype|xor
 	smz->getsymbol(cursym, curname, curint);
-	if(cursym==namesym){
+	if (cursym == namesym)
+	{
 		name devName = curname;
-		if(deviceType==10){
+		if (deviceType == 10)
+		{
 			cout << "DTYPE with name integer " << devName << endl;
 			//create DTYPE with name devName
 			return;
 		}
-		if(deviceType==11){
+		if (deviceType == 11)
+		{
 			cout << "XOR with name integer " << devName << endl;
 			//create XOR with name devName
 			return;
 		}
 		smz->getsymbol(cursym, curname, curint);
-		if(cursym==colon){
+		if (cursym == colon)
+		{
 			smz->getsymbol(cursym, curname, curint);
-			if(cursym==numsym){
-				switch(deviceType){
+			if (cursym == numsym)
+			{
+				switch (deviceType)
+				{
 					case 4:
-						if(curint>0){
+						if (curint > 0)
+						{
 							//create clock with curint and devName
 							cout << "CLOCK with name integer " << devName << " and " << curint << " program cycles per clock cycle" << endl;
 						}
-						else{
+						else
+						{
 							error();//clock must have number greater than 0
 						}
 						break;
 					case 5:
-						if (curint==1 | curint==0){
+						if (curint == 1 | curint == 0)
+						{
 							//create switch with curint and devName
 							cout << "SWITCH with name integer " << devName << " and intial state " << curint << endl;
 						}
-						else{
+						else
+						{
 							error();//switch must have either 0 or 1
 						}
 						break;
@@ -100,8 +130,10 @@ void parser::newDevice(int deviceType){
 					case 7:
 					case 8:
 					case 9:
-						if(curint>0 && curint<17){
-							switch(deviceType){
+						if (curint > 0 && curint < 17)
+						{
+							switch (deviceType)
+							{
 								case 6:
 									//create and gate with curint and devName
 									cout << "AND gate with name integer " << devName << " and " << curint << " input(s)" << endl;
@@ -122,7 +154,8 @@ void parser::newDevice(int deviceType){
 									cout << "How on earth have you managed to get here?" << endl;
 							}
 						}
-						else{
+						else
+						{
 							error();//must have between 1 and 16 inputs to a GATE
 						}
 						break;
@@ -131,86 +164,131 @@ void parser::newDevice(int deviceType){
 				}
 				return;
 			}
-			else{
+			else
+			{
 				error();//clock needs clock cycle number
 			}
 		}
-		else{
+		else
+		{
 			error();//need colon after name for CLOCK/SWITCH/GATE type
 		}
 	}
-	else{
+	else
+	{
 		error();//name must begin with name starting with letter and only containing letter number and _
 	}
 }
 
-void parser::connectionList(){
+void parser::connectionList()
+{
+	//EBNF: connections = 'CONNECTIONS' [con] {';' con} 'END'
 	smz->getsymbol(cursym, curname, curint);
-	if(cursym==endsym){
+	if (cursym == endsym)
+	{
 		return;
 	}
-	else if(cursym==namesym){
+	else if (cursym == namesym)
+	{
 		newConnection();
 	}
-	else{
+	else
+	{
 		error();//connection must start with the name of a device
 	}
 	smz->getsymbol(cursym, curname, curint);
-	while(cursym==semicol){
+	while (cursym == semicol)
+	{
 		smz->getsymbol(cursym, curname, curint);
-		if(cursym==namesym){
+		if (cursym == namesym)
+		{
 			newConnection();
 		}
-		else{
+		else
+		{
 			error();//connection must start with the name of a device or end of device list must be terminated with END (not semicolon)
 		}
 		smz->getsymbol(cursym, curname, curint);
 	}
-	if(cursym==endsym){
+	if (cursym == endsym)
+	{
 		return;
 	}
-	else{
+	else
+	{
 		error();//need semicolon or END
 	}
 }
 
-void parser::newConnection(){
+void parser::newConnection()
+{
+	//EBNF: con = devicename'.'input '=' devicename['.'output]
 	name connectionInName = curname;
 	smz->getsymbol(cursym, curname, curint);
-	if(cursym==dot){
+	if (cursym == dot)
+	{
 		smz->getsymbol(cursym, curname, curint);
-		if(cursym==iosym){
-			name inputGate=curname;
+		if (cursym == iosym)
+		{
+			name inputGate = curname;
 			smz->getsymbol(cursym, curname, curint);
-			if(cursym==equals){//SEARCH - you have got to here
+			if (cursym == equals) //SEARCH - you have got to here
+			{
 			}
-			else{
+			else
+			{
 				error();//SEARCH - you have got to here
 			}
 		}
-		else{
+		else
+		{
 			error();//specify input gate after dot
 		}
 	}
-	else{
+	else
+	{
 		error();//need to seperate connection input with a '.' (or need to specify input)
 	}
 }
 
-void parser::monitorList(){
+void parser::monitorList()
+{
+	//EBNF: mon = devicename['.'output]
+	
+	smz->getsymbol(cursym, curname, curint);
+	if (cursym == namesym)
+	{
+		name devName = curname;
+		smz->getsymbol(cursym, curname, curint);
+		if (cursym = semicol)
+		{
+			monz->makemonitor(devName, devName, ok);
+		}
+		else if (cursym = dot)
+		{
+			smz->getsymbol(cursym, curname, curint);
+			if (cursym = iosym)
+			{
+				monz->makemonitor(devName, cursym, ok);
+			}
+		}
+		else
+		{
+			error();
+		}
 }
 
-void parser::error(){
+void parser::error()
+{
 	cout << "PANIC" << endl;
 }
 
-parser::parser(network* network_mod, devices* devices_mod, monitor* monitor_mod, scanner* scanner_mod){
+parser::parser(network* network_mod, devices* devices_mod, monitor* monitor_mod, scanner* scanner_mod)
+{
 	netz = network_mod;  /* make internal copies of these class pointers */
 	dmz = devices_mod;   /* so we can call functions from these classes  */
 	mmz = monitor_mod;   /* eg. to call makeconnection from the network  */
 	smz = scanner_mod;   /* class you say:                               */
 	/* netz->makeconnection(i1, i2, o1, o2, ok);   */
-
 	/* any other initialisation you want to do? */
-
 }
