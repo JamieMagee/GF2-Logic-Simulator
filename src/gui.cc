@@ -2,6 +2,7 @@
 #include <GL/glut.h>
 #include "wx_icon.xpm"
 #include <iostream>
+#include <vector>
 #include "scanner.h"
 #include "parser.h"
 
@@ -28,9 +29,27 @@ MyGLCanvas::MyGLCanvas(wxWindow *parent, wxWindowID id, monitor* monitor_mod, na
   cyclesdisplayed = -1;
 }
 
-void MyGLCanvas::DrawSignalTrace(int xOffset, int yOffset, int xScale, int height, int mon, int cycles)
+void MyGLCanvas::DrawSignalTrace(int xOffset, int yOffset, int xScale, int height, int padding, int mon, int cycles)
 {
+	glBegin(GL_QUADS);
+	glColor4f(0.0, 0.5, 0.0, 0.05);
+	glVertex2f(xOffset, yOffset-height/2-padding);
+	glVertex2f(xOffset, yOffset+height/2+padding);
+	glVertex2f(xOffset+xScale*cycles, yOffset+height/2+padding);
+	glVertex2f(xOffset+xScale*cycles, yOffset-height/2-padding);
+	glEnd();
+
+	glBegin(GL_LINE_LOOP);
+	glColor4f(0.0, 0.7, 0.0, 0.4);
+	glVertex2f(xOffset, yOffset-height/2-padding);
+	glVertex2f(xOffset, yOffset+height/2+padding);
+	glVertex2f(xOffset+xScale*cycles, yOffset+height/2+padding);
+	glVertex2f(xOffset+xScale*cycles, yOffset-height/2-padding);
+	glEnd();
+
+	if (xScale>4) glLineWidth(2);
 	glBegin(GL_LINE_STRIP);
+	glColor4f(0.0, 0.8, 0.0, 1.0);
 	int y1, y2, i;
 	asignal s;
 	for (i=0; i<cycles; i++)
@@ -50,6 +69,7 @@ void MyGLCanvas::DrawSignalTrace(int xOffset, int yOffset, int xScale, int heigh
 		}
 	}
 	glEnd();
+	glLineWidth(1);
 }
 
 void MyGLCanvas::DrawText(int x, int y, wxString txt, void *font)
@@ -87,26 +107,42 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
     InitGL();
     init = true;
   }
-  glClear(GL_COLOR_BUFFER_BIT);
-
+	glClear(GL_COLOR_BUFFER_BIT);
 	if ((cyclesdisplayed >= 0) && (mmz->moncount() > 0))
 	{
 		int monCount = mmz->moncount();
 		int mon, height=20, xScale=5, spacing=30;
 		name dev, outp;
+		vector<wxString> monNames;
+		vector<int> monNameWidths;
+		int maxNameWidth = 1;
+		int canvasHeight = GetVirtualSize().GetHeight();
+		spacing = canvasHeight/monCount;
+		if (spacing>200) spacing = 200;
+		if (spacing<10) spacing = 10;
+		height = 0.8*spacing;
 		for (mon=0; mon<monCount; mon++)
 		{
-			// Draw the signal trace
-			glColor3f(0.0, 0.8, 0.0);
-			DrawSignalTrace(30, 10+spacing/2+mon*spacing, xScale, height, mon, cyclesdisplayed);
-
-			// Draw the monitor name
 			mmz->getmonname(mon, dev, outp);
 			wxString monName(nmz->getnamestring(dev).c_str(), wxConvUTF8);
 			if (outp!=blankname)
 				monName += wxT(".") + wxString(nmz->getnamestring(outp).c_str(), wxConvUTF8);
+			monNames.push_back(monName);
+			int w = GetTextWidth(monName);
+			monNameWidths.push_back(w);
+			if (w>maxNameWidth)
+				maxNameWidth = w;
+		}
+		int xOffset = maxNameWidth+5;
+		for (mon=0; mon<monCount; mon++)
+		{
+			// Draw the signal trace
+			glColor3f(0.0, 0.8, 0.0);
+			DrawSignalTrace(xOffset+5, canvasHeight-spacing/2-mon*spacing, xScale, height, spacing*0.075, mon, cyclesdisplayed);
+
+			// Draw the monitor name
 			glColor3f(0.0, 0.0, 1.0);
-			DrawText(1, 10+spacing/2+mon*spacing-12/2, monName);
+			DrawText(xOffset-monNameWidths[mon], canvasHeight-spacing/2-mon*spacing-12/2, monNames[mon]);
 		}
 	}
 	else if (mmz->moncount()==0)
@@ -121,10 +157,10 @@ void MyGLCanvas::Render(wxString example_text, int cycles)
 	}
 
   // Example of how to use GLUT to draw text on the canvas
-  glColor3f(0.0, 0.0, 1.0);
+  /*glColor3f(0.0, 0.0, 1.0);
   glRasterPos2f(10, 100);
   for (i = 0; i < example_text.Len(); i++) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, example_text[i]);
-
+*/
   // We've been drawing to the back buffer, flush the graphics pipeline and swap the back buffer to the front
   glFlush();
   SwapBuffers();
@@ -145,6 +181,8 @@ void MyGLCanvas::InitGL()
   glOrtho(0, w, 0, h, -1, 1); 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glEnable(GL_BLEND);
 }
 
 void MyGLCanvas::OnPaint(wxPaintEvent& event)

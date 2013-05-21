@@ -3,7 +3,7 @@
 #include "gui.h"
 #include <GL/glut.h>
 
-// #define USE_GUI
+#define USE_GUI
 
 IMPLEMENT_APP(MyApp)
   
@@ -32,6 +32,8 @@ bool MyApp::OnInit()
 		// XOR gate built from NANDS, with a switch&clock and a clock as the inputs (S1 ANDed with C2, and C1)
 		name c1=nmz->lookup("C1"), c2=nmz->lookup("C2"), s1=nmz->lookup("S1"), g1=nmz->lookup("G1"), g2=nmz->lookup("G2"), g3=nmz->lookup("G3"), g4=nmz->lookup("G4"), gi1 = nmz->lookup("GI1");
 		name i1=nmz->lookup("I1"), i2=nmz->lookup("I2");
+		name dt1=nmz->lookup("DT1");
+		name idata=nmz->lookup("DATA"), iclk=nmz->lookup("CLK"), iset=nmz->lookup("SET"), iclear=nmz->lookup("CLEAR");
 		bool ok;
 		dmz->makedevice(nandgate, g1, 2, ok);
 		dmz->makedevice(nandgate, g2, 2, ok);
@@ -56,6 +58,14 @@ bool MyApp::OnInit()
 		mmz->makemonitor(g4, blankname, ok);
 		mmz->makemonitor(c1, blankname, ok);
 		mmz->makemonitor(s1, blankname, ok);
+
+		dmz->makedevice(dtype, dt1, 0, ok);
+		netz->makeconnection(dt1, idata, g1, blankname, ok);
+		netz->makeconnection(dt1, iclk, c1, blankname, ok);
+		netz->makeconnection(dt1, iset, g4, blankname, ok);
+		netz->makeconnection(dt1, iclear, c2, blankname, ok);
+		mmz->makemonitor(dt1, nmz->lookup("Q"), ok);
+		mmz->makemonitor(dt1, nmz->lookup("QBAR"), ok);
 
 		netz->checknetwork(ok);
 		if (!ok)
