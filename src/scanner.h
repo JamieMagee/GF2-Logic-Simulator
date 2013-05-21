@@ -34,3 +34,4 @@ class scanner {
 };
 
 #endif
+test
