@@ -66,7 +66,13 @@ void scanner::getch()
 
 void scanner::getnumber(int& number)
 {
-
+	number=0;
+	
+	while (!isspace(curch)) {
+		number *= 10;
+		number += (int(curch)-int('0'));
+		eofile = (inf.get(curch) == 0);
+	}
 }
 
 void scanner::getname(name& id)
@@ -77,11 +83,6 @@ void scanner::getname(name& id)
 		str.push_back(curch);
 		getch();	
 	}
-
-	if (str.size() > maxlength) {
-		cout << "Warning: name '" << str << "' was truncated." << endl;
-		str.resize(maxlength);
-	}	
 	id = defnames->lookup(str);
 }
 
@@ -95,5 +96,20 @@ void scanner::skipspaces()
  
  void scanner::skipcomments()
  {
- 
+	char prevch;
+	
+	if (curch == '/') {
+		prevch = curch;
+		eofile = (inf.get(curch) == 0);	//get next character
+		if (curch == '*') {
+			prevch = curch;
+			eofile = (inf.get(curch) == 0);	//get next character
+			while (prevch != '*' && curch != '/') {
+				prevch = curch;
+				eofile = (inf.get(curch) == 0);	//get next character
+				if (eofile) break;
+			}
+		}
+	}
+	
  }
