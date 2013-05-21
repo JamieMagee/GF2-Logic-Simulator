@@ -7,12 +7,10 @@ scanner::scanner(names* names_mod, const char* defname)
 {
 	defnames = names_mod;
 	inf.open(defname);	//Open file
-
 	if (!inf)
 	{
 		cout << "Error: cannot open file for reading" << endl;
 	}
-
 	eofile = (inf.get(curch) == 0);	//Get first character
 }
 
@@ -25,7 +23,6 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
 {
 	skipspaces();
 	skipcomments();
-
 	if (eofile) s = eofsym;
 	else
 	{
@@ -36,18 +33,16 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
 		}
 		else
 		{
-			if(isalpha(curch))
+			if (isalpha(curch))
 			{
 				getname(id);
-
 				if (id == 0) s = devsym;
 				else if (id == 1) s = consym;
 				else if (id == 2) s = monsym;
 				else if (id == 3) s = endsym;
 				else if (id > 3 && id < 12) s = classsym;
 				else if (id > 11 && id < 34) s = iosym;
-				else
-					s = namesym;
+				else s = namesym;
 			}
 			else
 			{
@@ -56,24 +51,19 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
 					case '=':
 						s = equals;
 						break;
-
 					case ';':
 						s = semicol;
 						break;
-
 					case ':':
 						s = colon;
 						break;
-
 					case '.':
 						s = dot;
 						break;
-
 					default:
 						s = badsym;
 						break;
 				}
-
 				cursymlen = 1;
 				getch();
 			}
@@ -84,12 +74,10 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
 void scanner::writelineerror()
 {
 	string errorptr;
-
 	for (int i = 0; i < (line.length() - cursymlen); i++)
 	{
 		errorptr.push_back(' ');
 	}
-
 	errorptr.push_back('^');
 	cout << "Line " << linenum << ":" << endl;
 	cout << getline() << endl;		//Outputs current line
@@ -100,32 +88,27 @@ void scanner::getch()
 {
 	prevch = curch;
 	eofile = (inf.get(curch) == 0);	//get next character
-
 	if (curch == '\n')
 	{
 		linenum++;
 		eoline = true;
 	}
-
 	if (eoline)
 	{
 		line.clear();	// Clear string to start new line
 		skipspaces();
 		eoline = false;
 	}
-
-	if(prevch != '\n')
+	if (prevch != '\n')
 	{
 		line.push_back(prevch);
 	}
-
 }
 
 void scanner::getnumber(int& number)
 {
 	number = 0;
 	cursymlen = 0;
-
 	while (!isspace(curch))
 	{
 		number *= 10;
@@ -139,14 +122,12 @@ void scanner::getname(name& id)
 {
 	namestring str;
 	cursymlen = 0;
-
 	while (isalnum(curch))
 	{
 		str.push_back(curch);
 		cursymlen++;
 		getch();
 	}
-
 	id = defnames->lookup(str);
 }
 
@@ -155,26 +136,21 @@ void scanner::skipspaces()
 	while (isspace(curch))
 	{
 		getch();
-
 		if (eofile) break;
 	}
 }
 
 void scanner::skipcomments()
 {
-
 	if (curch == '/')
 	{
 		getch();
-
 		if (curch == '*')
 		{
 			getch();
-
 			while (prevch != '*' && curch != '/')
 			{
 				getch();
-
 				if (eofile) break;
 			}
 		}
@@ -183,15 +159,13 @@ void scanner::skipcomments()
 
 string scanner::getline()
 {
-	if(s != semicol)
+	if (s != semicol)
 	{
 		while (curch != ';' && !eofile)
 		{
 			getch();
 		}
-
 		line.push_back(curch);
 	}
-
 	return line;
 }
