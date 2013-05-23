@@ -18,13 +18,14 @@ END_EVENT_TABLE()
   
 int wxglcanvas_attrib_list[5] = {WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16, 0};
 
-MyGLCanvas::MyGLCanvas(wxWindow *parent, wxWindowID id, monitor* monitor_mod, names* names_mod,
-		       const wxPoint& pos, const wxSize& size, long style, const wxString& name):
+MyGLCanvas::MyGLCanvas(wxWindow *parent, wxWindowID id, monitor* monitor_mod, names* names_mod, wxScrolledWindow* scrollwind,
+	const wxPoint& pos, const wxSize& size, long style, const wxString& name):
     wxGLCanvas(parent, id, pos, size, style, name, wxglcanvas_attrib_list)
   // Constructor - initialises private variables
 {
   mmz = monitor_mod;
   nmz = names_mod;
+  scrollingParent = scrollwind;
   init = false;
   continuedCycles = totalCycles = 0;
 }
@@ -95,6 +96,7 @@ void MyGLCanvas::SimulationRun(int totalCycles_new, int continuedCycles_new)
 	totalCycles = totalCycles_new;
 	continuedCycles = continuedCycles_new;
 	Render();
+	if (scrollingParent) scrollingParent->Scroll(GetSize().GetWidth(),-1);
 }
 
 void MyGLCanvas::Render(wxString text)
@@ -122,11 +124,11 @@ void MyGLCanvas::Render(wxString text)
 		vector<wxString> monNames;
 		vector<int> monNameWidths;
 		int maxNameWidth = 1;
-		int canvasHeight = GetVirtualSize().GetHeight();
-		int canvasWidth = GetVirtualSize().GetWidth();
+		int canvasHeight = GetClientSize().GetHeight();
+		int canvasWidth = GetClientSize().GetWidth();
 		spacing = canvasHeight/monCount;
 		if (spacing>200) spacing = 200;
-		if (spacing<10) spacing = 10;
+		if (spacing<50) spacing = 50;
 		height = 0.8*spacing;
 		for (mon=0; mon<monCount; mon++)
 		{
@@ -141,6 +143,10 @@ void MyGLCanvas::Render(wxString text)
 				maxNameWidth = w;
 		}
 		int xOffset = maxNameWidth+5;
+		// Make sure all the traces fit in the canvas
+		SetMinSize(wxSize(2*totalCycles+10+xOffset,50*monCount));
+		// If inside a wxScrolledWindow, ensure that its scrolling area fits the canvas
+		if (scrollingParent) scrollingParent->FitInside();
 		float xScale = float(canvasWidth-xOffset-10)/totalCycles;
 		if (xScale<2) xScale = 2;
 		if (xScale>20) xScale = 20;
@@ -266,15 +272,21 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
   menuBar->Append(fileMenu, wxT("&File"));
   SetMenuBar(menuBar);
 
-  wxBoxSizer *topsizer = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *topsizer = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *leftsizer = new wxBoxSizer(wxVERTICAL);
 
-  wxBoxSizer *leftsizer = new wxBoxSizer(wxVERTICAL);
-  canvas = new MyGLCanvas(this, wxID_ANY, monitor_mod, names_mod);
-  leftsizer->Add(canvas, 3, wxEXPAND | wxALL, 10);
-  outputTextCtrl = new wxTextCtrl(this, OUTPUT_TEXTCTRL_ID, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
-  outputTextRedirect = new wxStreamToTextRedirector(outputTextCtrl);// Redirect all text sent to cout to the outputTextCtrl textbox
-  leftsizer->Add(outputTextCtrl, 1, wxEXPAND | wxALL, 10);
-  topsizer->Add(leftsizer, 4, wxEXPAND | wxALL, 10);
+	wxScrolledWindow *sw = new wxScrolledWindow(this,-1, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN|wxVSCROLL);
+	wxBoxSizer *swsizer = new wxBoxSizer(wxHORIZONTAL);
+	canvas = new MyGLCanvas(sw, wxID_ANY, monitor_mod, names_mod, sw);
+	swsizer->Add(canvas, 1, wxEXPAND | wxALL, 0);
+	sw->SetSizer(swsizer);
+	sw->SetScrollRate(10, 10);
+	leftsizer->Add(sw, 3, wxEXPAND | wxALL, 10);
+
+	outputTextCtrl = new wxTextCtrl(this, OUTPUT_TEXTCTRL_ID, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
+	outputTextRedirect = new wxStreamToTextRedirector(outputTextCtrl);// Redirect all text sent to cout to the outputTextCtrl textbox
+	leftsizer->Add(outputTextCtrl, 1, wxEXPAND | wxALL, 10);
+	topsizer->Add(leftsizer, 4, wxEXPAND | wxALL, 10);
 
 
 	wxBoxSizer *sidesizer = new wxBoxSizer(wxVERTICAL);

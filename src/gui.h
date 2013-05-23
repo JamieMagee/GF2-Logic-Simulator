@@ -5,6 +5,7 @@
 #include <wx/glcanvas.h>
 #include <wx/spinctrl.h>
 #include <wx/textctrl.h>
+#include <wx/scrolwin.h>
 #include "names.h"
 #include "devices.h"
 #include "monitor.h"
@@ -58,12 +59,13 @@ class MyFrame: public wxFrame
 class MyGLCanvas: public wxGLCanvas
 {
  public:
-  MyGLCanvas(wxWindow *parent, wxWindowID id = wxID_ANY, monitor* monitor_mod = NULL, names* names_mod = NULL,
+  MyGLCanvas(wxWindow *parent, wxWindowID id = wxID_ANY, monitor* monitor_mod = NULL, names* names_mod = NULL, wxScrolledWindow* scrollwind = NULL,
 	     const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = 0,
 	     const wxString& name = wxT("MyGLCanvas")); // constructor
   void Render(wxString text=wxT("")); // function to draw canvas contents
   void SimulationRun(int totalCycles_new, int continuedCycles_new);
  private:
+  wxScrolledWindow* scrollingParent;
   bool init;                         // has the GL context been initialised?
   int continuedCycles;// how many simulation cycles were completed last time the run or continue button was used
   int totalCycles;// how many simulation cycles have been completed
