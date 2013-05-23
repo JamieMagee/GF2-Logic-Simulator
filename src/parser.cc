@@ -87,13 +87,13 @@ void parser::newDevice(int deviceType)
 		if (deviceType == 10)
 		{
 			cout << "DTYPE with name integer " << devName << endl;
-			//create DTYPE with name devName
+			devz->makedevice(dtype, devName, 0, ok);	//create DTYPE with name devName
 			return;
 		}
 		if (deviceType == 11)
 		{
 			cout << "XOR with name integer " << devName << endl;
-			//create XOR with name devName
+			devz->makedevice(xorgate, devName, 2, ok); //create XOR with name devName
 			return;
 		}
 		smz->getsymbol(cursym, curname, curint);
@@ -107,7 +107,7 @@ void parser::newDevice(int deviceType)
 					case 4:
 						if (curint > 0)
 						{
-							//create clock with curint and devName
+							devz->makedevice(aclock, devName, curint, ok) //create clock with curint and devName
 							cout << "CLOCK with name integer " << devName << " and " << curint << " program cycles per clock cycle" << endl;
 						}
 						else
@@ -116,9 +116,9 @@ void parser::newDevice(int deviceType)
 						}
 						break;
 					case 5:
-						if (curint == 1 | curint == 0)
+						if (curint == 1 || curint == 0)
 						{
-							//create switch with curint and devName
+							devz->makedevice(aswitch, devName, curint, ok)//create switch with curint and devName
 							cout << "SWITCH with name integer " << devName << " and intial state " << curint << endl;
 						}
 						else
@@ -135,20 +135,20 @@ void parser::newDevice(int deviceType)
 							switch (deviceType)
 							{
 								case 6:
-									//create and gate with curint and devName
+									devz->makedevice(andgate, devName, curint, ok)//create and gate with curint and devName
 									cout << "AND gate with name integer " << devName << " and " << curint << " input(s)" << endl;
 									break;
 								case 7:
-									//create nand gate with curint and devName
+									devz->makedevice(nandgate, devName, curint, ok)//create nand gate with curint and devName
 									cout << "NAND gate with name integer " << devName << " and " << curint << " input(s)" << endl;
 									break;
 								case 8:
-									//create or gate with curint and devName
+									devz->makedevice(orgate, devName, curint, ok)//create or gate with curint and devName
 									cout << "OR gate with name integer " << devName << " and " << curint << " input(s)" << endl;
 									break;
 								case 9:
 									break;
-									//create nor gate with curint and devName
+									devz->makedevice(norgate, devName, curint, ok)//create nor gate with curint and devName
 									cout << "NOR gate with name integer " << devName << " and " << curint << " input(s)" << endl;
 								default:
 									cout << "How on earth have you managed to get here?" << endl;
@@ -223,59 +223,147 @@ void parser::connectionList()
 void parser::newConnection()
 {
 	//EBNF: con = devicename'.'input '=' devicename['.'output]
-	name connectionInName = curname;
-	smz->getsymbol(cursym, curname, curint);
-	if (cursym == dot)
+	if (nmz->lookup(curname) != badname)
 	{
+		name connectionInName = curname;
 		smz->getsymbol(cursym, curname, curint);
-		if (cursym == iosym)
+		if (cursym == dot)
 		{
-			name inputGate = curname;
 			smz->getsymbol(cursym, curname, curint);
-			if (cursym == equals) //SEARCH - you have got to here
+			if (cursym == iosym)
 			{
+				name inputPin = curname;
+				smz->getsymbol(cursym, curname, curint);
+				if (cursym == equals) //SEARCH - you have got to here
+				{
+					smz->getsymbol(cursym, curname, curint);
+					if (nmz->lookup(curname) != badname)
+					{
+						connectionOutName = curname;
+						switch (curname)
+						{
+							case 10:
+								smz->getsymbol(cursym, curname, curint);
+								if (cursym == dot)
+								{
+									smz->getsymbol(cursym, curname, curint);
+									if (cursym == iosym)
+									{
+										netz->makeconnection(connectionInName, inputPin, connectionOutName, cursym, ok) //DAT NESTING
+										return;
+									}
+								}
+								else
+								{
+									error();	//Expect a dot after dtype
+								}
+							default:
+								netz->makeconnection(connectionInName, inputPin, connectionOutName, connectionOutName, ok)
+								return;
+						}
+					}
+					else
+					{
+						error(); //Device does not exist
+					}
+				}
+				else
+				{
+					error();//SEARCH - you have got to here
+				}
 			}
 			else
 			{
-				error();//SEARCH - you have got to here
+				error();//specify input gate after dot
 			}
 		}
 		else
 		{
-			error();//specify input gate after dot
+			error();//need to seperate connection input with a '.' (or need to specify input)
 		}
 	}
 	else
 	{
-		error();//need to seperate connection input with a '.' (or need to specify input)
+		error(); //Device does not exist
 	}
 }
 
 void parser::monitorList()
 {
+	//EBNF: monitors = 'MONITORS' [mon] {';' mon} 'END'
+	smz->getsymbol(cursym, curname, curint);
+	if (cursym == endsym)
+	{
+		return;
+	}
+	else if (cursym == namesym)
+	{
+		newMonitor();
+	}
+	else
+	{
+		error();//monitor must start with the name of a device
+	}
+	smz->getsymbol(cursym, curname, curint);
+	while (cursym == semicol)
+	{
+		smz->getsymbol(cursym, curname, curint);
+		if (cursym == namesym)
+		{
+			newMonitor();
+		}
+		else
+		{
+			error();//monitor must start with the name of a device or end of device list must be terminated with END (not semicolon)
+		}
+		smz->getsymbol(cursym, curname, curint);
+	}
+	if (cursym == endsym)
+	{
+		return;
+	}
+	else
+	{
+		error();//need semicolon or END
+	}
+}
+
+void parser::newMonitor()
+{
 	//EBNF: mon = devicename['.'output]
-	
 	smz->getsymbol(cursym, curname, curint);
 	if (cursym == namesym)
 	{
-		name devName = curname;
-		smz->getsymbol(cursym, curname, curint);
-		if (cursym = semicol)
+		if (nmz->lookup(curname) != badname)
 		{
-			monz->makemonitor(devName, devName, ok);
-		}
-		else if (cursym = dot)
-		{
-			smz->getsymbol(cursym, curname, curint);
-			if (cursym = iosym)
+			monitorName = curname;
+			switch (curname)
 			{
-				monz->makemonitor(devName, cursym, ok);
+				case 10:
+					smz->getsymbol(cursym, curname, curint);
+					if (cursym == dot)
+					{
+						smz->getsymbol(cursym, curname, curint);
+						if (cursym == iosym)
+						{
+							mmz->makemonitor(monitorName, cursym, ok);
+							return;
+						}
+					}
+					else
+					{
+						error();	//Expect a dot after dtype
+					}
+				default:
+					mmz->makemonitor(monitorName, monitorName, ok);
+					return;
 			}
 		}
 		else
 		{
 			error();
 		}
+	}
 }
 
 void parser::error()
