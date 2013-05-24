@@ -21,6 +21,9 @@ scanner::~scanner()
 
 void scanner::getsymbol(symbol& s, name& id, int& num)
 {
+	num = 0;
+	s = badsym;
+	cursymlen = 0;
 	skipspaces();
 	skipcomments();
 	if (eofile) s = eofsym;
@@ -96,7 +99,7 @@ void scanner::getch()
 	if (eoline)
 	{
 		line.clear();	// Clear string to start new line
-		skipspaces();
+		//skipspaces();
 		eoline = false;
 	}
 	if (prevch != '\n')
@@ -109,7 +112,7 @@ void scanner::getnumber(int& number)
 {
 	number = 0;
 	cursymlen = 0;
-	while (!isspace(curch))
+	while (isdigit(curch))
 	{
 		number *= 10;
 		number += (int(curch) - int('0'));
