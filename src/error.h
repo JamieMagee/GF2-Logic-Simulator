@@ -8,4 +8,17 @@
 #include "monitor.h"
 #include "parser.h"
 
+typedef string errorstring;
+
+class error{
+	private:
+		int errorCount;
+		int warningCount;
+		vector<errorstring> errorlist;	
+	public:
+		void newError(int errorCode);
+		void newWarning(int warningCode);
+		void countError();//counts total number of errors and 
+};
+
 #endif /* error_h */

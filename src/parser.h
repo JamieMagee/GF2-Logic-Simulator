@@ -23,10 +23,12 @@ class parser {
   devices* dmz; 
   monitor* mmz;
   scanner* smz;
+  error* erz;
   int curint;
   symbol cursym;
   name curname;
-  bool ok;
+  bool correctOperation;
+  bool anyErrors;
   int badname;
   name monitorName;
   name connectionInName;
