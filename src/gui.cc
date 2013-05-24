@@ -507,8 +507,18 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	canvas = new MyGLCanvas(this, wxID_ANY, monitor_mod, names_mod, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
 	leftsizer->Add(canvas, 3, wxEXPAND | wxALL, 10);
 
-	outputTextCtrl = new wxTextCtrl(this, OUTPUT_TEXTCTRL_ID, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
-	outputTextRedirect = new wxStreamToTextRedirector(outputTextCtrl);// Redirect all text sent to cout to the outputTextCtrl textbox
+	// Create the log textbox, mainly for displaying error messages from the parser
+	// Captures everything sent to cout
+	// wxTE_DONTWRAP means that a horizontal scrollbar will be used instead of wrapping, so that the position of an error can be indicated correctly
+	outputTextCtrl = new wxTextCtrl(this, OUTPUT_TEXTCTRL_ID, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY | wxTE_DONTWRAP);
+
+	// Set to a monospace font, so that the position of an error can be indicated correctly
+	wxTextAttr outputTextAttr = outputTextCtrl->GetDefaultStyle();
+	outputTextAttr.SetFont(wxFont(10, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+	outputTextCtrl->SetDefaultStyle(outputTextAttr);
+
+	// Redirect all text sent to cout to the outputTextCtrl textbox
+	outputTextRedirect = new wxStreamToTextRedirector(outputTextCtrl);
 	leftsizer->Add(outputTextCtrl, 1, wxEXPAND | wxALL, 10);
 	topsizer->Add(leftsizer, 4, wxEXPAND | wxALL, 10);
 
@@ -578,6 +588,8 @@ void MyFrame::clearCircuit()
 bool MyFrame::loadFile(const char * filename)
 // load a file (can be called by menu File->Open or for the command line argument)
 {
+	// Clear log window
+	outputTextCtrl->ChangeValue(wxT(""));
 	cout << "Loading file " << filename << endl;
 
 	clearCircuit();
@@ -591,6 +603,11 @@ bool MyFrame::loadFile(const char * filename)
 
 	canvas->MonitorsChanged();
 
+	if (!result)
+	{
+		// scroll to the start of the output so that the first error message (which may have caused any subsequent error messages) is visible
+		outputTextCtrl->ShowPosition(0);
+	}
 	return result;
 }
 
