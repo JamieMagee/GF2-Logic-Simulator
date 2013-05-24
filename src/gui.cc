@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <algorithm>
 #include "scanner.h"
 #include "parser.h"
 
@@ -123,7 +124,15 @@ void GLCanvasMonitorTrace::Draw(MyGLCanvas *canvas, const wxRect& visibleRegion)
 {
 	if (!mmz || !canvas || monId<0 || monId>=mmz->moncount()) return;
 
-	int canvasHeight = canvas->GetClientSize().GetHeight();
+	if (!mmz->getsamplecount(monId))
+	{
+		glColor4f(0.8, 0.0, 0.0, 1.0);
+		DrawGlutText(xOffset+10, yCentre-5, _("No data"), GLUT_BITMAP_HELVETICA_12);
+	}
+	if (totalCycles > mmz->getsamplecount(monId))
+		totalCycles = mmz->getsamplecount(monId);
+	if (continuedCycles > mmz->getsamplecount(monId))
+		continuedCycles = mmz->getsamplecount(monId);
 
 	wxRect backgroundRegion(xOffset, yCentre-sigHeight/2-padding, ceil(xScale*totalCycles), sigHeight+padding*2);
 	wxRect traceRegion = backgroundRegion.Intersect(visibleRegion);// this will be slightly different when cycle numbers are added to the axis
@@ -284,7 +293,7 @@ void MyGLCanvas::UpdateMinCanvasSize()
 	// Make sure all the traces fit in the canvas
 	int xOffset = maxMonNameWidth+5;
 	int maxXTextWidth = ceil(log10(totalCycles))*8;// estimate of max x axis scale text width
-	SetVirtualSize(minXScale*totalCycles+15+xOffset+maxXTextWidth/2,50*mons.size());
+	SetVirtualSize(minXScale*totalCycles+15+xOffset+maxXTextWidth/2,50*mons.size()+10);
 }
 
 // Notify of a change to the number of displayed cycles
@@ -322,7 +331,7 @@ void MyGLCanvas::MonitorsChanged()
 
 // copied from wxScrolledWindow:
 #ifdef __WXMSW__
-WXLRESULT wxScrolledWindow::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam,WXLPARAM lParam)
+WXLRESULT MyGLCanvas::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam,WXLPARAM lParam)
 {
     WXLRESULT rc = wxPanel::MSWWindowProc(nMsg, wParam, lParam);
 #ifndef __WXWINCE__
@@ -472,6 +481,8 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_MENU(wxID_OPEN, MyFrame::OnOpenFile)
   EVT_BUTTON(SIMCTRL_BUTTON_RUN_ID, MyFrame::OnButtonRun)
   EVT_BUTTON(SIMCTRL_BUTTON_CONT_ID, MyFrame::OnButtonContinue)
+  EVT_BUTTON(MONITORS_ADD_BUTTON_ID, MyFrame::OnButtonAddMon)
+  EVT_BUTTON(MONITORS_DEL_BUTTON_ID, MyFrame::OnButtonDelMon)
   EVT_SPINCTRL(MY_SPINCNTRL_ID, MyFrame::OnSpin)
   EVT_TEXT_ENTER(MY_TEXTCTRL_ID, MyFrame::OnText)
 END_EVENT_TABLE()
@@ -488,6 +499,7 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
   dmz = devices_mod;
   mmz = monitor_mod;
   netz = net_mod;
+  totalCycles = continuedCycles = 0;
   if (nmz == NULL || dmz == NULL || mmz == NULL || netz == NULL) {
     cout << "Cannot operate GUI without names, devices, network and monitor classes" << endl;
     exit(1);
@@ -496,10 +508,10 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
   wxMenu *fileMenu = new wxMenu;
   fileMenu->Append(wxID_OPEN);
   fileMenu->AppendSeparator();
-  fileMenu->Append(wxID_ABOUT, wxT("&About"));
-  fileMenu->Append(wxID_EXIT, wxT("&Quit"));
+  fileMenu->Append(wxID_ABOUT, _("&About"));
+  fileMenu->Append(wxID_EXIT, _("&Quit"));
   wxMenuBar *menuBar = new wxMenuBar;
-  menuBar->Append(fileMenu, wxT("&File"));
+  menuBar->Append(fileMenu, _("&File"));
   SetMenuBar(menuBar);
 
 	wxBoxSizer *topsizer = new wxBoxSizer(wxHORIZONTAL);
@@ -525,13 +537,14 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 
 
 	wxBoxSizer *sidesizer = new wxBoxSizer(wxVERTICAL);
-	wxStaticBoxSizer *simctrls_sizer = new wxStaticBoxSizer(wxVERTICAL, this, wxT("Simulation"));
+	wxStaticBoxSizer *simctrls_sizer = new wxStaticBoxSizer(wxVERTICAL, this, _("Simulation"));
 	wxBoxSizer *simctrls_cycles_sizer = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer *simctrls_button_sizer = new wxBoxSizer(wxHORIZONTAL);
 
-	simctrls_button_sizer->Add(new wxButton(this, SIMCTRL_BUTTON_RUN_ID, wxT("Run")), 0, wxALL, 10);
-	simctrls_button_sizer->Add(new wxButton(this, SIMCTRL_BUTTON_CONT_ID, wxT("Continue")), 0, wxALL, 10);
-	simctrls_cycles_sizer->Add(new wxStaticText(this, wxID_ANY, wxT("Cycles")), 0, wxALL|wxALIGN_CENTER_VERTICAL, 10);
+	simctrls_button_sizer->Add(new wxButton(this, SIMCTRL_BUTTON_RUN_ID, _("Run")), 0, wxALL, 10);
+	simctrl_continue = new wxButton(this, SIMCTRL_BUTTON_CONT_ID, _("Continue"));
+	simctrls_button_sizer->Add(simctrl_continue, 0, wxALL, 10);
+	simctrls_cycles_sizer->Add(new wxStaticText(this, wxID_ANY, _("Cycles")), 0, wxALL|wxALIGN_CENTER_VERTICAL, 10);
 	spin = new wxSpinCtrl(this, MY_SPINCNTRL_ID, wxString(wxT("31")));
 	spin->SetRange(1,1000000);
 	simctrls_cycles_sizer->Add(spin, 0, wxALL, 10);
@@ -539,13 +552,15 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	simctrls_sizer->Add(simctrls_cycles_sizer);
 	simctrls_sizer->Add(simctrls_button_sizer);
 
-	wxStaticBoxSizer *monitors_sizer = new wxStaticBoxSizer(wxVERTICAL, this, wxT("Monitors"));
+	wxStaticBoxSizer *edit_sizer = new wxStaticBoxSizer(wxVERTICAL, this, _("Edit circuit"));
+	edit_sizer->Add(new wxButton(this, MONITORS_ADD_BUTTON_ID, _("Add monitors")), 0, (wxALL & ~wxBOTTOM) | wxEXPAND, 10);
+	edit_sizer->Add(new wxButton(this, MONITORS_DEL_BUTTON_ID, _("Remove monitors")), 0, (wxALL & ~wxTOP) | wxEXPAND, 10);
 
-	wxStaticBoxSizer *switches_sizer = new wxStaticBoxSizer(wxVERTICAL, this, wxT("Switches"));
+	wxStaticBoxSizer *switches_sizer = new wxStaticBoxSizer(wxVERTICAL, this, _("Switches"));
 
 
 	sidesizer->Add(simctrls_sizer, 0, wxALL, 10);
-	sidesizer->Add(monitors_sizer, 1, wxEXPAND | wxALL, 10);
+	sidesizer->Add(edit_sizer, 0, wxEXPAND | wxALL, 10);
 	sidesizer->Add(switches_sizer, 1, wxEXPAND | wxALL, 10);
 	//sidesizer->Add(new wxTextCtrl(this, MY_TEXTCTRL_ID, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER), 0 , wxALL, 10);
 	topsizer->Add(sidesizer, 0, wxEXPAND | wxALIGN_CENTER);
@@ -568,7 +583,7 @@ void MyFrame::OnExit(wxCommandEvent &event)
 void MyFrame::OnAbout(wxCommandEvent &event)
   // Callback for the about menu item
 {
-  wxMessageDialog about(this, wxT("Example wxWidgets GUI\nAndrew Gee\nFebruary 2011"), wxT("About Logsim"), wxICON_INFORMATION | wxOK);
+  wxMessageDialog about(this, wxT("Logic simulator\nIIA GF2 Team 8\n2013"), _("About Logsim"), wxICON_INFORMATION | wxOK);
   about.ShowModal();
 }
 
@@ -620,6 +635,7 @@ void MyFrame::OnButtonRun(wxCommandEvent &event)
 	mmz->resetmonitor();
 	runnetwork(spin->GetValue());
 	canvas->SimulationRun(totalCycles, continuedCycles);
+	simctrl_continue->Enable();
 }
 
 void MyFrame::OnButtonContinue(wxCommandEvent &event)
@@ -628,6 +644,27 @@ void MyFrame::OnButtonContinue(wxCommandEvent &event)
 	int n, ncycles;
 	runnetwork(spin->GetValue());
 	canvas->SimulationRun(totalCycles, continuedCycles);
+}
+
+void MyFrame::OnButtonAddMon(wxCommandEvent& event)
+{
+	AddMonitorsDialog *dlg = new AddMonitorsDialog(this, _("Add monitors"), wxDefaultPosition, wxDefaultSize, nmz, dmz, mmz, netz, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
+	if (dlg->ShowModal()==wxID_OK)
+	{
+		canvas->MonitorsChanged();
+		if (totalCycles)
+		{
+			// Disable the continue button, since if the simulation is continued the displayed sample times for the new monitors will be incorrect
+			simctrl_continue->Disable();
+			cout << wxString(_("Monitor added, run simulation again to see updated signals")).mb_str() << endl;
+		}
+	}
+	dlg->Destroy();
+}
+
+void MyFrame::OnButtonDelMon(wxCommandEvent& event)
+{
+	;
 }
 
 void MyFrame::OnSpin(wxSpinEvent &event)
@@ -673,3 +710,86 @@ void MyFrame::runnetwork(int ncycles)
 	/*if (ok) totalCycles = totalCycles + ncycles;
 	else totalCycles = 0;*/
 }
+
+
+
+
+bool outputinfo_namestrcmp(const outputinfo a, const outputinfo b)
+{
+	return (a.namestr<b.namestr);
+}
+
+AddMonitorsDialog::AddMonitorsDialog(wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, names *names_mod, devices *devices_mod, monitor *monitor_mod, network *net_mod, long style):
+	wxDialog(parent, wxID_ANY, title, pos, size, style)
+{
+	SetIcon(wxIcon(wx_icon));
+
+	nmz = names_mod;
+	dmz = devices_mod;
+	mmz = monitor_mod;
+	netz = net_mod;
+
+	int monCount = mmz->moncount();
+	devlink d = netz->devicelist();
+	while (d!=NULL)
+	{
+		outplink o = d->olist;
+		while (o!=NULL)
+		{
+			bool isMonitored = false;
+			name monDev, monOut;
+			for (int i=0; i<monCount; i++)
+			{
+				mmz->getmonname(i, monDev, monOut);
+				if (monDev==d->id && monOut==o->id)
+				{
+					isMonitored = true;
+					break;
+				}
+			}
+			if (!isMonitored)
+			{
+				outputinfo outinf;
+				outinf.devname = d->id;
+				outinf.outpname = o->id;
+				outinf.namestr = netz->getsignalstring(d->id, o->id);
+				availableOutputs.push_back(outinf);
+			}
+			o = o->next;
+		}
+		d = d->next;
+	}
+	sort(availableOutputs.begin(), availableOutputs.end(), outputinfo_namestrcmp);
+
+	wxArrayString displayedOutputs;
+	displayedOutputs.Alloc(availableOutputs.size());
+	for (vector<outputinfo>::iterator it=availableOutputs.begin(); it!=availableOutputs.end(); ++it)
+	{
+		displayedOutputs.Add(wxString(it->namestr.c_str(), wxConvUTF8));
+	}
+
+	wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
+	topsizer->Add(new wxStaticText(this, wxID_ANY, _("Select output(s) to monitor:")), 0, wxLEFT | wxRIGHT | wxTOP, 10);
+	lbox = new wxListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, displayedOutputs, wxLB_EXTENDED | wxLB_NEEDED_SB);
+	topsizer->Add(lbox, 1, wxALL | wxEXPAND, 10);
+	topsizer->Add(CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxEXPAND, 10);
+	//SetSizeHints(400, 400);
+	SetSizerAndFit(topsizer);
+}
+
+void AddMonitorsDialog::OnOK(wxCommandEvent& event)
+{
+	wxArrayInt selections;
+	lbox->GetSelections(selections);
+	int num = selections.GetCount();
+	bool ok;
+	for (int i=0; i<num; i++)
+	{
+		mmz->makemonitor(availableOutputs[selections[i]].devname, availableOutputs[selections[i]].outpname, ok);
+	}
+	EndModal(wxID_OK);
+}
+
+BEGIN_EVENT_TABLE(AddMonitorsDialog, wxDialog)
+	EVT_BUTTON(wxID_OK, AddMonitorsDialog::OnOK)
+END_EVENT_TABLE()

@@ -48,6 +48,9 @@ class monitor {
   void getmonname (int n, name& dev, name& outp);
     /* Returns name of n'th monitor.                                       */
 
+  // Returns the number of samples recorded by the n'th monitor
+  int getsamplecount(int m);
+  
   void resetmonitor (void);
     /* Initialises monitor memory in preparation for a new output sequence */
  

@@ -5,11 +5,16 @@
 #include <wx/glcanvas.h>
 #include <wx/spinctrl.h>
 #include <wx/textctrl.h>
+#include <wx/listbox.h>
 #include <wx/scrolwin.h>
 #include "names.h"
 #include "devices.h"
 #include "monitor.h"
 #include "network.h"
+#include <vector>
+#include <string>
+
+using namespace std;
 
 enum { 
   MY_SPINCNTRL_ID = wxID_HIGHEST + 1,
@@ -17,7 +22,9 @@ enum {
   MY_BUTTON_ID,
   OUTPUT_TEXTCTRL_ID,
   SIMCTRL_BUTTON_RUN_ID,
-  SIMCTRL_BUTTON_CONT_ID
+  SIMCTRL_BUTTON_CONT_ID,
+  MONITORS_ADD_BUTTON_ID,
+  MONITORS_DEL_BUTTON_ID
 }; // widget identifiers
 
 int GetGlutTextWidth(wxString txt, void *font=NULL);
@@ -76,6 +83,7 @@ class MyFrame: public wxFrame
   wxSpinCtrl *spin;                       // control widget to select the number of cycles
   wxTextCtrl *outputTextCtrl;             // textbox to display messages sent to cout (e.g. error messages from scanner and parser)
   wxStreamToTextRedirector *outputTextRedirect;
+  wxButton *simctrl_continue;
   names *nmz;                             // pointer to names class
   devices *dmz;                           // pointer to devices class
   monitor *mmz;                           // pointer to monitor class
@@ -91,6 +99,8 @@ class MyFrame: public wxFrame
   void OnOpenFile(wxCommandEvent& event); // callback for open file menu item
   void OnButtonRun(wxCommandEvent& event);
   void OnButtonContinue(wxCommandEvent& event);
+	void OnButtonAddMon(wxCommandEvent& event);
+	void OnButtonDelMon(wxCommandEvent& event);
   void OnSpin(wxSpinEvent& event);        // callback for spin control
   void OnText(wxCommandEvent& event);     // callback for text entry field
   DECLARE_EVENT_TABLE()
@@ -133,5 +143,32 @@ public:
 private:
   DECLARE_EVENT_TABLE()
 };
+
+
+
+
+
+struct outputinfo
+{
+	name devname, outpname;
+	string namestr;
+};
+
+class AddMonitorsDialog: public wxDialog
+{
+public:
+	AddMonitorsDialog(wxWindow* parent, const wxString& title, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, names *names_mod = NULL, devices *devices_mod = NULL, monitor *monitor_mod = NULL, network *net_mod = NULL, long style = wxDEFAULT_DIALOG_STYLE);
+	virtual ~AddMonitorsDialog() {}
+private:
+	names *nmz;
+	devices *dmz;
+	monitor *mmz;
+	network *netz;
+	vector<outputinfo> availableOutputs;
+	wxListBox *lbox;
+	void OnOK(wxCommandEvent& event);
+	DECLARE_EVENT_TABLE()
+};
+
 
 #endif /* gui_h */

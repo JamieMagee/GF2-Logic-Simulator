@@ -122,11 +122,25 @@ void monitor::recordsignals (void)
  */
 bool monitor::getsignaltrace(int m, int c, asignal &s)
 {
-  if ((c < cycles) && (m < moncount ())) {
+  if ((c < cycles) && (m < moncount ()) && c<mtab[m].disp.size()) {
     s = mtab[m].disp[c];
     return true;
   }
   return false;
+}
+
+/***********************************************************************
+ *
+ * Get number of recorded cycles for the monitor, returns -1 if invalid
+ * monitor.
+ *
+ */
+int monitor::getsamplecount(int m)
+{
+  if (m < moncount ()) {
+    return mtab[m].disp.size();
+  }
+  return -1;
 }
 
 /***********************************************************************
