@@ -105,15 +105,16 @@ int GLCanvasMonitorTrace::GetNameWidth()
 	return monNameWidth;
 }
 
-void GLCanvasMonitorTrace::SetGeometry(int xOffset_new, int yOffset_new, float xScale_new, int sigHeight_new, int padding_new, int spacing_new)
+void GLCanvasMonitorTrace::SetGeometry(int xOffset_new, int yCentre_new, float xScale_new, int sigHeight_new, int padding_new, int spacing_new, int xBgName_new)
 {
 	geometrySet = true;
 	xOffset = xOffset_new;
-	yOffset = yOffset_new;
+	yCentre = yCentre_new;
 	xScale = xScale_new;
 	sigHeight = int(sigHeight_new/2)*2;// make sure this is even, so that the trace is symmetrical about the horizontal centre line
 	padding = padding_new;
 	spacing = spacing_new;
+	xBgName = xBgName_new;
 }
 
 void GLCanvasMonitorTrace::Draw(MyGLCanvas *canvas, const wxRect& visibleRegion)
@@ -121,17 +122,16 @@ void GLCanvasMonitorTrace::Draw(MyGLCanvas *canvas, const wxRect& visibleRegion)
 	if (!mmz || !canvas || monId<0 || monId>=mmz->moncount()) return;
 
 	int canvasHeight = canvas->GetClientSize().GetHeight();
-	int centerY = canvasHeight - yOffset - spacing*monId - spacing/2;
 
-	wxRect backgroundRegion(xOffset, centerY-sigHeight/2-padding, ceil(xScale*totalCycles), sigHeight+padding*2);
+	wxRect backgroundRegion(xOffset, yCentre-sigHeight/2-padding, ceil(xScale*totalCycles), sigHeight+padding*2);
 	wxRect traceRegion = backgroundRegion.Intersect(visibleRegion);// this will be slightly different when cycle numbers are added to the axis
 	if (traceRegion.IsEmpty()) return;
 	wxRect clippedbg = backgroundRegion.Intersect(visibleRegion);
 
 	// background colour
 	glBegin(GL_QUADS);
-	glColor4f(0.0, 0.5, 0.0, 0.05);
-	wxRect_GlVertex(clippedbg);
+	glColor4f(0.0, 0.5, 0.0, 0.08);
+	wxRect_GlVertex(backgroundRegion.Intersect(visibleRegion));
 	glEnd();
 
 	// border
@@ -180,19 +180,19 @@ void GLCanvasMonitorTrace::Draw(MyGLCanvas *canvas, const wxRect& visibleRegion)
 		cycleLimit = int((visibleRegion.x+visibleRegion.width - xOffset)/xScale) + 1;
 	if (cycleLimit>totalCycles)
 		cycleLimit = totalCycles;
-	int prevY = centerY;
+	int prevY = yCentre;
 	for (i=firstCycle; i<cycleLimit; i++)
 	{
 		if (mmz->getsignaltrace(monId, i, s))
 		{
 			if (s==low || s==rising)
-				y1 = centerY-sigHeight/2;
+				y1 = yCentre-sigHeight/2;
 			else
-				y1 = centerY+sigHeight/2;
+				y1 = yCentre+sigHeight/2;
 			if (s==low || s==falling)
-				y2 = centerY-sigHeight/2;
+				y2 = yCentre-sigHeight/2;
 			else
-				y2 = centerY+sigHeight/2;
+				y2 = yCentre+sigHeight/2;
 			if (y1!=prevY) glVertex2f(xOffset+xScale*i, y1);
 			glVertex2f(xOffset+xScale*(i+1), y2);
 			prevY = y2;
@@ -204,11 +204,16 @@ void GLCanvasMonitorTrace::Draw(MyGLCanvas *canvas, const wxRect& visibleRegion)
 
 void GLCanvasMonitorTrace::DrawName(MyGLCanvas *canvas, const wxRect& visibleRegion)
 {
-	if (xOffset < visibleRegion.x) return;
-	int canvasHeight = canvas->GetClientSize().GetHeight();
-	int centerY = canvasHeight - yOffset - spacing*monId - spacing/2;
-	glColor4f(0.0, 0.0, 0.0, 1.0);
-	DrawGlutText(xOffset-monNameWidth-4, centerY-6, monName, GLUT_BITMAP_HELVETICA_12);
+	if (xOffset < visibleRegion.x+xBgName)
+	{
+		glColor4f(0.0, 0.0, 0.0, 0.4);
+		DrawGlutText(xBgName, yCentre-5, monName, GLUT_BITMAP_HELVETICA_12);
+	}
+	else
+	{
+		glColor4f(0.0, 0.0, 0.0, 1.0);
+		DrawGlutText(xOffset-monNameWidth-4, yCentre-5, monName, GLUT_BITMAP_HELVETICA_12);
+	}
 }
 
 // MyGLCanvas ////////////////////////////////////////////////////////////////////////////////////
@@ -331,7 +336,7 @@ void MyGLCanvas::Render(wxString text)
 		if (xScale>20) xScale = 20;
 		for (i=0; i<mons.size(); i++)
 		{
-			mons[i].SetGeometry(xOffset+scrollX, 5+scrollY, xScale, height, spacing*0.075, spacing);
+			mons[i].SetGeometry(xOffset+scrollX, canvasHeight-(5+scrollY)-spacing*i-spacing/2, xScale, height, spacing*0.075, spacing, 10);
 			mons[i].Draw(this, visibleRegion);
 			mons[i].DrawName(this, visibleRegion);
 		}
