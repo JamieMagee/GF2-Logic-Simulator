@@ -3,10 +3,213 @@
 #include "wx_icon.xpm"
 #include <iostream>
 #include <vector>
+#include <cmath>
 #include "scanner.h"
 #include "parser.h"
 
 using namespace std;
+
+int GetGlutTextWidth(wxString txt, void *font)
+{
+	int width = 0;
+	if (!font) font = GLUT_BITMAP_HELVETICA_12;
+	for (int i = 0; i < txt.Len(); i++)
+		width += glutBitmapWidth(font, txt[i]);
+	return width;
+}
+
+void DrawGlutText(int x, int y, wxString txt, void *font)
+{
+	if (!font) font = GLUT_BITMAP_HELVETICA_12;
+	int xMove = 0, yMove = 0;
+	/* If x or y are outside the viewport, call glRasterPos2f with a position inside
+	 * the viewport, then move it using glBitmap (as described in glRasterPos man page).
+	 * Otherwise the text doesn't get rendered.
+	 * Assuming viewport starts at (0,0) and only implemented for positions to the left of
+	 * or above (0,0) for now. */
+	if (x<0) xMove = x;
+	if (y<0) yMove = y;
+	glRasterPos2f(x-xMove, y-yMove);
+	if (xMove || yMove) glBitmap (0, 0, 0, 0, xMove, yMove, NULL);
+	for (int i = 0; i < txt.Len(); i++)
+		glutBitmapCharacter(font, txt[i]);
+}
+
+void wxRect_GlVertex(const wxRect& r)
+{
+	glVertex2f(r.x, r.y);
+	glVertex2f(r.x+r.width, r.y);
+	glVertex2f(r.x+r.width, r.y+r.height);
+	glVertex2f(r.x, r.y+r.height);
+}
+
+// GLCanvasMonitorTrace - class to handle drawing of one monitor trace
+GLCanvasMonitorTrace::GLCanvasMonitorTrace() :
+	monId(-1), mmz(NULL), nmz(NULL), monName(wxT("")), monNameWidth(0), geometrySet(false)
+{}
+
+GLCanvasMonitorTrace::GLCanvasMonitorTrace(int newMonId, monitor *monitor_mod, names *names_mod) :
+	geometrySet(false)
+{
+	SetMonitorId(newMonId);
+	SetModules(monitor_mod, names_mod);
+}
+
+int GLCanvasMonitorTrace::GetMonitorId()
+{
+	return monId;
+}
+
+void GLCanvasMonitorTrace::SetMonitorId(int newMonId)
+{
+	monId = newMonId;
+	UpdateName();
+}
+
+void GLCanvasMonitorTrace::SetModules(monitor *monitor_mod, names *names_mod)
+{
+	mmz = monitor_mod;
+	nmz = names_mod;
+}
+
+void GLCanvasMonitorTrace::SimulationRun(int totalCycles_new, int continuedCycles_new)
+{
+	totalCycles = totalCycles_new;
+	continuedCycles = continuedCycles_new;
+}
+
+void GLCanvasMonitorTrace::UpdateName()
+{
+	if (monId<0 || !nmz || !mmz)
+	{
+		monName = wxT("");
+		monNameWidth = 0;
+		return;
+	}
+	name dev, outp;
+	mmz->getmonname(monId, dev, outp);
+	if (dev==blankname)
+	{
+		monName = wxT("");
+		monNameWidth = 0;
+		return;
+	}
+	monName = wxString(nmz->getnamestring(dev).c_str(), wxConvUTF8);
+	if (outp!=blankname)
+		monName += wxT(".") + wxString(nmz->getnamestring(outp).c_str(), wxConvUTF8);
+	monNameWidth = GetGlutTextWidth(monName, GLUT_BITMAP_HELVETICA_12);
+}
+
+int GLCanvasMonitorTrace::GetNameWidth()
+{
+	return monNameWidth;
+}
+
+void GLCanvasMonitorTrace::SetGeometry(int xOffset_new, int yOffset_new, float xScale_new, int sigHeight_new, int padding_new, int spacing_new)
+{
+	geometrySet = true;
+	xOffset = xOffset_new;
+	yOffset = yOffset_new;
+	xScale = xScale_new;
+	sigHeight = int(sigHeight_new/2)*2;// make sure this is even, so that the trace is symmetrical about the horizontal centre line
+	padding = padding_new;
+	spacing = spacing_new;
+}
+
+void GLCanvasMonitorTrace::Draw(MyGLCanvas *canvas, const wxRect& visibleRegion)
+{
+	if (!mmz || !canvas || monId<0 || monId>=mmz->moncount()) return;
+
+	int canvasHeight = canvas->GetClientSize().GetHeight();
+	int centerY = canvasHeight - yOffset - spacing*monId - spacing/2;
+
+	wxRect backgroundRegion(xOffset, centerY-sigHeight/2-padding, ceil(xScale*totalCycles), sigHeight+padding*2);
+	wxRect traceRegion = backgroundRegion.Intersect(visibleRegion);// this will be slightly different when cycle numbers are added to the axis
+	if (traceRegion.IsEmpty()) return;
+	wxRect clippedbg = backgroundRegion.Intersect(visibleRegion);
+
+	// background colour
+	glBegin(GL_QUADS);
+	glColor4f(0.0, 0.5, 0.0, 0.05);
+	wxRect_GlVertex(clippedbg);
+	glEnd();
+
+	// border
+	glColor4f(0.0, 0.7, 0.0, 0.4);
+	if (clippedbg==backgroundRegion)
+	{
+		// if the whole backgroundRegion is in the visible region, draw the whole border
+		glBegin(GL_LINE_LOOP);
+		wxRect_GlVertex(backgroundRegion);
+		glEnd();
+	}
+	else
+	{
+		// otherwise just draw part of it
+		glBegin(GL_LINES);
+		// horizontal lines
+		glVertex2f(clippedbg.x, clippedbg.y);
+		glVertex2f(clippedbg.x+clippedbg.width, clippedbg.y);
+		glVertex2f(clippedbg.x, clippedbg.y+clippedbg.height);
+		glVertex2f(clippedbg.x+clippedbg.width, clippedbg.y+clippedbg.height);
+		// vertical lines if they are in the visible region
+		if (backgroundRegion.x >= visibleRegion.x)
+		{
+			glVertex2f(clippedbg.x, clippedbg.y+1);
+			glVertex2f(clippedbg.x, clippedbg.y+clippedbg.height-1);
+		}
+		if (backgroundRegion.x+backgroundRegion.width <= visibleRegion.x+visibleRegion.width)
+		{
+			glVertex2f(clippedbg.x+clippedbg.width, clippedbg.y+1);
+			glVertex2f(clippedbg.x+clippedbg.width, clippedbg.y+clippedbg.height-1);
+		}
+		glEnd();
+	}
+
+	// actual signal trace
+	if (xScale>4) glLineWidth(2);
+	glBegin(GL_LINE_STRIP);
+	glColor4f(0.0, 0.8, 0.0, 1.0);
+	int y1, y2, i;
+	asignal s;
+	int firstCycle = 0;
+	int cycleLimit = totalCycles;
+	if (xOffset < visibleRegion.x)
+		firstCycle = int((visibleRegion.x-xOffset)/xScale);
+	if (xOffset + totalCycles*xScale > visibleRegion.x+visibleRegion.width)
+		cycleLimit = int((visibleRegion.x+visibleRegion.width - xOffset)/xScale) + 1;
+	if (cycleLimit>totalCycles)
+		cycleLimit = totalCycles;
+	int prevY = centerY;
+	for (i=firstCycle; i<cycleLimit; i++)
+	{
+		if (mmz->getsignaltrace(monId, i, s))
+		{
+			if (s==low || s==rising)
+				y1 = centerY-sigHeight/2;
+			else
+				y1 = centerY+sigHeight/2;
+			if (s==low || s==falling)
+				y2 = centerY-sigHeight/2;
+			else
+				y2 = centerY+sigHeight/2;
+			if (y1!=prevY) glVertex2f(xOffset+xScale*i, y1);
+			glVertex2f(xOffset+xScale*(i+1), y2);
+			prevY = y2;
+		}
+	}
+	glEnd();
+	glLineWidth(1);
+}
+
+void GLCanvasMonitorTrace::DrawName(MyGLCanvas *canvas, const wxRect& visibleRegion)
+{
+	if (xOffset < visibleRegion.x) return;
+	int canvasHeight = canvas->GetClientSize().GetHeight();
+	int centerY = canvasHeight - yOffset - spacing*monId - spacing/2;
+	glColor4f(0.0, 0.0, 0.0, 1.0);
+	DrawGlutText(xOffset-monNameWidth-4, centerY-6, monName, GLUT_BITMAP_HELVETICA_12);
+}
 
 // MyGLCanvas ////////////////////////////////////////////////////////////////////////////////////
 
@@ -19,93 +222,89 @@ END_EVENT_TABLE()
 int wxglcanvas_attrib_list[5] = {WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16, 0};
 
 MyGLCanvas::MyGLCanvas(wxWindow *parent, wxWindowID id, monitor* monitor_mod, names* names_mod,
-		       const wxPoint& pos, const wxSize& size, long style, const wxString& name):
-    wxGLCanvas(parent, id, pos, size, style, name, wxglcanvas_attrib_list)
+	const wxPoint& pos, const wxSize& size, long style, const wxString& name):
+    wxGLCanvas(parent, id, pos, size, style, name, wxglcanvas_attrib_list),
+	wxScrollHelperNative(this), scrollX(0), scrollY(0)
   // Constructor - initialises private variables
 {
   mmz = monitor_mod;
   nmz = names_mod;
   init = false;
   continuedCycles = totalCycles = 0;
+  MonitorsChanged();
+  SetScrollRate(10, 10);
 }
 
-void MyGLCanvas::DrawSignalTrace(int xOffset, int yOffset, float xScale, int height, int padding, int mon, int cycles)
+void MyGLCanvas::ScrollWindow(int dx, int dy, const wxRect *rect)
 {
-	glBegin(GL_QUADS);
-	glColor4f(0.0, 0.5, 0.0, 0.05);
-	glVertex2f(xOffset, yOffset-height/2-padding);
-	glVertex2f(xOffset, yOffset+height/2+padding);
-	glVertex2f(xOffset+xScale*cycles, yOffset+height/2+padding);
-	glVertex2f(xOffset+xScale*cycles, yOffset-height/2-padding);
-	glEnd();
-
-	glBegin(GL_LINE_LOOP);
-	glColor4f(0.0, 0.7, 0.0, 0.4);
-	glVertex2f(xOffset, yOffset-height/2-padding);
-	glVertex2f(xOffset, yOffset+height/2+padding);
-	glVertex2f(xOffset+xScale*cycles, yOffset+height/2+padding);
-	glVertex2f(xOffset+xScale*cycles, yOffset-height/2-padding);
-	glEnd();
-
-	if (xScale>4) glLineWidth(2);
-	glBegin(GL_LINE_STRIP);
-	glColor4f(0.0, 0.8, 0.0, 1.0);
-	int y1, y2, i;
-	asignal s;
-	for (i=0; i<cycles; i++)
-	{
-		if (mmz->getsignaltrace(mon, i, s))
-		{
-			if (s==low || s==rising)
-				y1 = yOffset-height/2;
-			else
-				y1 = yOffset+height/2;
-			if (s==low || s==falling)
-				y2 = yOffset-height/2;
-			else
-				y2 = yOffset+height/2;
-			glVertex2f(xOffset+xScale*i, y1);
-			glVertex2f(xOffset+xScale*(i+1), y2);
-		}
-	}
-	glEnd();
-	glLineWidth(1);
+	// override ScrollWindow(), since MyGLCanvas does its own scrolling by offsetting all drawn points and clipping
+	scrollX += dx;
+	scrollY += dy;
+	Refresh();
 }
 
-void MyGLCanvas::DrawText(int x, int y, wxString txt, void *font)
+void MyGLCanvas::UpdateMinCanvasSize()
 {
-	int width = 0;
-	if (!font) font = GLUT_BITMAP_HELVETICA_12;
-	glRasterPos2f(x, y);
-	for (int i = 0; i < txt.Len(); i++)
-		glutBitmapCharacter(font, txt[i]);
+	// Make sure all the traces fit in the canvas
+	int xOffset = maxMonNameWidth+5;
+	SetVirtualSize(2*totalCycles+10+xOffset,50*mons.size());
 }
 
-int MyGLCanvas::GetTextWidth(wxString txt, void *font)
-{
-	int width = 0;
-	if (!font) font = GLUT_BITMAP_HELVETICA_12;
-	for (int i = 0; i < txt.Len(); i++)
-		width += glutBitmapWidth(font, txt[i]);
-	return width;
-}
-
+// Notify of a change to the number of displayed cycles
 void MyGLCanvas::SimulationRun(int totalCycles_new, int continuedCycles_new)
 {
 	totalCycles = totalCycles_new;
 	continuedCycles = continuedCycles_new;
+	for (int i=0; i<mons.size(); i++)
+	{
+		mons[i].SimulationRun(totalCycles, continuedCycles);
+	}
 	Render();
+	UpdateMinCanvasSize();
+	// Scroll to the most recently simulated cycles
+	Scroll(GetVirtualSize().GetWidth()-GetClientSize().GetWidth(),-1);
 }
 
+// Notify of a change to the active monitors
+void MyGLCanvas::MonitorsChanged()
+{
+	int monCount = mmz->moncount();
+	mons.resize(monCount);
+	maxMonNameWidth = 0;
+	for (int i=0; i<monCount; i++)
+	{
+		mons[i].SetMonitorId(i);
+		mons[i].SetModules(mmz, nmz);
+		mons[i].SimulationRun(totalCycles, continuedCycles);
+		if (mons[i].GetNameWidth()>maxMonNameWidth)
+			maxMonNameWidth = mons[i].GetNameWidth();
+	}
+	UpdateMinCanvasSize();
+}
+
+
+// copied from wxScrolledWindow:
+#ifdef __WXMSW__
+WXLRESULT wxScrolledWindow::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam,WXLPARAM lParam)
+{
+    WXLRESULT rc = wxPanel::MSWWindowProc(nMsg, wParam, lParam);
+#ifndef __WXWINCE__
+    // we need to process arrows ourselves for scrolling
+    if ( nMsg == WM_GETDLGCODE )
+    {
+        rc |= DLGC_WANTARROWS;
+    }
+#endif
+    return rc;
+}
+#endif // __WXMSW__
+// end copied from wxScrolledWindow
+
+
 void MyGLCanvas::Render(wxString text)
-  // Draws canvas contents - the following example writes the string "example text" onto the canvas
-  // and draws a signal trace. The trace is artificial if the simulator has not yet been run.
-  // When the simulator is run, the number of cycles is passed as a parameter and the first monitor
-  // trace is displayed.
 {
 	float y;
 	unsigned int i;
-	asignal s;
 
 	SetCurrent();
 	if (!init)
@@ -117,53 +316,35 @@ void MyGLCanvas::Render(wxString text)
 	if ((totalCycles > 0) && (mmz->moncount() > 0))
 	{
 		int monCount = mmz->moncount();
-		int mon, height=20, spacing=30;
-		name dev, outp;
-		vector<wxString> monNames;
-		vector<int> monNameWidths;
-		int maxNameWidth = 1;
-		int canvasHeight = GetVirtualSize().GetHeight();
-		int canvasWidth = GetVirtualSize().GetWidth();
-		spacing = canvasHeight/monCount;
+		int canvasHeight = GetClientSize().GetHeight();
+		int canvasWidth = GetClientSize().GetWidth();
+		int spacing = (canvasHeight-10)/monCount;
 		if (spacing>200) spacing = 200;
-		if (spacing<10) spacing = 10;
-		height = 0.8*spacing;
-		for (mon=0; mon<monCount; mon++)
-		{
-			mmz->getmonname(mon, dev, outp);
-			wxString monName(nmz->getnamestring(dev).c_str(), wxConvUTF8);
-			if (outp!=blankname)
-				monName += wxT(".") + wxString(nmz->getnamestring(outp).c_str(), wxConvUTF8);
-			monNames.push_back(monName);
-			int w = GetTextWidth(monName);
-			monNameWidths.push_back(w);
-			if (w>maxNameWidth)
-				maxNameWidth = w;
-		}
-		int xOffset = maxNameWidth+5;
+		if (spacing<50) spacing = 50;
+		int height = 0.8*spacing;
+
+		int xOffset = maxMonNameWidth+5;
+		wxRect visibleRegion(0,0,canvasWidth,canvasHeight);
+
 		float xScale = float(canvasWidth-xOffset-10)/totalCycles;
 		if (xScale<2) xScale = 2;
 		if (xScale>20) xScale = 20;
-		for (mon=0; mon<monCount; mon++)
+		for (i=0; i<mons.size(); i++)
 		{
-			// Draw the signal trace
-			glColor3f(0.0, 0.8, 0.0);
-			DrawSignalTrace(xOffset+5, canvasHeight-spacing/2-mon*spacing, xScale, height, spacing*0.075, mon, totalCycles);
-
-			// Draw the monitor name
-			glColor3f(0.0, 0.0, 1.0);
-			DrawText(xOffset-monNameWidths[mon], canvasHeight-spacing/2-mon*spacing-12/2, monNames[mon]);
+			mons[i].SetGeometry(xOffset+scrollX, 5+scrollY, xScale, height, spacing*0.075, spacing);
+			mons[i].Draw(this, visibleRegion);
+			mons[i].DrawName(this, visibleRegion);
 		}
 	}
 	else if (mmz->moncount()==0)
 	{
 		glColor3f(0.5, 0.0, 0.0);
-		DrawText(5, 10, wxT("No monitors"));
+		DrawGlutText(5, 10, wxT("No monitors"));
 	}
 	else
 	{
 		glColor3f(0.8, 0.0, 0.0);
-		DrawText(5, 10, wxT("No simulation results to display"));
+		DrawGlutText(5, 10, wxT("No simulation results to display"));
 	}
 
 	// We've been drawing to the back buffer, flush the graphics pipeline and swap the back buffer to the front
@@ -266,15 +447,16 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
   menuBar->Append(fileMenu, wxT("&File"));
   SetMenuBar(menuBar);
 
-  wxBoxSizer *topsizer = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *topsizer = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer *leftsizer = new wxBoxSizer(wxVERTICAL);
 
-  wxBoxSizer *leftsizer = new wxBoxSizer(wxVERTICAL);
-  canvas = new MyGLCanvas(this, wxID_ANY, monitor_mod, names_mod);
-  leftsizer->Add(canvas, 3, wxEXPAND | wxALL, 10);
-  outputTextCtrl = new wxTextCtrl(this, OUTPUT_TEXTCTRL_ID, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
-  outputTextRedirect = new wxStreamToTextRedirector(outputTextCtrl);// Redirect all text sent to cout to the outputTextCtrl textbox
-  leftsizer->Add(outputTextCtrl, 1, wxEXPAND | wxALL, 10);
-  topsizer->Add(leftsizer, 4, wxEXPAND | wxALL, 10);
+	canvas = new MyGLCanvas(this, wxID_ANY, monitor_mod, names_mod, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+	leftsizer->Add(canvas, 3, wxEXPAND | wxALL, 10);
+
+	outputTextCtrl = new wxTextCtrl(this, OUTPUT_TEXTCTRL_ID, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
+	outputTextRedirect = new wxStreamToTextRedirector(outputTextCtrl);// Redirect all text sent to cout to the outputTextCtrl textbox
+	leftsizer->Add(outputTextCtrl, 1, wxEXPAND | wxALL, 10);
+	topsizer->Add(leftsizer, 4, wxEXPAND | wxALL, 10);
 
 
 	wxBoxSizer *sidesizer = new wxBoxSizer(wxVERTICAL);
@@ -286,6 +468,7 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	simctrls_button_sizer->Add(new wxButton(this, SIMCTRL_BUTTON_CONT_ID, wxT("Continue")), 0, wxALL, 10);
 	simctrls_cycles_sizer->Add(new wxStaticText(this, wxID_ANY, wxT("Cycles")), 0, wxALL|wxALIGN_CENTER_VERTICAL, 10);
 	spin = new wxSpinCtrl(this, MY_SPINCNTRL_ID, wxString(wxT("31")));
+	spin->SetRange(1,1000);
 	simctrls_cycles_sizer->Add(spin, 0, wxALL, 10);
 
 	simctrls_sizer->Add(simctrls_cycles_sizer);
@@ -327,7 +510,7 @@ void MyFrame::OnAbout(wxCommandEvent &event)
 void MyFrame::OnOpenFile(wxCommandEvent &event)
   // Callback for the File -> Open menu item
 {
-	wxFileDialog openFileDialog(this, wxT("Open logic circuit"), wxT(""), wxT(""), wxT("*.*"), wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+	wxFileDialog openFileDialog(this, wxT("Open logic circuit"), wxT(""), wxT(""), wxT("Logic circuit files (*.gf2)|*.gf2|All files (*.*)|*.*"), wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_CHANGE_DIR);
 	if (openFileDialog.ShowModal() == wxID_CANCEL)
 		return; // cancelled, don't open a file
 	loadFile(openFileDialog.GetPath().mb_str());
@@ -351,6 +534,8 @@ bool MyFrame::loadFile(const char * filename)
 	//TODO: maybe display a messagebox here or disable a few UI controls (like the Run button) if reading failed
 	if (!result)
 		cout << "Failed to load file" << endl;
+
+	canvas->MonitorsChanged();
 
 	return result;
 }

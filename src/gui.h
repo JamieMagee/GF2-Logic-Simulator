@@ -5,6 +5,7 @@
 #include <wx/glcanvas.h>
 #include <wx/spinctrl.h>
 #include <wx/textctrl.h>
+#include <wx/scrolwin.h>
 #include "names.h"
 #include "devices.h"
 #include "monitor.h"
@@ -19,8 +20,47 @@ enum {
   SIMCTRL_BUTTON_CONT_ID
 }; // widget identifiers
 
+int GetGlutTextWidth(wxString txt, void *font=NULL);
+void DrawGlutText(int x, int y, wxString txt, void *font=NULL);
+
 class MyGLCanvas;
 class SimCtrls;
+
+void wxRect_GlVertex(const wxRect& r);
+
+class GLCanvasMonitorTrace
+{
+	friend class MyGLCanvas;
+public:
+	GLCanvasMonitorTrace();
+	GLCanvasMonitorTrace(int newMonId, monitor *monitor_mod, names *names_mod);
+	void SetModules(monitor *monitor_mod, names *names_mod);
+	// Get or set the monitor id (the "n" in "n'th monitor" in monitor class calls, also determines position)
+	int GetMonitorId();
+	void SetMonitorId(int newMonId);
+	// Notify of a change in the number of displayed cycles
+	void SimulationRun(int totalCycles_new, int continuedCycles_new);
+	// Draw the signal trace, visible coordinates are used so that time is not wasted in drawing areas hidden due to scrolling.
+	void Draw(MyGLCanvas *canvas, const wxRect& visibleRegion);
+	void DrawName(MyGLCanvas *canvas, const wxRect& visibleRegion);
+	// Get the width in pixels of the name, used by MyGLCanvas.Render() to determine how much space to leave between the traces and the edge of the canvas
+	int GetNameWidth();
+	// Set the geometry and positioning of the monitor trace. xOffset and yOffset are the top left corner of the bounding box of the first trace. xScale is the x-axis scale (the number of pixels per cycle). height is the height of the signal trace itself, padding the distance between the top of the signal trace and the edge of the graph background, and spacing the vertical distance between centre lines of consecutive monitors.
+	void SetGeometry(int xOffset_new, int yOffset_new, float xScale_new, int sigHeight_new, int padding_new, int spacing_new);
+private:
+	int monId;
+	monitor *mmz; // pointer to monitor class, used to extract signal traces
+	names *nmz; // pointer to names class, used to extract signal names
+	wxString monName;
+	int monNameWidth;
+	bool geometrySet;
+	int xOffset, yOffset, sigHeight, padding, spacing;
+	float xScale;
+	wxRect backgroundRegion;
+	void UpdateName();// Update monName and monNameWidth
+	int continuedCycles;// how many simulation cycles were completed last time the run or continue button was used
+	int totalCycles;// how many simulation cycles have been completed
+};
 
 class MyFrame: public wxFrame
 {
@@ -55,7 +95,7 @@ class MyFrame: public wxFrame
   DECLARE_EVENT_TABLE()
 };
     
-class MyGLCanvas: public wxGLCanvas
+class MyGLCanvas: public wxGLCanvas, public wxScrollHelperNative
 {
  public:
   MyGLCanvas(wxWindow *parent, wxWindowID id = wxID_ANY, monitor* monitor_mod = NULL, names* names_mod = NULL,
@@ -63,19 +103,32 @@ class MyGLCanvas: public wxGLCanvas
 	     const wxString& name = wxT("MyGLCanvas")); // constructor
   void Render(wxString text=wxT("")); // function to draw canvas contents
   void SimulationRun(int totalCycles_new, int continuedCycles_new);
+  void MonitorsChanged();
+  void UpdateMinCanvasSize();
  private:
   bool init;                         // has the GL context been initialised?
   int continuedCycles;// how many simulation cycles were completed last time the run or continue button was used
   int totalCycles;// how many simulation cycles have been completed
   monitor *mmz;                      // pointer to monitor class, used to extract signal traces
   names *nmz;                        // pointer to names class, used to extract signal names
+  int maxMonNameWidth;
+  vector<GLCanvasMonitorTrace> mons;
   void InitGL();                     // function to initialise GL context
   void OnSize(wxSizeEvent& event);   // callback for when canvas is resized
   void OnPaint(wxPaintEvent& event); // callback for when canvas is exposed
   void OnMouse(wxMouseEvent& event); // callback for mouse events inside canvas
-  void DrawSignalTrace(int xOffset, int yOffset, float xScale, int height, int padding, int mon, int cycles);
-  void DrawText(int x, int y, wxString txt, void *font=NULL);
-  int GetTextWidth(wxString txt, void *font=NULL);
+  int scrollX, scrollY;
+public:
+  virtual void ScrollWindow(int dx, int dy, const wxRect* rect = (wxRect *)NULL);
+
+  // copied from wxScrolledWindow
+#ifdef __WXMSW__
+    virtual WXLRESULT MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam);
+#endif // __WXMSW__
+  WX_FORWARD_TO_SCROLL_HELPER()
+  // end copied from wxScrolledWindow
+
+private:
   DECLARE_EVENT_TABLE()
 };
 
