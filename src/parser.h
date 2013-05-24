@@ -6,6 +6,7 @@
 #include "network.h"
 #include "devices.h"
 #include "monitor.h"
+#include "error.h"
 
 using namespace std;
 
@@ -17,14 +18,19 @@ class parser {
   void monitorList();
   void newDevice(int deviceType);
   void newConnection();
+  void newMonitor();
   network* netz; // instantiations of various classes for parser to use.
   devices* dmz; 
   monitor* mmz;
   scanner* smz;
-  bool successfulOp;
   int curint;
   symbol cursym;
   name curname;
+  bool ok;
+  int badname;
+  name monitorName;
+  name connectionInName;
+  name connectionOutName;
 
   /* put other stuff that the class uses internally here */
   /* also declare internal functions                     */
