@@ -46,7 +46,7 @@ public:
 	// Get the width in pixels of the name, used by MyGLCanvas.Render() to determine how much space to leave between the traces and the edge of the canvas
 	int GetNameWidth();
 	// Set the geometry and positioning of the monitor trace. xOffset and yOffset are the top left corner of the bounding box of the first trace. xScale is the x-axis scale (the number of pixels per cycle). height is the height of the signal trace itself, padding the distance between the top of the signal trace and the edge of the graph background, and spacing the vertical distance between centre lines of consecutive monitors.
-	void SetGeometry(int xOffset_new, int yOffset_new, float xScale_new, int sigHeight_new, int padding_new, int spacing_new, int xBgName_new);
+	void SetGeometry(int xOffset_new, int yOffset_new, double xScale_new, int sigHeight_new, int padding_new, int spacing_new, int xBgName_new, int axisLabelInterval_new);
 private:
 	int monId;
 	monitor *mmz; // pointer to monitor class, used to extract signal traces
@@ -55,7 +55,8 @@ private:
 	int monNameWidth;
 	bool geometrySet;
 	int xOffset, yCentre, sigHeight, padding, spacing, xBgName;
-	float xScale;
+	int axisLabelInterval;// cycles between numbers on x axis
+	double xScale;
 	wxRect backgroundRegion;
 	void UpdateName();// Update monName and monNameWidth
 	int continuedCycles;// how many simulation cycles were completed last time the run or continue button was used
@@ -118,6 +119,7 @@ class MyGLCanvas: public wxGLCanvas, public wxScrollHelperNative
   void OnPaint(wxPaintEvent& event); // callback for when canvas is exposed
   void OnMouse(wxMouseEvent& event); // callback for mouse events inside canvas
   int scrollX, scrollY;
+  int minXScale, maxXScale;
 public:
   virtual void ScrollWindow(int dx, int dy, const wxRect* rect = (wxRect *)NULL);
 

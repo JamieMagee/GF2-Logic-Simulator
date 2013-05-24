@@ -37,10 +37,10 @@ void DrawGlutText(int x, int y, wxString txt, void *font)
 
 void wxRect_GlVertex(const wxRect& r)
 {
-	glVertex2f(r.x, r.y);
-	glVertex2f(r.x+r.width, r.y);
-	glVertex2f(r.x+r.width, r.y+r.height);
-	glVertex2f(r.x, r.y+r.height);
+	glVertex2i(r.x, r.y);
+	glVertex2i(r.x+r.width, r.y);
+	glVertex2i(r.x+r.width, r.y+r.height);
+	glVertex2i(r.x, r.y+r.height);
 }
 
 // GLCanvasMonitorTrace - class to handle drawing of one monitor trace
@@ -105,7 +105,7 @@ int GLCanvasMonitorTrace::GetNameWidth()
 	return monNameWidth;
 }
 
-void GLCanvasMonitorTrace::SetGeometry(int xOffset_new, int yCentre_new, float xScale_new, int sigHeight_new, int padding_new, int spacing_new, int xBgName_new)
+void GLCanvasMonitorTrace::SetGeometry(int xOffset_new, int yCentre_new, double xScale_new, int sigHeight_new, int padding_new, int spacing_new, int xBgName_new, int axisLabelInterval_new)
 {
 	geometrySet = true;
 	xOffset = xOffset_new;
@@ -115,6 +115,7 @@ void GLCanvasMonitorTrace::SetGeometry(int xOffset_new, int yCentre_new, float x
 	padding = padding_new;
 	spacing = spacing_new;
 	xBgName = xBgName_new;
+	axisLabelInterval = axisLabelInterval_new;
 }
 
 void GLCanvasMonitorTrace::Draw(MyGLCanvas *canvas, const wxRect& visibleRegion)
@@ -148,26 +149,26 @@ void GLCanvasMonitorTrace::Draw(MyGLCanvas *canvas, const wxRect& visibleRegion)
 		// otherwise just draw part of it
 		glBegin(GL_LINES);
 		// horizontal lines
-		glVertex2f(clippedbg.x, clippedbg.y);
-		glVertex2f(clippedbg.x+clippedbg.width, clippedbg.y);
-		glVertex2f(clippedbg.x, clippedbg.y+clippedbg.height);
-		glVertex2f(clippedbg.x+clippedbg.width, clippedbg.y+clippedbg.height);
+		glVertex2i(clippedbg.x, clippedbg.y);
+		glVertex2i(clippedbg.x+clippedbg.width, clippedbg.y);
+		glVertex2i(clippedbg.x, clippedbg.y+clippedbg.height);
+		glVertex2i(clippedbg.x+clippedbg.width, clippedbg.y+clippedbg.height);
 		// vertical lines if they are in the visible region
 		if (backgroundRegion.x >= visibleRegion.x)
 		{
-			glVertex2f(clippedbg.x, clippedbg.y+1);
-			glVertex2f(clippedbg.x, clippedbg.y+clippedbg.height-1);
+			glVertex2i(clippedbg.x, clippedbg.y+1);
+			glVertex2i(clippedbg.x, clippedbg.y+clippedbg.height-1);
 		}
 		if (backgroundRegion.x+backgroundRegion.width <= visibleRegion.x+visibleRegion.width)
 		{
-			glVertex2f(clippedbg.x+clippedbg.width, clippedbg.y+1);
-			glVertex2f(clippedbg.x+clippedbg.width, clippedbg.y+clippedbg.height-1);
+			glVertex2i(clippedbg.x+clippedbg.width, clippedbg.y+1);
+			glVertex2i(clippedbg.x+clippedbg.width, clippedbg.y+clippedbg.height-1);
 		}
 		glEnd();
 	}
 
 	// actual signal trace
-	if (xScale>4) glLineWidth(2);
+	if (xScale>5) glLineWidth(2);
 	glBegin(GL_LINE_STRIP);
 	glColor4f(0.0, 0.8, 0.0, 1.0);
 	int y1, y2, i;
@@ -193,13 +194,40 @@ void GLCanvasMonitorTrace::Draw(MyGLCanvas *canvas, const wxRect& visibleRegion)
 				y2 = yCentre-sigHeight/2;
 			else
 				y2 = yCentre+sigHeight/2;
-			if (y1!=prevY) glVertex2f(xOffset+xScale*i, y1);
-			glVertex2f(xOffset+xScale*(i+1), y2);
+			if (y1!=prevY) glVertex2i(xOffset+xScale*i, y1);
+			glVertex2i(xOffset+xScale*(i+1), y2);
 			prevY = y2;
 		}
 	}
 	glEnd();
 	glLineWidth(1);
+
+	// Draw cycle numbers on axis and dashed vertical lines for them
+	firstCycle = (int(firstCycle/axisLabelInterval)-1) * axisLabelInterval;
+	if (firstCycle<0)
+		firstCycle = 0;
+	cycleLimit = (int(cycleLimit/axisLabelInterval)+1) * axisLabelInterval;
+	if (cycleLimit>totalCycles)
+		cycleLimit = totalCycles;
+	glLineStipple(2, 0xAAAA);
+	glEnable(GL_LINE_STIPPLE);
+	for (i=firstCycle; i<=cycleLimit; i+=axisLabelInterval)
+	{
+		if (i!=0 && i!=totalCycles)
+		{
+			glBegin(GL_LINE_STRIP);
+			glColor4f(0.0, 0.0, 0.0, 0.2);
+			glVertex2i(xOffset+xScale*i, yCentre-sigHeight/2-padding);
+			glVertex2i(xOffset+xScale*i, yCentre+sigHeight/2+padding);
+			glEnd();
+		}
+		glColor4f(0.0, 0.0, 0.0, 1.0);
+		wxString labelText;
+		labelText.Printf(wxT("%d"), i);
+		int labelWidth = GetGlutTextWidth(labelText, GLUT_BITMAP_HELVETICA_10);
+		DrawGlutText(xOffset+xScale*i - labelWidth/2, yCentre-sigHeight/2-padding-11, labelText, GLUT_BITMAP_HELVETICA_10);
+	}
+	glDisable(GL_LINE_STIPPLE);
 }
 
 void GLCanvasMonitorTrace::DrawName(MyGLCanvas *canvas, const wxRect& visibleRegion)
@@ -212,7 +240,7 @@ void GLCanvasMonitorTrace::DrawName(MyGLCanvas *canvas, const wxRect& visibleReg
 	else
 	{
 		glColor4f(0.0, 0.0, 0.0, 1.0);
-		DrawGlutText(xOffset-monNameWidth-4, yCentre-5, monName, GLUT_BITMAP_HELVETICA_12);
+		DrawGlutText(xOffset-monNameWidth-5, yCentre-5, monName, GLUT_BITMAP_HELVETICA_12);
 	}
 }
 
@@ -232,12 +260,14 @@ MyGLCanvas::MyGLCanvas(wxWindow *parent, wxWindowID id, monitor* monitor_mod, na
 	wxScrollHelperNative(this), scrollX(0), scrollY(0)
   // Constructor - initialises private variables
 {
-  mmz = monitor_mod;
-  nmz = names_mod;
-  init = false;
-  continuedCycles = totalCycles = 0;
-  MonitorsChanged();
-  SetScrollRate(10, 10);
+	mmz = monitor_mod;
+	nmz = names_mod;
+	init = false;
+	continuedCycles = totalCycles = 0;
+	MonitorsChanged();
+	SetScrollRate(10,10);
+	minXScale = 2;
+	maxXScale = 50;
 }
 
 void MyGLCanvas::ScrollWindow(int dx, int dy, const wxRect *rect)
@@ -252,7 +282,8 @@ void MyGLCanvas::UpdateMinCanvasSize()
 {
 	// Make sure all the traces fit in the canvas
 	int xOffset = maxMonNameWidth+5;
-	SetVirtualSize(2*totalCycles+10+xOffset,50*mons.size());
+	int maxXTextWidth = ceil(log10(totalCycles))*8;// estimate of max x axis scale text width
+	SetVirtualSize(minXScale*totalCycles+15+xOffset+maxXTextWidth/2,50*mons.size());
 }
 
 // Notify of a change to the number of displayed cycles
@@ -308,7 +339,6 @@ WXLRESULT wxScrolledWindow::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam,WXLPARAM 
 
 void MyGLCanvas::Render(wxString text)
 {
-	float y;
 	unsigned int i;
 
 	SetCurrent();
@@ -326,17 +356,36 @@ void MyGLCanvas::Render(wxString text)
 		int spacing = (canvasHeight-10)/monCount;
 		if (spacing>200) spacing = 200;
 		if (spacing<50) spacing = 50;
-		int height = 0.8*spacing;
+		int height = 0.8*(spacing-14);
 
-		int xOffset = maxMonNameWidth+5;
+		int xOffset = maxMonNameWidth+10;
 		wxRect visibleRegion(0,0,canvasWidth,canvasHeight);
 
-		float xScale = float(canvasWidth-xOffset-10)/totalCycles;
-		if (xScale<2) xScale = 2;
-		if (xScale>20) xScale = 20;
+		double xScale = double(canvasWidth-xOffset-10)/totalCycles;
+		if (xScale<minXScale) xScale = minXScale;
+		if (xScale>50) xScale = 50;
+
+		// Work out the best interval to use between displayed cycle numbers on the x axis
+		int minAxisLabelIntervalPixels = ceil(ceil(log10(totalCycles))*8*2);
+		int base = 1;
+		int baseMultiples[] = {1,2,5};
+		int axisLabelInterval = 1;
+		while (axisLabelInterval<=totalCycles)
+		{
+			for (i=0; i<3; i++)
+			{
+				axisLabelInterval = baseMultiples[i]*base;
+				if (axisLabelInterval*xScale >= minAxisLabelIntervalPixels)
+					break;
+			}
+			if (axisLabelInterval*xScale >= minAxisLabelIntervalPixels)
+				break;
+			base *= 10;
+		}
+		// Draw the traces
 		for (i=0; i<mons.size(); i++)
 		{
-			mons[i].SetGeometry(xOffset+scrollX, canvasHeight-(5+scrollY)-spacing*i-spacing/2, xScale, height, spacing*0.075, spacing, 10);
+			mons[i].SetGeometry(xOffset+scrollX, canvasHeight-scrollY-spacing*i-spacing/2, xScale, height, spacing*0.075, spacing, 10, axisLabelInterval);
 			mons[i].Draw(this, visibleRegion);
 			mons[i].DrawName(this, visibleRegion);
 		}
@@ -473,7 +522,7 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	simctrls_button_sizer->Add(new wxButton(this, SIMCTRL_BUTTON_CONT_ID, wxT("Continue")), 0, wxALL, 10);
 	simctrls_cycles_sizer->Add(new wxStaticText(this, wxID_ANY, wxT("Cycles")), 0, wxALL|wxALIGN_CENTER_VERTICAL, 10);
 	spin = new wxSpinCtrl(this, MY_SPINCNTRL_ID, wxString(wxT("31")));
-	spin->SetRange(1,1000);
+	spin->SetRange(1,1000000);
 	simctrls_cycles_sizer->Add(spin, 0, wxALL, 10);
 
 	simctrls_sizer->Add(simctrls_cycles_sizer);
