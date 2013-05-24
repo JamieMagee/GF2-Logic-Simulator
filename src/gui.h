@@ -108,17 +108,17 @@ class MyFrame: public wxFrame
   DECLARE_EVENT_TABLE()
 };
     
-class MyGLCanvas: public wxGLCanvas
+class MyGLCanvas: public wxGLCanvas, public wxScrollHelperNative
 {
  public:
-  MyGLCanvas(wxWindow *parent, wxWindowID id = wxID_ANY, monitor* monitor_mod = NULL, names* names_mod = NULL, wxScrolledWindow* scrollwind = NULL,
+  MyGLCanvas(wxWindow *parent, wxWindowID id = wxID_ANY, monitor* monitor_mod = NULL, names* names_mod = NULL,
 	     const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = 0,
 	     const wxString& name = wxT("MyGLCanvas")); // constructor
   void Render(wxString text=wxT("")); // function to draw canvas contents
   void SimulationRun(int totalCycles_new, int continuedCycles_new);
   void MonitorsChanged();
+  void UpdateMinCanvasSize();
  private:
-  wxScrolledWindow* scrollingParent;
   bool init;                         // has the GL context been initialised?
   int continuedCycles;// how many simulation cycles were completed last time the run or continue button was used
   int totalCycles;// how many simulation cycles have been completed
@@ -130,6 +130,18 @@ class MyGLCanvas: public wxGLCanvas
   void OnSize(wxSizeEvent& event);   // callback for when canvas is resized
   void OnPaint(wxPaintEvent& event); // callback for when canvas is exposed
   void OnMouse(wxMouseEvent& event); // callback for mouse events inside canvas
+  int scrollX, scrollY;
+public:
+  virtual void ScrollWindow(int dx, int dy, const wxRect* rect = (wxRect *)NULL);
+
+  // copied from wxScrolledWindow
+#ifdef __WXMSW__
+    virtual WXLRESULT MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam);
+#endif // __WXMSW__
+  WX_FORWARD_TO_SCROLL_HELPER()
+  // end copied from wxScrolledWindow
+
+private:
   DECLARE_EVENT_TABLE()
 };
 

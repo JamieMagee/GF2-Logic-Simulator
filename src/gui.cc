@@ -273,17 +273,33 @@ END_EVENT_TABLE()
   
 int wxglcanvas_attrib_list[5] = {WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16, 0};
 
-MyGLCanvas::MyGLCanvas(wxWindow *parent, wxWindowID id, monitor* monitor_mod, names* names_mod, wxScrolledWindow* scrollwind,
+MyGLCanvas::MyGLCanvas(wxWindow *parent, wxWindowID id, monitor* monitor_mod, names* names_mod,
 	const wxPoint& pos, const wxSize& size, long style, const wxString& name):
-    wxGLCanvas(parent, id, pos, size, style, name, wxglcanvas_attrib_list)
+    wxGLCanvas(parent, id, pos, size, style, name, wxglcanvas_attrib_list),
+	wxScrollHelperNative(this), scrollX(0), scrollY(0)
   // Constructor - initialises private variables
 {
   mmz = monitor_mod;
   nmz = names_mod;
-  scrollingParent = scrollwind;
   init = false;
   continuedCycles = totalCycles = 0;
   MonitorsChanged();
+  SetScrollRate(10, 10);
+}
+
+void MyGLCanvas::ScrollWindow(int dx, int dy, const wxRect *rect)
+{
+	// override ScrollWindow(), since MyGLCanvas does its own scrolling by offsetting all drawn points and clipping
+	scrollX += dx;
+	scrollY += dy;
+	Refresh();
+}
+
+void MyGLCanvas::UpdateMinCanvasSize()
+{
+	// Make sure all the traces fit in the canvas
+	int xOffset = maxMonNameWidth+5;
+	SetVirtualSize(2*totalCycles+10+xOffset,50*mons.size());
 }
 
 // Notify of a change to the number of displayed cycles
@@ -296,8 +312,9 @@ void MyGLCanvas::SimulationRun(int totalCycles_new, int continuedCycles_new)
 		mons[i].SimulationRun(totalCycles, continuedCycles);
 	}
 	Render();
+	UpdateMinCanvasSize();
 	// Scroll to the most recently simulated cycles
-	if (scrollingParent) scrollingParent->Scroll(GetSize().GetWidth(),-1);
+	Scroll(GetVirtualSize().GetWidth()-GetClientSize().GetWidth(),-1);
 }
 
 // Notify of a change to the active monitors
@@ -314,7 +331,27 @@ void MyGLCanvas::MonitorsChanged()
 		if (mons[i].GetNameWidth()>maxMonNameWidth)
 			maxMonNameWidth = mons[i].GetNameWidth();
 	}
+	UpdateMinCanvasSize();
 }
+
+
+// copied from wxScrolledWindow:
+#ifdef __WXMSW__
+WXLRESULT wxScrolledWindow::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam,WXLPARAM lParam)
+{
+    WXLRESULT rc = wxPanel::MSWWindowProc(nMsg, wParam, lParam);
+#ifndef __WXWINCE__
+    // we need to process arrows ourselves for scrolling
+    if ( nMsg == WM_GETDLGCODE )
+    {
+        rc |= DLGC_WANTARROWS;
+    }
+#endif
+    return rc;
+}
+#endif // __WXMSW__
+// end copied from wxScrolledWindow
+
 
 void MyGLCanvas::Render(wxString text)
 {
@@ -327,7 +364,7 @@ void MyGLCanvas::Render(wxString text)
 		InitGL();
 		init = true;
 	}
-	//glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT);
 	if ((totalCycles > 0) && (mmz->moncount() > 0))
 	{
 		int monCount = mmz->moncount();
@@ -339,45 +376,25 @@ void MyGLCanvas::Render(wxString text)
 		int height = 0.8*spacing;
 
 		int xOffset = maxMonNameWidth+5;
-		// Make sure all the traces fit in the canvas
-		SetMinSize(wxSize(2*totalCycles+10+xOffset,50*monCount));
-		// If inside a wxScrolledWindow, ensure that its scrolling area fits the canvas
-		if (scrollingParent) scrollingParent->FitInside();
-
 		RegionCoords visibleRegion(0,0,canvasWidth,canvasHeight);
-		if (scrollingParent)
-		{
-			int scrollX, scrollY, scrollXunit, scrollYunit;
-			scrollingParent->GetViewStart(&scrollX, &scrollY);// in scrolling units, not pixels
-			scrollingParent->GetScrollPixelsPerUnit(&scrollXunit, &scrollYunit);// scaling factor from scrolling units to pixels
-			wxSize swsize = scrollingParent->GetClientSize();// visible width and height of scrolling window
-			visibleRegion = RegionCoords(scrollX*scrollXunit, scrollY*scrollYunit, swsize.GetWidth(), swsize.GetHeight());
-		}
-
-		glBegin(GL_QUADS);
-		glColor3f(1.0, 1.0, 1.0);
-		visibleRegion.GlVertex();
-		glEnd();
 
 		float xScale = float(canvasWidth-xOffset-10)/totalCycles;
 		if (xScale<2) xScale = 2;
 		if (xScale>20) xScale = 20;
 		for (i=0; i<mons.size(); i++)
 		{
-			mons[i].SetGeometry(xOffset, 5, xScale, height, spacing*0.075, spacing);
+			mons[i].SetGeometry(xOffset+scrollX, 5+scrollY, xScale, height, spacing*0.075, spacing);
 			mons[i].Draw(this, visibleRegion);
 			mons[i].DrawName(this, visibleRegion);
 		}
 	}
 	else if (mmz->moncount()==0)
 	{
-		glClear(GL_COLOR_BUFFER_BIT);
 		glColor3f(0.5, 0.0, 0.0);
 		DrawGlutText(5, 10, wxT("No monitors"));
 	}
 	else
 	{
-		glClear(GL_COLOR_BUFFER_BIT);
 		glColor3f(0.8, 0.0, 0.0);
 		DrawGlutText(5, 10, wxT("No simulation results to display"));
 	}
@@ -485,13 +502,8 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	wxBoxSizer *topsizer = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer *leftsizer = new wxBoxSizer(wxVERTICAL);
 
-	wxScrolledWindow *sw = new wxScrolledWindow(this,-1, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN|wxVSCROLL);
-	wxBoxSizer *swsizer = new wxBoxSizer(wxHORIZONTAL);
-	canvas = new MyGLCanvas(sw, wxID_ANY, monitor_mod, names_mod, sw);
-	swsizer->Add(canvas, 1, wxEXPAND | wxALL, 0);
-	sw->SetSizer(swsizer);
-	sw->SetScrollRate(10, 10);
-	leftsizer->Add(sw, 3, wxEXPAND | wxALL, 10);
+	canvas = new MyGLCanvas(this, wxID_ANY, monitor_mod, names_mod, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+	leftsizer->Add(canvas, 3, wxEXPAND | wxALL, 10);
 
 	outputTextCtrl = new wxTextCtrl(this, OUTPUT_TEXTCTRL_ID, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
 	outputTextRedirect = new wxStreamToTextRedirector(outputTextCtrl);// Redirect all text sent to cout to the outputTextCtrl textbox
