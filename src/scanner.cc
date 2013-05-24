@@ -94,13 +94,7 @@ void scanner::getch()
 	if (curch == '\n')
 	{
 		linenum++;
-		eoline = true;
-	}
-	if (eoline)
-	{
-		line.clear();	// Clear string to start new line
-		//skipspaces();
-		eoline = false;
+		line.clear();
 	}
 	if (prevch != '\n')
 	{
@@ -151,11 +145,14 @@ void scanner::skipcomments()
 		if (curch == '*')
 		{
 			getch();
-			while (prevch != '*' && curch != '/')
+			while (!(prevch == '*' && curch == '/'))
 			{
 				getch();
 				if (eofile) break;
 			}
+			getch();
+			getch();
+			getch(); //Get to next useful char
 		}
 	}
 }
