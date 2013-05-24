@@ -16,6 +16,7 @@ bool parser::readin(void)
 	else
 	{
 		error(); //must have device list first
+		cout << "must have device list first" << endl;
 	}
 	smz->getsymbol(cursym, curname, curint);
 	if (cursym == consym)
@@ -25,6 +26,7 @@ bool parser::readin(void)
 	else
 	{
 		error(); //must have connection list second
+		cout << "must have connection list second" << endl;
 	}
 	smz->getsymbol(cursym, curname, curint);
 	if (cursym == monsym)
@@ -34,12 +36,14 @@ bool parser::readin(void)
 	else
 	{
 		error(); //must have monitor list last
+		cout << "must have monitor list last" << endl;
+		cout << cursym << endl;
 	}
 }
 
 void parser::deviceList()
 {
-	//EBNF: devices = 'DEVICES' dev {';' dev} 'END'
+	//EBNF: devices = 'DEVICES' dev {';' dev} ';' 'END'
 	smz->getsymbol(cursym, curname, curint);
 	if (cursym == classsym)
 	{
@@ -48,10 +52,12 @@ void parser::deviceList()
 	else if (cursym == endsym)
 	{
 		error(); //must have at least one device
+		cout << "must have at least one device" << endl;
 	}
 	else
 	{
 		error(); //need a device type
+		cout << "need a device type" << endl;
 	}
 	smz->getsymbol(cursym, curname, curint);
 	while (cursym == semicol)
@@ -61,20 +67,26 @@ void parser::deviceList()
 		{
 			newDevice(curname);
 		}
-		else
+		else if (cursym == endsym)
+		{
+			return;
+		}
+		else 
 		{
 			error();//new device must have a name or must end with END not semicolon
+			cout << "new device must have a name or must end with END not semicolon" << endl;
 		}
 		smz->getsymbol(cursym, curname, curint);
 	}
-	if (cursym == endsym)
-	{
-		return;
-	}
-	else
-	{
-		error();//need semicolon or END
-	}
+	//if (cursym == endsym)
+	//{
+		//return;
+	//}
+	//else
+	//{
+		//error();//need semicolon or END
+		//cout << "need semicolon or END" << endl;
+	//}
 }
 
 void parser::newDevice(int deviceType)
@@ -195,6 +207,7 @@ void parser::connectionList()
 	else
 	{
 		error();//connection must start with the name of a device
+		cout << "connection must start with the name of a device" << endl;
 	}
 	smz->getsymbol(cursym, curname, curint);
 	while (cursym == semicol)
@@ -204,19 +217,16 @@ void parser::connectionList()
 		{
 			newConnection();
 		}
+		else if (cursym == endsym)
+		{
+			return;
+		}
 		else
 		{
 			error();//connection must start with the name of a device or end of device list must be terminated with END (not semicolon)
+			cout << "connection must start with the name of a device or end of device list must be terminated with END (not semicolon)" << endl;
 		}
 		smz->getsymbol(cursym, curname, curint);
-	}
-	if (cursym == endsym)
-	{
-		return;
-	}
-	else
-	{
-		error();//need semicolon or END
 	}
 }
 
@@ -256,6 +266,7 @@ void parser::newConnection()
 								else
 								{
 									error();	//Expect a dot after dtype
+									cout << "Expect a dot after dtype" << endl;
 								}
 							default:
 								netz->makeconnection(connectionInName, inputPin, connectionOutName, connectionOutName, ok);
@@ -265,26 +276,32 @@ void parser::newConnection()
 					else
 					{
 						error(); //Device does not exist
+						cout << "Device does not exist" << endl;
 					}
 				}
 				else
 				{
 					error();//SEARCH - you have got to here
+					cout << " " << endl;
 				}
 			}
 			else
 			{
 				error();//specify input gate after dot
+				cout << "specify input gate after dot" << endl;
 			}
 		}
 		else
 		{
 			error();//need to seperate connection input with a '.' (or need to specify input)
+			cout << " " << endl;
 		}
 	}
 	else
 	{
 		error(); //Device does not exist
+		cout << "Device does not exist" << endl;
+		cout << "symbol " << cursym << " name " << curname << " int" << curint << endl;
 	}
 }
 
@@ -303,6 +320,7 @@ void parser::monitorList()
 	else
 	{
 		error();//monitor must start with the name of a device
+		cout << "monitor must start with the name of a device" << endl;
 	}
 	smz->getsymbol(cursym, curname, curint);
 	while (cursym == semicol)
@@ -312,19 +330,16 @@ void parser::monitorList()
 		{
 			newMonitor();
 		}
+		else if (cursym == endsym)
+		{
+			return;
+		}
 		else
 		{
 			error();//monitor must start with the name of a device or end of device list must be terminated with END (not semicolon)
+			cout << "monitor must start with the name of a device or end of device list must be terminated with END (not semicolon)" << endl;
 		}
 		smz->getsymbol(cursym, curname, curint);
-	}
-	if (cursym == endsym)
-	{
-		return;
-	}
-	else
-	{
-		error();//need semicolon or END
 	}
 }
 
@@ -353,6 +368,8 @@ void parser::newMonitor()
 					else
 					{
 						error();	//Expect a dot after dtype
+						cout << "Expect a dot after dtype" << endl;
+						
 					}
 				default:
 					mmz->makemonitor(monitorName, monitorName, ok);
@@ -362,13 +379,14 @@ void parser::newMonitor()
 		else
 		{
 			error();
+			cout << "Bad device monitor" << endl;
 		}
 	}
 }
 
 void parser::error()
 {
-	cout << "PANIC" << endl;
+	//cout << "PC LOAD LETTER" << endl;
 }
 
 parser::parser(network* network_mod, devices* devices_mod, monitor* monitor_mod, scanner* scanner_mod)
