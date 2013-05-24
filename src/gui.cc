@@ -70,6 +70,7 @@ void GLCanvasMonitorTrace::SetModules(monitor *monitor_mod, names *names_mod)
 {
 	mmz = monitor_mod;
 	nmz = names_mod;
+	UpdateName();
 }
 
 void GLCanvasMonitorTrace::SimulationRun(int totalCycles_new, int continuedCycles_new)
@@ -309,8 +310,8 @@ void MyGLCanvas::MonitorsChanged()
 	maxMonNameWidth = 0;
 	for (int i=0; i<monCount; i++)
 	{
-		mons[i].SetMonitorId(i);
 		mons[i].SetModules(mmz, nmz);
+		mons[i].SetMonitorId(i);
 		mons[i].SimulationRun(totalCycles, continuedCycles);
 		if (mons[i].GetNameWidth()>maxMonNameWidth)
 			maxMonNameWidth = mons[i].GetNameWidth();
@@ -504,7 +505,7 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	wxBoxSizer *topsizer = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer *leftsizer = new wxBoxSizer(wxVERTICAL);
 
-	canvas = new MyGLCanvas(this, wxID_ANY, monitor_mod, names_mod, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+	canvas = new MyGLCanvas(this, wxID_ANY, mmz, nmz, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
 	leftsizer->Add(canvas, 3, wxEXPAND | wxALL, 10);
 
 	// Create the log textbox, mainly for displaying error messages from the parser

@@ -82,7 +82,7 @@ bool MyApp::OnInit()
   // Construct the GUI
   MyFrame *frame = new MyFrame(NULL, wxT("Logic simulator"), wxDefaultPosition,  wxSize(800, 600), nmz, dmz, mmz, netz);
   frame->Show(true);
-  if (argc == 2)
+  if (argc == 2 && wxString(argv[1]) != wxT("builtin-example"))
   {
     frame->loadFile(wxString(argv[1]).mb_str());
   }
