@@ -35,71 +35,12 @@ void DrawGlutText(int x, int y, wxString txt, void *font)
 		glutBitmapCharacter(font, txt[i]);
 }
 
-
-RegionCoords::RegionCoords() :
-	x(0), y(0), w(0), h(0)
-{}
-
-RegionCoords::RegionCoords(int x_new, int y_new, int w_new, int h_new) :
-	x(x_new), y(y_new), w(w_new), h(h_new)
-{}
-
-void RegionCoords::ClipToFitIn(RegionCoords clip)
+void wxRect_GlVertex(const wxRect& r)
 {
-	if (x > clip.x+clip.w)
-	{
-		x = clip.x+clip.w;
-		w = 0;
-	}
-	if (x < clip.x)
-	{
-		w = w-(clip.x-x);
-		if (w<0) w = 0;
-		x = clip.x;
-	}
-	if (x+w > clip.x+clip.w)
-	{
-		w = clip.x+clip.w - x;
-	}
-
-	if (y > clip.y+clip.h)
-	{
-		y = clip.y+clip.h;
-		h = 0;
-	}
-	if (y < clip.y)
-	{
-		h = h-(clip.y-y);
-		if (h<0) h = 0;
-		y = clip.y;
-	}
-	if (y+h > clip.y+clip.h)
-	{
-		h = clip.y+clip.h - y;
-	}
-}
-
-bool RegionCoords::ContainsPoint(int testx, int testy) const
-{
-	return (testx>=x && testx<=x+w && testy>=y && testy<=y+h);
-}
-
-bool RegionCoords::IsEmpty() const
-{
-	return (w==0 || h==0);
-}
-
-void RegionCoords::GlVertex() const
-{
-	glVertex2f(x, y);
-	glVertex2f(x+w, y);
-	glVertex2f(x+w, y+h);
-	glVertex2f(x, y+h);
-}
-
-bool operator==(const RegionCoords& a, const RegionCoords& b)
-{
-	return (a.x==b.x && a.y==b.y && a.w==b.w && a.h==b.h);
+	glVertex2f(r.x, r.y);
+	glVertex2f(r.x+r.width, r.y);
+	glVertex2f(r.x+r.width, r.y+r.height);
+	glVertex2f(r.x, r.y+r.height);
 }
 
 // GLCanvasMonitorTrace - class to handle drawing of one monitor trace
@@ -175,24 +116,22 @@ void GLCanvasMonitorTrace::SetGeometry(int xOffset_new, int yOffset_new, float x
 	spacing = spacing_new;
 }
 
-void GLCanvasMonitorTrace::Draw(MyGLCanvas *canvas, const RegionCoords& visibleRegion)
+void GLCanvasMonitorTrace::Draw(MyGLCanvas *canvas, const wxRect& visibleRegion)
 {
 	if (!mmz || !canvas || monId<0 || monId>=mmz->moncount()) return;
 
 	int canvasHeight = canvas->GetClientSize().GetHeight();
 	int centerY = canvasHeight - yOffset - spacing*monId - spacing/2;
 
-	RegionCoords backgroundRegion(xOffset, centerY-sigHeight/2-padding, ceil(xScale*totalCycles), sigHeight+padding*2);
-	RegionCoords traceRegion = backgroundRegion;// this will be slightly different when cycle numbers are added to the axis
-	traceRegion.ClipToFitIn(visibleRegion);
+	wxRect backgroundRegion(xOffset, centerY-sigHeight/2-padding, ceil(xScale*totalCycles), sigHeight+padding*2);
+	wxRect traceRegion = backgroundRegion.Intersect(visibleRegion);// this will be slightly different when cycle numbers are added to the axis
 	if (traceRegion.IsEmpty()) return;
-	RegionCoords clippedbg = backgroundRegion;
-	backgroundRegion.ClipToFitIn(visibleRegion);
+	wxRect clippedbg = backgroundRegion.Intersect(visibleRegion);
 
 	// background colour
 	glBegin(GL_QUADS);
 	glColor4f(0.0, 0.5, 0.0, 0.05);
-	clippedbg.GlVertex();
+	wxRect_GlVertex(clippedbg);
 	glEnd();
 
 	// border
@@ -201,7 +140,7 @@ void GLCanvasMonitorTrace::Draw(MyGLCanvas *canvas, const RegionCoords& visibleR
 	{
 		// if the whole backgroundRegion is in the visible region, draw the whole border
 		glBegin(GL_LINE_LOOP);
-		backgroundRegion.GlVertex();
+		wxRect_GlVertex(backgroundRegion);
 		glEnd();
 	}
 	else
@@ -210,19 +149,19 @@ void GLCanvasMonitorTrace::Draw(MyGLCanvas *canvas, const RegionCoords& visibleR
 		glBegin(GL_LINES);
 		// horizontal lines
 		glVertex2f(clippedbg.x, clippedbg.y);
-		glVertex2f(clippedbg.x+clippedbg.w, clippedbg.y);
-		glVertex2f(clippedbg.x, clippedbg.y+clippedbg.h);
-		glVertex2f(clippedbg.x+clippedbg.w, clippedbg.y+clippedbg.h);
+		glVertex2f(clippedbg.x+clippedbg.width, clippedbg.y);
+		glVertex2f(clippedbg.x, clippedbg.y+clippedbg.height);
+		glVertex2f(clippedbg.x+clippedbg.width, clippedbg.y+clippedbg.height);
 		// vertical lines if they are in the visible region
 		if (backgroundRegion.x >= visibleRegion.x)
 		{
 			glVertex2f(clippedbg.x, clippedbg.y+1);
-			glVertex2f(clippedbg.x, clippedbg.y+clippedbg.h-1);
+			glVertex2f(clippedbg.x, clippedbg.y+clippedbg.height-1);
 		}
-		if (backgroundRegion.x+backgroundRegion.w <= visibleRegion.x+visibleRegion.w)
+		if (backgroundRegion.x+backgroundRegion.width <= visibleRegion.x+visibleRegion.width)
 		{
-			glVertex2f(clippedbg.x+clippedbg.w, clippedbg.y+1);
-			glVertex2f(clippedbg.x+clippedbg.w, clippedbg.y+clippedbg.h-1);
+			glVertex2f(clippedbg.x+clippedbg.width, clippedbg.y+1);
+			glVertex2f(clippedbg.x+clippedbg.width, clippedbg.y+clippedbg.height-1);
 		}
 		glEnd();
 	}
@@ -237,8 +176,8 @@ void GLCanvasMonitorTrace::Draw(MyGLCanvas *canvas, const RegionCoords& visibleR
 	int cycleLimit = totalCycles;
 	if (xOffset < visibleRegion.x)
 		firstCycle = int((visibleRegion.x-xOffset)/xScale);
-	if (xOffset + totalCycles*xScale > visibleRegion.x+visibleRegion.w)
-		cycleLimit = int((visibleRegion.x+visibleRegion.w - xOffset)/xScale) + 1;
+	if (xOffset + totalCycles*xScale > visibleRegion.x+visibleRegion.width)
+		cycleLimit = int((visibleRegion.x+visibleRegion.width - xOffset)/xScale) + 1;
 	if (cycleLimit>totalCycles)
 		cycleLimit = totalCycles;
 	int prevY = centerY;
@@ -263,7 +202,7 @@ void GLCanvasMonitorTrace::Draw(MyGLCanvas *canvas, const RegionCoords& visibleR
 	glLineWidth(1);
 }
 
-void GLCanvasMonitorTrace::DrawName(MyGLCanvas *canvas, const RegionCoords& visibleRegion)
+void GLCanvasMonitorTrace::DrawName(MyGLCanvas *canvas, const wxRect& visibleRegion)
 {
 	if (xOffset < visibleRegion.x) return;
 	int canvasHeight = canvas->GetClientSize().GetHeight();
@@ -385,7 +324,7 @@ void MyGLCanvas::Render(wxString text)
 		int height = 0.8*spacing;
 
 		int xOffset = maxMonNameWidth+5;
-		RegionCoords visibleRegion(0,0,canvasWidth,canvasHeight);
+		wxRect visibleRegion(0,0,canvasWidth,canvasHeight);
 
 		float xScale = float(canvasWidth-xOffset-10)/totalCycles;
 		if (xScale<2) xScale = 2;

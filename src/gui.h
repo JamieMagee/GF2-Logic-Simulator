@@ -26,20 +26,7 @@ void DrawGlutText(int x, int y, wxString txt, void *font=NULL);
 class MyGLCanvas;
 class SimCtrls;
 
-// Class to help with passing around coordinates and clipping to the visible area when drawing monitor traces
-class RegionCoords
-{
-public:
-	RegionCoords();
-	RegionCoords(int x_new, int y_new, int w_new, int h_new);
-	int x, y, w, h;
-	void ClipToFitIn(RegionCoords clip);// clip this region to fit in the specified region
-	bool ContainsPoint(int testx, int testy) const;
-	bool IsEmpty() const;//Returns true if the region has zero width or height
-	void GlVertex() const;
-};
-bool operator==(const RegionCoords& a, const RegionCoords& b);
-
+void wxRect_GlVertex(const wxRect& r);
 
 class GLCanvasMonitorTrace
 {
@@ -54,8 +41,8 @@ public:
 	// Notify of a change in the number of displayed cycles
 	void SimulationRun(int totalCycles_new, int continuedCycles_new);
 	// Draw the signal trace, visible coordinates are used so that time is not wasted in drawing areas hidden due to scrolling.
-	void Draw(MyGLCanvas *canvas, const RegionCoords& visibleRegion);
-	void DrawName(MyGLCanvas *canvas, const RegionCoords& visibleRegion);
+	void Draw(MyGLCanvas *canvas, const wxRect& visibleRegion);
+	void DrawName(MyGLCanvas *canvas, const wxRect& visibleRegion);
 	// Get the width in pixels of the name, used by MyGLCanvas.Render() to determine how much space to leave between the traces and the edge of the canvas
 	int GetNameWidth();
 	// Set the geometry and positioning of the monitor trace. xOffset and yOffset are the top left corner of the bounding box of the first trace. xScale is the x-axis scale (the number of pixels per cycle). height is the height of the signal trace itself, padding the distance between the top of the signal trace and the edge of the graph background, and spacing the vertical distance between centre lines of consecutive monitors.
@@ -69,7 +56,7 @@ private:
 	bool geometrySet;
 	int xOffset, yOffset, sigHeight, padding, spacing;
 	float xScale;
-	RegionCoords backgroundRegion;
+	wxRect backgroundRegion;
 	void UpdateName();// Update monName and monNameWidth
 	int continuedCycles;// how many simulation cycles were completed last time the run or continue button was used
 	int totalCycles;// how many simulation cycles have been completed
