@@ -510,7 +510,7 @@ void MyFrame::OnAbout(wxCommandEvent &event)
 void MyFrame::OnOpenFile(wxCommandEvent &event)
   // Callback for the File -> Open menu item
 {
-	wxFileDialog openFileDialog(this, wxT("Open logic circuit"), wxT(""), wxT(""), wxT("*.*"), wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+	wxFileDialog openFileDialog(this, wxT("Open logic circuit"), wxT(""), wxT(""), wxT("Logic circuit files (*.gf2)|*.gf2|All files (*.*)|*.*"), wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_CHANGE_DIR);
 	if (openFileDialog.ShowModal() == wxID_CANCEL)
 		return; // cancelled, don't open a file
 	loadFile(openFileDialog.GetPath().mb_str());
