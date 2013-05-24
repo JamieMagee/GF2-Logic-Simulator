@@ -21,7 +21,16 @@ int GetGlutTextWidth(wxString txt, void *font)
 void DrawGlutText(int x, int y, wxString txt, void *font)
 {
 	if (!font) font = GLUT_BITMAP_HELVETICA_12;
-	glRasterPos2f(x, y);
+	int xMove = 0, yMove = 0;
+	/* If x or y are outside the viewport, call glRasterPos2f with a position inside
+	 * the viewport, then move it using glBitmap (as described in glRasterPos man page).
+	 * Otherwise the text doesn't get rendered.
+	 * Assuming viewport starts at (0,0) and only implemented for positions to the left of
+	 * or above (0,0) for now. */
+	if (x<0) xMove = x;
+	if (y<0) yMove = y;
+	glRasterPos2f(x-xMove, y-yMove);
+	if (xMove || yMove) glBitmap (0, 0, 0, 0, xMove, yMove, NULL);
 	for (int i = 0; i < txt.Len(); i++)
 		glutBitmapCharacter(font, txt[i]);
 }
