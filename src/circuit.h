@@ -39,9 +39,9 @@ public:
 	// Simulate the logic circuit, optionally clearing monitors beforehand
 	bool Simulate(int ncycles, bool resetBefore=true);
 
-	ObserverSubject monitorsChanged;// change to which signals are being monitored
+	ObserverSubject monitorsChanged;// addition or removal of monitors
 	ObserverSubject circuitChanged;// changes to devices, device properties, and connections
-	ObserverSubject monitorSamplesChanged;// simulation has been run or continued or monitor samples have been cleared
+	ObserverSubject monitorSamplesChanged;// simulation has been run or continued, or monitor samples have been cleared
 
 	names* nmz(){ return names_mod; }
 	devices* dmz(){ return devices_mod; }

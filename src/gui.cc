@@ -280,7 +280,8 @@ MyGLCanvas::~MyGLCanvas()
 {
 	if (c)
 	{
-		;
+		c->monitorsChanged.Detach(this);
+		c->monitorSamplesChanged.Detach(this);
 	}
 }
 
