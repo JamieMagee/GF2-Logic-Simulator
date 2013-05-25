@@ -46,14 +46,14 @@ void wxRect_GlVertex(const wxRect& r)
 
 // GLCanvasMonitorTrace - class to handle drawing of one monitor trace
 GLCanvasMonitorTrace::GLCanvasMonitorTrace() :
-	monId(-1), mmz(NULL), monName(wxT("")), monNameWidth(0), geometrySet(false)
+	monId(-1), c(NULL), monName(wxT("")), monNameWidth(0), geometrySet(false)
 {}
 
-GLCanvasMonitorTrace::GLCanvasMonitorTrace(int newMonId, monitor *monitor_mod) :
+GLCanvasMonitorTrace::GLCanvasMonitorTrace(int newMonId, circuit* circ) :
 	geometrySet(false)
 {
+	c = circ;
 	SetMonitorId(newMonId);
-	SetModules(monitor_mod);
 }
 
 int GLCanvasMonitorTrace::GetMonitorId()
@@ -67,13 +67,7 @@ void GLCanvasMonitorTrace::SetMonitorId(int newMonId)
 	UpdateName();
 }
 
-void GLCanvasMonitorTrace::SetModules(monitor *monitor_mod)
-{
-	mmz = monitor_mod;
-	UpdateName();
-}
-
-void GLCanvasMonitorTrace::SimulationRun(int totalCycles_new, int continuedCycles_new)
+void GLCanvasMonitorTrace::OnMonitorSamplesChanged(int totalCycles_new, int continuedCycles_new)
 {
 	totalCycles = totalCycles_new;
 	continuedCycles = continuedCycles_new;
@@ -81,13 +75,13 @@ void GLCanvasMonitorTrace::SimulationRun(int totalCycles_new, int continuedCycle
 
 void GLCanvasMonitorTrace::UpdateName()
 {
-	if (!mmz)
+	if (!c)
 	{
 		monName = wxT("");
 		monNameWidth = 0;
 		return;
 	}
-	monName = wxString(mmz->getsignalstring(monId).c_str(), wxConvUTF8);
+	monName = wxString(c->mmz()->getsignalstring(monId).c_str(), wxConvUTF8);
 	monNameWidth = GetGlutTextWidth(monName, GLUT_BITMAP_HELVETICA_12);
 }
 
@@ -111,17 +105,26 @@ void GLCanvasMonitorTrace::SetGeometry(int xOffset_new, int yCentre_new, double 
 
 void GLCanvasMonitorTrace::Draw(MyGLCanvas *canvas, const wxRect& visibleRegion)
 {
-	if (!mmz || !canvas || monId<0 || monId>=mmz->moncount() || !geometrySet) return;
+	if (!c || !canvas || monId<0 || monId>=c->mmz()->moncount() || !geometrySet) return;
 
-	if (!mmz->getsamplecount(monId))
+	// If this monitor was added after the simulation was run, it might have no data even though c->GetTotalCycles() is greater than zero
+	int sampleCount = c->mmz()->getsamplecount(monId);
+	if (!sampleCount)
 	{
 		glColor4f(0.8, 0.0, 0.0, 1.0);
-		DrawGlutText(xOffset+10, yCentre-5, _("No data"), GLUT_BITMAP_HELVETICA_12);
+		if (xOffset < visibleRegion.x+xBgName)
+		{
+			DrawGlutText(xBgName, yCentre-5, _("No data"), GLUT_BITMAP_HELVETICA_12);
+		}
+		else
+		{
+			DrawGlutText(xOffset+10, yCentre-5, _("No data"), GLUT_BITMAP_HELVETICA_12);
+		}
 	}
-	if (totalCycles > mmz->getsamplecount(monId))
-		totalCycles = mmz->getsamplecount(monId);
-	if (continuedCycles > mmz->getsamplecount(monId))
-		continuedCycles = mmz->getsamplecount(monId);
+	if (totalCycles > sampleCount)
+		totalCycles = sampleCount;
+	if (continuedCycles > sampleCount)
+		continuedCycles = sampleCount;
 
 	wxRect backgroundRegion(xOffset, yCentre-sigHeight/2-padding, ceil(xScale*totalCycles), sigHeight+padding*2);
 	wxRect traceRegion = wxRect(xOffset, yCentre-sigHeight/2-padding-11, ceil(xScale*totalCycles), sigHeight+padding*2+11).Intersect(visibleRegion);// includes cycle numbers on the axis
@@ -183,7 +186,7 @@ void GLCanvasMonitorTrace::Draw(MyGLCanvas *canvas, const wxRect& visibleRegion)
 	int prevY = yCentre;
 	for (i=firstCycle; i<cycleLimit; i++)
 	{
-		if (mmz->getsignaltrace(monId, i, s))
+		if (c->mmz()->getsignaltrace(monId, i, s))
 		{
 			if (s==low || s==rising)
 				y1 = yCentre-sigHeight/2;
@@ -232,7 +235,7 @@ void GLCanvasMonitorTrace::Draw(MyGLCanvas *canvas, const wxRect& visibleRegion)
 void GLCanvasMonitorTrace::DrawName(MyGLCanvas *canvas, const wxRect& visibleRegion)
 {
 	if (!geometrySet) return;
-	if (xOffset < visibleRegion.x+xBgName)
+	if (xOffset < visibleRegion.x+xBgName && c->mmz()->getsamplecount(monId))
 	{
 		glColor4f(0.0, 0.0, 0.0, 0.4);
 		DrawGlutText(xBgName, yCentre-5, monName, GLUT_BITMAP_HELVETICA_12);
@@ -254,18 +257,31 @@ END_EVENT_TABLE()
   
 int wxglcanvas_attrib_list[5] = {WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16, 0};
 
-MyGLCanvas::MyGLCanvas(wxWindow *parent, wxWindowID id, monitor* monitor_mod,
+MyGLCanvas::MyGLCanvas(circuit* circ, wxWindow *parent, wxWindowID id,
 	const wxPoint& pos, const wxSize& size, long style, const wxString& name):
     wxGLCanvas(parent, id, pos, size, style, name, wxglcanvas_attrib_list),
 	wxScrollHelperNative(this), scrollX(0), scrollY(0)
   // Constructor - initialises private variables
 {
 	init = false;
-	continuedCycles = totalCycles = 0;
-	SetModules(monitor_mod);
+	c = circ;
+	if (c)
+	{
+		c->monitorsChanged.Attach(this, &MyGLCanvas::OnMonitorsChanged);
+		c->monitorSamplesChanged.Attach(this, &MyGLCanvas::OnMonitorSamplesChanged);
+		OnMonitorsChanged();
+	}
 	SetScrollRate(10,10);
 	minXScale = 2;
 	maxXScale = 50;
+}
+
+MyGLCanvas::~MyGLCanvas()
+{
+	if (c)
+	{
+		;
+	}
 }
 
 void MyGLCanvas::ScrollWindow(int dx, int dy, const wxRect *rect)
@@ -278,6 +294,7 @@ void MyGLCanvas::ScrollWindow(int dx, int dy, const wxRect *rect)
 
 void MyGLCanvas::UpdateMinCanvasSize()
 {
+	int totalCycles = c->GetTotalCycles();
 	// Make sure all the traces fit in the canvas
 	int xOffset = maxMonNameWidth+5;
 	int maxXTextWidth = ceil(log10(totalCycles))*8;// estimate of max x axis scale text width
@@ -285,41 +302,36 @@ void MyGLCanvas::UpdateMinCanvasSize()
 }
 
 // Notify of a change to the number of displayed cycles
-void MyGLCanvas::SimulationRun(int totalCycles_new, int continuedCycles_new)
+void MyGLCanvas::OnMonitorSamplesChanged()
 {
-	totalCycles = totalCycles_new;
-	continuedCycles = continuedCycles_new;
+	int totalCycles = c->GetTotalCycles();
+	int continuedCycles = c->GetContinuedCycles();
 	for (int i=0; i<mons.size(); i++)
 	{
-		mons[i].SimulationRun(totalCycles, continuedCycles);
+		mons[i].OnMonitorSamplesChanged(totalCycles, continuedCycles);
 	}
-	Render();
 	UpdateMinCanvasSize();
 	// Scroll to the most recently simulated cycles
 	Scroll(GetVirtualSize().GetWidth()-GetClientSize().GetWidth(),-1);
+	Render();
 }
 
 // Notify of a change to the active monitors
-void MyGLCanvas::MonitorsChanged()
+void MyGLCanvas::OnMonitorsChanged()
 {
-	int monCount = mmz->moncount();
+	int monCount = c->mmz()->moncount();
 	mons.resize(monCount);
 	maxMonNameWidth = 0;
+	int totalCycles = c->GetTotalCycles();
+	int continuedCycles = c->GetContinuedCycles();
 	for (int i=0; i<monCount; i++)
 	{
-		mons[i].SetModules(mmz);
-		mons[i].SetMonitorId(i);
-		mons[i].SimulationRun(totalCycles, continuedCycles);
+		mons[i] = GLCanvasMonitorTrace(i, c);
+		mons[i].OnMonitorSamplesChanged(totalCycles, continuedCycles);
 		if (mons[i].GetNameWidth()>maxMonNameWidth)
 			maxMonNameWidth = mons[i].GetNameWidth();
 	}
 	UpdateMinCanvasSize();
-}
-
-void MyGLCanvas::SetModules(monitor* monitor_mod)
-{
-	mmz = monitor_mod;
-	MonitorsChanged();
 }
 
 // copied from wxScrolledWindow:
@@ -351,10 +363,11 @@ void MyGLCanvas::Render(wxString text)
 		init = true;
 	}
 	glClear(GL_COLOR_BUFFER_BIT);
-	if ((totalCycles > 0) && (mmz->moncount() > 0))
+	if (c->GetTotalCycles() > 0 && c->mmz()->moncount() > 0)
 	{
+		int totalCycles = c->GetTotalCycles();
 		// Scale traces (within limits) to fit the size of the canvas
-		int monCount = mmz->moncount();
+		int monCount = c->mmz()->moncount();
 		int canvasHeight = GetClientSize().GetHeight();
 		int canvasWidth = GetClientSize().GetWidth();
 		int spacing = (canvasHeight-10)/monCount;
@@ -362,7 +375,7 @@ void MyGLCanvas::Render(wxString text)
 		if (spacing<50) spacing = 50;
 		int height = 0.8*(spacing-14);
 		int xOffset = maxMonNameWidth+10;
-		double xScale = double(canvasWidth-xOffset-10)/totalCycles;
+		double xScale = double(canvasWidth-xOffset-10)/c->GetTotalCycles();
 		if (xScale<minXScale) xScale = minXScale;
 		if (xScale>50) xScale = 50;
 
@@ -394,7 +407,7 @@ void MyGLCanvas::Render(wxString text)
 			mons[i].DrawName(this, visibleRegion);
 		}
 	}
-	else if (mmz->moncount()==0)
+	else if (c->mmz()->moncount()==0)
 	{
 		glColor3f(0.5, 0.0, 0.0);
 		DrawGlutText(5, 10, wxT("No monitors"));
@@ -477,8 +490,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_BUTTON(SIMCTRL_BUTTON_CONT_ID, MyFrame::OnButtonContinue)
   EVT_BUTTON(MONITORS_ADD_BUTTON_ID, MyFrame::OnButtonAddMon)
   EVT_BUTTON(MONITORS_DEL_BUTTON_ID, MyFrame::OnButtonDelMon)
-  EVT_SPINCTRL(MY_SPINCNTRL_ID, MyFrame::OnSpin)
-  EVT_TEXT_ENTER(MY_TEXTCTRL_ID, MyFrame::OnText)
 END_EVENT_TABLE()
   
 MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, const wxSize& size,
@@ -489,17 +500,12 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 {
   SetIcon(wxIcon(wx_icon));
 
-  nmz = names_mod;
-  dmz = devices_mod;
-  mmz = monitor_mod;
-  netz = net_mod;
-  mods_allocated = false;
-  totalCycles = continuedCycles = 0;
-  if (nmz == NULL || dmz == NULL || mmz == NULL || netz == NULL) {
+  if (names_mod == NULL || devices_mod == NULL || monitor_mod == NULL || net_mod == NULL) {
     cout << "Cannot operate GUI without names, devices, network and monitor classes" << endl;
     exit(1);
   }
-
+	c = new circuit(names_mod, devices_mod, monitor_mod, net_mod);
+  
   wxMenu *fileMenu = new wxMenu;
   fileMenu->Append(wxID_OPEN);
   fileMenu->AppendSeparator();
@@ -512,7 +518,7 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	wxBoxSizer *topsizer = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer *leftsizer = new wxBoxSizer(wxVERTICAL);
 
-	canvas = new MyGLCanvas(this, wxID_ANY, mmz, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+	canvas = new MyGLCanvas(c, this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
 	leftsizer->Add(canvas, 3, wxEXPAND | wxALL, 10);
 
 	// Create the log textbox, mainly for displaying error messages from the parser, captures everything sent to cout
@@ -551,7 +557,7 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	edit_sizer->Add(new wxButton(this, MONITORS_DEL_BUTTON_ID, _("Remove monitors")), 0, (wxALL & ~wxTOP) | wxEXPAND, 10);
 
 	wxStaticBoxSizer *switches_sizer = new wxStaticBoxSizer(wxVERTICAL, this, _("Switches"));
-	switchesCtrl = new SwitchesCheckListBox(this, SWITCHES_CTRL_ID, wxDefaultPosition, wxDefaultSize, nmz, dmz, netz, wxLB_NEEDED_SB);
+	switchesCtrl = new SwitchesCheckListBox(c, this, SWITCHES_CTRL_ID, wxDefaultPosition, wxDefaultSize, wxLB_NEEDED_SB);
 	switches_sizer->Add(switchesCtrl, 1, wxEXPAND | wxALL, 10);
 
 
@@ -592,28 +598,6 @@ void MyFrame::OnOpenFile(wxCommandEvent &event)
 	loadFile(openFileDialog.GetPath().mb_str());
 }
 
-void MyFrame::clearCircuit()
-{
-	if (mods_allocated)// Whether the current nmz,netz,dmz,mmz were allocated by this class instead of being passed in the constructor
-	{
-		// destroy the old circuit modules in reverse order of creation
-		delete mmz;
-		delete dmz;
-		delete netz;
-		delete nmz;
-	}
-	// create new circuit modules
-	nmz = new names();
-	netz = new network(nmz);
-	dmz = new devices(nmz, netz);
-	mmz = new monitor(nmz, netz);
-	mods_allocated = true;
-	canvas->SetModules(mmz);
-	totalCycles = continuedCycles = 0;
-	canvas->SimulationRun(totalCycles, continuedCycles);
-	switchesCtrl->SetModules(nmz, dmz, netz);
-}
-
 bool MyFrame::loadFile(const char * filename)
 // load a file (can be called by menu File->Open or for the command line argument)
 {
@@ -621,57 +605,61 @@ bool MyFrame::loadFile(const char * filename)
 	outputTextCtrl->ChangeValue(wxT(""));
 	cout << "Loading file " << filename << endl;
 
-	clearCircuit();
-	scanner *smz = new scanner(nmz, filename);
-	parser *pmz = new parser(netz, dmz, mmz, smz);
+	c->Clear();
+
+	scanner *smz = new scanner(c->nmz(), filename);
+	parser *pmz = new parser(c->netz(), c->dmz(), c->mmz(), smz);
 	bool result = pmz->readin();
+
+	if (result)
+	{
+		c->netz()->checknetwork(result);
+	}
 
 	//TODO: maybe display a messagebox here or disable a few UI controls (like the Run button) if reading failed
 	if (!result)
 		cout << "Failed to load file" << endl;
 
-	canvas->MonitorsChanged();
-	switchesCtrl->DevicesChanged();
+	c->circuitChanged.Trigger();
+	c->monitorsChanged.Trigger();
+	c->monitorSamplesChanged.Trigger();
 
 	if (!result)
 	{
 		// scroll to the start of the output so that the first error message (which may have caused any subsequent error messages) is visible
 		outputTextCtrl->ShowPosition(0);
 	}
+	
+	delete pmz;
+	delete smz;
+
 	return result;
 }
 
 void MyFrame::OnButtonRun(wxCommandEvent &event)
   // Callback for the run simulation button
 {
-	int n, ncycles;
-	totalCycles = 0;
-	mmz->resetmonitor();
-	runnetwork(spin->GetValue());
-	canvas->SimulationRun(totalCycles, continuedCycles);
+	c->Simulate(spin->GetValue(),true);
 	simctrl_continue->Enable();
 }
 
 void MyFrame::OnButtonContinue(wxCommandEvent &event)
   // Callback for the continue simulation button
 {
-	int n, ncycles;
-	runnetwork(spin->GetValue());
-	canvas->SimulationRun(totalCycles, continuedCycles);
+	c->Simulate(spin->GetValue(),false);
 }
 
 void MyFrame::OnButtonAddMon(wxCommandEvent& event)// "Add monitors" button clicked
 {
-	int oldMonCount = mmz->moncount();
-	AddMonitorsDialog *dlg = new AddMonitorsDialog(this, _("Add monitors"), wxDefaultPosition, wxDefaultSize, nmz, dmz, mmz, netz, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
-	if (dlg->ShowModal()==wxID_OK && oldMonCount!=mmz->moncount())
+	int oldMonCount = c->mmz()->moncount();
+	AddMonitorsDialog *dlg = new AddMonitorsDialog(c, this, _("Add monitors"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
+	if (dlg->ShowModal()==wxID_OK && oldMonCount!=c->mmz()->moncount())
 	{
-		canvas->MonitorsChanged();
-		if (totalCycles)
+		if (c->GetTotalCycles())// if there are samples stored in the monitors
 		{
 			// Disable the continue button, since if the simulation is continued the displayed sample times for the new monitors will be incorrect
 			simctrl_continue->Disable();
-			cout << wxString(wxPLURAL("Monitor added, run simulation again to see updated signals", "Monitors added, run simulation again to see updated signals", mmz->moncount()-oldMonCount)).mb_str() << endl;
+			cout << wxString(wxPLURAL("Monitor added, run simulation again to see updated signals", "Monitors added, run simulation again to see updated signals", c->mmz()->moncount()-oldMonCount)).mb_str() << endl;
 		}
 	}
 	dlg->Destroy();
@@ -679,59 +667,10 @@ void MyFrame::OnButtonAddMon(wxCommandEvent& event)// "Add monitors" button clic
 
 void MyFrame::OnButtonDelMon(wxCommandEvent& event)// "Remove monitors" button clicked
 {
-	DelMonitorsDialog *dlg = new DelMonitorsDialog(this, _("Remove monitors"), wxDefaultPosition, wxDefaultSize, mmz, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
-	if (dlg->ShowModal()==wxID_OK)
-	{
-		canvas->MonitorsChanged();
-	}
+	DelMonitorsDialog *dlg = new DelMonitorsDialog(c, this, _("Remove monitors"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
+	dlg->ShowModal();
 	dlg->Destroy();
 }
-
-void MyFrame::OnSpin(wxSpinEvent &event)
-  // Callback for the spin control
-{
-  wxString text;
-
-  text.Printf(wxT("New spinctrl value %d"), event.GetPosition());
-  canvas->Render(text);
-}
-
-void MyFrame::OnText(wxCommandEvent &event)
-  // Callback for the text entry field
-{
-  wxString text;
-
-  text.Printf(wxT("New text entered %s"), event.GetString().c_str());
-  canvas->Render(text);
-}
-
-void MyFrame::runnetwork(int ncycles)
-  // Function to run the network
-{
-	bool ok = true;
-	int n = ncycles;
-	continuedCycles = 0;
-
-	while ((n > 0) && ok)
-	{
-		dmz->executedevices (ok);
-		if (ok)
-		{
-			n--;
-			totalCycles++;
-			continuedCycles++;
-			mmz->recordsignals();
-		}
-		else
-		{
-			cout << "Error: network is oscillating" << endl;
-		}
-	}
-	/*if (ok) totalCycles = totalCycles + ncycles;
-	else totalCycles = 0;*/
-}
-
-
 
 
 bool outputinfo_namestrcmp(const outputinfo a, const outputinfo b)
@@ -739,18 +678,17 @@ bool outputinfo_namestrcmp(const outputinfo a, const outputinfo b)
 	return (a.namestr<b.namestr);
 }
 
-AddMonitorsDialog::AddMonitorsDialog(wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, names *names_mod, devices *devices_mod, monitor *monitor_mod, network *net_mod, long style):
+AddMonitorsDialog::AddMonitorsDialog(circuit* circ, wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
 	wxDialog(parent, wxID_ANY, title, pos, size, style)
 {
 	SetIcon(wxIcon(wx_icon));
 
-	nmz = names_mod;
-	dmz = devices_mod;
-	mmz = monitor_mod;
-	netz = net_mod;
+	c = circ;
+	monitor* mmz = c->mmz();
 
 	int monCount = mmz->moncount();
-	devlink d = netz->devicelist();
+	oldMonCount = monCount;
+	devlink d = c->netz()->devicelist();
 	while (d!=NULL)
 	{
 		outplink o = d->olist;
@@ -772,7 +710,7 @@ AddMonitorsDialog::AddMonitorsDialog(wxWindow* parent, const wxString& title, co
 				outputinfo outinf;
 				outinf.devname = d->id;
 				outinf.outpname = o->id;
-				outinf.namestr = netz->getsignalstring(d->id, o->id);
+				outinf.namestr = c->netz()->getsignalstring(d->id, o->id);
 				availableOutputs.push_back(outinf);
 			}
 			o = o->next;
@@ -804,7 +742,11 @@ void AddMonitorsDialog::OnOK(wxCommandEvent& event)
 	bool ok;
 	for (int i=0; i<num; i++)
 	{
-		mmz->makemonitor(availableOutputs[selections[i]].devname, availableOutputs[selections[i]].outpname, ok);
+		c->mmz()->makemonitor(availableOutputs[selections[i]].devname, availableOutputs[selections[i]].outpname, ok);
+	}
+	if (c->mmz()->moncount() != oldMonCount)
+	{
+		c->monitorsChanged.Trigger();
 	}
 	EndModal(wxID_OK);
 }
@@ -814,19 +756,19 @@ BEGIN_EVENT_TABLE(AddMonitorsDialog, wxDialog)
 END_EVENT_TABLE()
 
 
-DelMonitorsDialog::DelMonitorsDialog(wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, monitor *monitor_mod, long style):
+DelMonitorsDialog::DelMonitorsDialog(circuit* circ, wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
 	wxDialog(parent, wxID_ANY, title, pos, size, style)
 {
 	SetIcon(wxIcon(wx_icon));
-	mmz = monitor_mod;
+	c = circ;
 
 	// Copy monitor names into a wxArrayString to pass to the listbox
-	int monCount = mmz->moncount();
+	int monCount = c->mmz()->moncount();
 	wxArrayString monitorList;
 	monitorList.Alloc(monCount);
 	for (int i=0; i<monCount; i++)
 	{
-		monitorList.Add(wxString(mmz->getsignalstring(i).c_str(), wxConvUTF8));
+		monitorList.Add(wxString(c->mmz()->getsignalstring(i).c_str(), wxConvUTF8));
 	}
 
 	// Create controls
@@ -843,6 +785,7 @@ void DelMonitorsDialog::OnOK(wxCommandEvent& event)
 	wxArrayInt selections;
 	lbox->GetSelections(selections);
 	bool ok;
+	monitor* mmz = c->mmz();
 	name dev, outp;
 	// Remove selected monitors
 	// Note loop direction - remmonitor deletes an entry and shifts monitors into the space, changing the IDs of later monitors. Therefore remove monitors with a higher ID (towards the end of the listbox) first.
@@ -851,6 +794,9 @@ void DelMonitorsDialog::OnOK(wxCommandEvent& event)
 		mmz->getmonname(selections[i], dev, outp);
 		mmz->remmonitor(dev, outp, ok);
 	}
+	if (selections.GetCount())
+		c->monitorsChanged.Trigger();
+
 	EndModal(wxID_OK);
 }
 
@@ -859,34 +805,41 @@ BEGIN_EVENT_TABLE(DelMonitorsDialog, wxDialog)
 END_EVENT_TABLE()
 
 
-SwitchesCheckListBox::SwitchesCheckListBox(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, names *names_mod, devices *devices_mod, network *network_mod, long style)
+SwitchesCheckListBox::SwitchesCheckListBox(circuit* circ, wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style)
 	: wxCheckListBox(parent, id, pos, size, 0, NULL, style & ~wxLB_SORT)
 {
-	SetModules(names_mod, devices_mod, network_mod);
+	c = circ;
+	if (c)
+	{
+		c->circuitChanged.Attach(this, &SwitchesCheckListBox::OnCircuitChanged);
+	}
+	OnCircuitChanged();
 }
 
-void SwitchesCheckListBox::SetModules(names *names_mod, devices *devices_mod, network *network_mod)
+SwitchesCheckListBox::~SwitchesCheckListBox()
 {
-	nmz = names_mod;
-	dmz = devices_mod;
-	netz = network_mod;
-	DevicesChanged();
+	if (c)
+	{
+		c->circuitChanged.Detach(this);
+	}
 }
 
-void SwitchesCheckListBox::DevicesChanged()
+void SwitchesCheckListBox::OnCircuitChanged()
 {
+	if (!c) return;
+
 	wxArrayString switchNames;
-	devlink d = netz->devicelist();
+	devlink d = c->netz()->devicelist();
 	while (d!=NULL)
 	{
 		if (d->kind == aswitch)
 		{
-			switchNames.Add(wxString(nmz->getnamestring(d->id).c_str(), wxConvUTF8));
+			switchNames.Add(wxString(c->nmz()->getnamestring(d->id).c_str(), wxConvUTF8));
 		}
 		d = d->next;
 	}
 	Set(switchNames);
-	d = netz->devicelist();
+	d = c->netz()->devicelist();
 	int i = 0;
 	while (d!=NULL)
 	{
@@ -901,9 +854,11 @@ void SwitchesCheckListBox::DevicesChanged()
 
 void SwitchesCheckListBox::OnSwitchChanged(wxCommandEvent& event)
 {
+	if (!c) return;
+
 	int changedI = event.GetInt();
 	int i = 0;
-	devlink targetD = NULL, d = netz->devicelist();
+	devlink targetD = NULL, d = c->netz()->devicelist();
 	while (d!=NULL)
 	{
 		if (d->kind == aswitch)
@@ -924,6 +879,8 @@ void SwitchesCheckListBox::OnSwitchChanged(wxCommandEvent& event)
 		targetD->swstate = high;
 	else
 		targetD->swstate = low;
+
+	c->circuitChanged.Trigger();
 }
 
 BEGIN_EVENT_TABLE(SwitchesCheckListBox, wxCheckListBox)

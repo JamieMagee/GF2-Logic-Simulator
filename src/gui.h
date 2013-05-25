@@ -12,6 +12,7 @@
 #include "devices.h"
 #include "monitor.h"
 #include "network.h"
+#include "circuit.h"
 #include <vector>
 #include <string>
 
@@ -41,13 +42,12 @@ class GLCanvasMonitorTrace
 {
 public:
 	GLCanvasMonitorTrace();
-	GLCanvasMonitorTrace(int newMonId, monitor *monitor_mod);
-	void SetModules(monitor *monitor_mod);
+	GLCanvasMonitorTrace(int newMonId, circuit* c);
 	// Get or set the monitor id (the "n" in "n'th monitor" in monitor class calls, also determines position)
 	int GetMonitorId();
 	void SetMonitorId(int newMonId);
 	// Notify of a change in the number of displayed cycles
-	void SimulationRun(int totalCycles_new, int continuedCycles_new);
+	void OnMonitorSamplesChanged(int totalCycles_new, int continuedCycles_new);
 	// Draw the signal trace, visible coordinates are used so that time is not wasted in drawing areas hidden due to scrolling.
 	void Draw(MyGLCanvas *canvas, const wxRect& visibleRegion);
 	void DrawName(MyGLCanvas *canvas, const wxRect& visibleRegion);
@@ -64,7 +64,7 @@ public:
 	void SetGeometry(int xOffset_new, int yCentre_new, double xScale_new, int sigHeight_new, int padding_new, int spacing_new, int xBgName_new, int axisLabelInterval_new);
 private:
 	int monId;
-	monitor *mmz;// pointer to monitor class, used to extract signal traces and names
+	circuit* c;
 	wxString monName;// cached monitor name, to avoid constructing it again every time the signal is drawn
 	int monNameWidth;// width in pixels of monitor name
 	bool geometrySet;// whether SetGeometry() has been called
@@ -94,17 +94,8 @@ class MyFrame: public wxFrame
   wxStreamToTextRedirector *outputTextRedirect;
   SwitchesCheckListBox *switchesCtrl;
   wxButton *simctrl_continue;
-  names *nmz;                             // pointer to names class
-  devices *dmz;                           // pointer to devices class
-  monitor *mmz;                           // pointer to monitor class
-  network *netz;                          // pointer to network class
-  bool mods_allocated;// true if nmz,dmz,mmz,netz were allocated by this class, false if they are currently the values passed to the constructor
-  int continuedCycles;// how many simulation cycles were completed last time the run or continue button was used
-  int totalCycles;// how many simulation cycles have been completed
+	circuit* c;
 
-  void clearCircuit();// clear all devices, connections, and monitors
-
-  void runnetwork(int ncycles);           // function to run the logic network
   void OnExit(wxCommandEvent& event);     // callback for exit menu item
   void OnAbout(wxCommandEvent& event);    // callback for about menu item
   void OnOpenFile(wxCommandEvent& event); // callback for open file menu item
@@ -112,25 +103,22 @@ class MyFrame: public wxFrame
   void OnButtonContinue(wxCommandEvent& event);
 	void OnButtonAddMon(wxCommandEvent& event);
 	void OnButtonDelMon(wxCommandEvent& event);
-  void OnSpin(wxSpinEvent& event);        // callback for spin control
-  void OnText(wxCommandEvent& event);     // callback for text entry field
+ 
   DECLARE_EVENT_TABLE()
 };
     
 class MyGLCanvas: public wxGLCanvas, public wxScrollHelperNative
 {
  public:
-  MyGLCanvas(wxWindow *parent, wxWindowID id = wxID_ANY, monitor* monitor_mod = NULL, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = 0, const wxString& name = wxT("MyGLCanvas"));
+  MyGLCanvas(circuit* circ, wxWindow *parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = 0, const wxString& name = wxT("MyGLCanvas"));
+  ~MyGLCanvas();
   void Render(wxString text=wxT("")); // function to draw canvas contents
-  void SimulationRun(int totalCycles_new, int continuedCycles_new);
-  void MonitorsChanged();
+  void OnMonitorSamplesChanged();
+  void OnMonitorsChanged();
   void UpdateMinCanvasSize();
-	void SetModules(monitor* monitor_mod);
  private:
   bool init;                         // has the GL context been initialised?
-  int continuedCycles;// how many simulation cycles were completed last time the run or continue button was used
-  int totalCycles;// how many simulation cycles have been completed
-  monitor *mmz;
+  circuit* c;
   int maxMonNameWidth;
   vector<GLCanvasMonitorTrace> mons;
   void InitGL();                     // function to initialise GL context
@@ -166,12 +154,10 @@ struct outputinfo
 class AddMonitorsDialog: public wxDialog
 {
 public:
-	AddMonitorsDialog(wxWindow* parent, const wxString& title, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, names *names_mod = NULL, devices *devices_mod = NULL, monitor *monitor_mod = NULL, network *net_mod = NULL, long style = wxDEFAULT_DIALOG_STYLE);
+	AddMonitorsDialog(circuit* circ, wxWindow* parent, const wxString& title, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE);
 private:
-	names *nmz;
-	devices *dmz;
-	monitor *mmz;
-	network *netz;
+	circuit* c;
+	int oldMonCount;
 	vector<outputinfo> availableOutputs;
 	wxListBox *lbox;
 	void OnOK(wxCommandEvent& event);
@@ -181,9 +167,9 @@ private:
 class DelMonitorsDialog: public wxDialog
 {
 public:
-	DelMonitorsDialog(wxWindow* parent, const wxString& title, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, monitor *monitor_mod = NULL, long style = wxDEFAULT_DIALOG_STYLE);
+	DelMonitorsDialog(circuit* circ, wxWindow* parent, const wxString& title, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE);
 private:
-	monitor *mmz;
+	circuit* c;
 	wxListBox *lbox;
 	void OnOK(wxCommandEvent& event);
 	DECLARE_EVENT_TABLE()
@@ -192,13 +178,11 @@ private:
 class SwitchesCheckListBox: public wxCheckListBox
 {
 public:
-	SwitchesCheckListBox(wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, names *names_mod = NULL, devices *devices_mod = NULL, network *network_mod = NULL, long style = 0);
-	void SetModules(names *names_mod, devices *devices_mod, network *network_mod);
-	void DevicesChanged();
+	SwitchesCheckListBox(circuit* circ, wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = 0);
+	~SwitchesCheckListBox();
+	void OnCircuitChanged();
 private:
-	names *nmz;
-	devices *dmz;
-	network *netz;
+	circuit* c;
 	void OnSwitchChanged(wxCommandEvent& event);
 	DECLARE_EVENT_TABLE()
 };
