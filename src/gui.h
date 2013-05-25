@@ -94,6 +94,7 @@ class MyFrame: public wxFrame
   devices *dmz;                           // pointer to devices class
   monitor *mmz;                           // pointer to monitor class
   network *netz;                          // pointer to network class
+  bool mods_allocated;// true if nmz,dmz,mmz,netz were allocated by this class, false if they are currently the values passed to the constructor
   int continuedCycles;// how many simulation cycles were completed last time the run or continue button was used
   int totalCycles;// how many simulation cycles have been completed
 

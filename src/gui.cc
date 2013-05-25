@@ -493,6 +493,7 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
   dmz = devices_mod;
   mmz = monitor_mod;
   netz = net_mod;
+  mods_allocated = false;
   totalCycles = continuedCycles = 0;
   if (nmz == NULL || dmz == NULL || mmz == NULL || netz == NULL) {
     cout << "Cannot operate GUI without names, devices, network and monitor classes" << endl;
@@ -591,7 +592,23 @@ void MyFrame::OnOpenFile(wxCommandEvent &event)
 
 void MyFrame::clearCircuit()
 {
-	//TODO
+	if (mods_allocated)// Whether the current nmz,netz,dmz,mmz were allocated by this class instead of being passed in the constructor
+	{
+		// destroy the old circuit modules in reverse order of creation
+		delete mmz;
+		delete dmz;
+		delete netz;
+		delete nmz;
+	}
+	// create new circuit modules
+	nmz = new names();
+	netz = new network(nmz);
+	dmz = new devices(nmz, netz);
+	mmz = new monitor(nmz, netz);
+	mods_allocated = true;
+	canvas->SetModules(mmz);
+	totalCycles = continuedCycles = 0;
+	canvas->SimulationRun(totalCycles, continuedCycles);
 }
 
 bool MyFrame::loadFile(const char * filename)
