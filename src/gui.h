@@ -6,6 +6,7 @@
 #include <wx/spinctrl.h>
 #include <wx/textctrl.h>
 #include <wx/listbox.h>
+#include <wx/checklst.h>
 #include <wx/scrolwin.h>
 #include "names.h"
 #include "devices.h"
@@ -24,13 +25,15 @@ enum {
   SIMCTRL_BUTTON_RUN_ID,
   SIMCTRL_BUTTON_CONT_ID,
   MONITORS_ADD_BUTTON_ID,
-  MONITORS_DEL_BUTTON_ID
+  MONITORS_DEL_BUTTON_ID,
+  SWITCHES_CTRL_ID
 }; // widget identifiers
 
 int GetGlutTextWidth(wxString txt, void *font=NULL);
 void DrawGlutText(int x, int y, wxString txt, void *font=NULL);
 
 class MyGLCanvas;
+class SwitchesCheckListBox;
 
 void wxRect_GlVertex(const wxRect& r);
 
@@ -89,6 +92,7 @@ class MyFrame: public wxFrame
   wxSpinCtrl *spin;                       // control widget to select the number of cycles
   wxTextCtrl *outputTextCtrl;             // textbox to display messages sent to cout (e.g. error messages from scanner and parser)
   wxStreamToTextRedirector *outputTextRedirect;
+  SwitchesCheckListBox *switchesCtrl;
   wxButton *simctrl_continue;
   names *nmz;                             // pointer to names class
   devices *dmz;                           // pointer to devices class
@@ -182,6 +186,20 @@ private:
 	monitor *mmz;
 	wxListBox *lbox;
 	void OnOK(wxCommandEvent& event);
+	DECLARE_EVENT_TABLE()
+};
+
+class SwitchesCheckListBox: public wxCheckListBox
+{
+public:
+	SwitchesCheckListBox(wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, names *names_mod = NULL, devices *devices_mod = NULL, network *network_mod = NULL, long style = 0);
+	void SetModules(names *names_mod, devices *devices_mod, network *network_mod);
+	void DevicesChanged();
+private:
+	names *nmz;
+	devices *dmz;
+	network *netz;
+	void OnSwitchChanged(wxCommandEvent& event);
 	DECLARE_EVENT_TABLE()
 };
 

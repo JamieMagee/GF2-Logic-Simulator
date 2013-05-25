@@ -539,7 +539,7 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	simctrl_continue = new wxButton(this, SIMCTRL_BUTTON_CONT_ID, _("Continue"));
 	simctrls_button_sizer->Add(simctrl_continue, 0, wxALL, 10);
 	simctrls_cycles_sizer->Add(new wxStaticText(this, wxID_ANY, _("Cycles")), 0, wxALL|wxALIGN_CENTER_VERTICAL, 10);
-	spin = new wxSpinCtrl(this, MY_SPINCNTRL_ID, wxString(wxT("31")));
+	spin = new wxSpinCtrl(this, MY_SPINCNTRL_ID, wxString(wxT("42")));
 	spin->SetRange(1,1000000);
 	simctrls_cycles_sizer->Add(spin, 0, wxALL, 10);
 
@@ -551,6 +551,8 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	edit_sizer->Add(new wxButton(this, MONITORS_DEL_BUTTON_ID, _("Remove monitors")), 0, (wxALL & ~wxTOP) | wxEXPAND, 10);
 
 	wxStaticBoxSizer *switches_sizer = new wxStaticBoxSizer(wxVERTICAL, this, _("Switches"));
+	switchesCtrl = new SwitchesCheckListBox(this, SWITCHES_CTRL_ID, wxDefaultPosition, wxDefaultSize, nmz, dmz, netz, wxLB_NEEDED_SB);
+	switches_sizer->Add(switchesCtrl, 1, wxEXPAND | wxALL, 10);
 
 
 	sidesizer->Add(simctrls_sizer, 0, wxALL, 10);
@@ -609,6 +611,7 @@ void MyFrame::clearCircuit()
 	canvas->SetModules(mmz);
 	totalCycles = continuedCycles = 0;
 	canvas->SimulationRun(totalCycles, continuedCycles);
+	switchesCtrl->SetModules(nmz, dmz, netz);
 }
 
 bool MyFrame::loadFile(const char * filename)
@@ -628,6 +631,7 @@ bool MyFrame::loadFile(const char * filename)
 		cout << "Failed to load file" << endl;
 
 	canvas->MonitorsChanged();
+	switchesCtrl->DevicesChanged();
 
 	if (!result)
 	{
@@ -807,8 +811,7 @@ void AddMonitorsDialog::OnOK(wxCommandEvent& event)
 
 BEGIN_EVENT_TABLE(AddMonitorsDialog, wxDialog)
 	EVT_BUTTON(wxID_OK, AddMonitorsDialog::OnOK)
-END_EVENT_TABLE();
-
+END_EVENT_TABLE()
 
 
 DelMonitorsDialog::DelMonitorsDialog(wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, monitor *monitor_mod, long style):
@@ -853,4 +856,76 @@ void DelMonitorsDialog::OnOK(wxCommandEvent& event)
 
 BEGIN_EVENT_TABLE(DelMonitorsDialog, wxDialog)
 	EVT_BUTTON(wxID_OK, DelMonitorsDialog::OnOK)
+END_EVENT_TABLE()
+
+
+SwitchesCheckListBox::SwitchesCheckListBox(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, names *names_mod, devices *devices_mod, network *network_mod, long style)
+	: wxCheckListBox(parent, id, pos, size, 0, NULL, style & ~wxLB_SORT)
+{
+	SetModules(names_mod, devices_mod, network_mod);
+}
+
+void SwitchesCheckListBox::SetModules(names *names_mod, devices *devices_mod, network *network_mod)
+{
+	nmz = names_mod;
+	dmz = devices_mod;
+	netz = network_mod;
+	DevicesChanged();
+}
+
+void SwitchesCheckListBox::DevicesChanged()
+{
+	wxArrayString switchNames;
+	devlink d = netz->devicelist();
+	while (d!=NULL)
+	{
+		if (d->kind == aswitch)
+		{
+			switchNames.Add(wxString(nmz->getnamestring(d->id).c_str(), wxConvUTF8));
+		}
+		d = d->next;
+	}
+	Set(switchNames);
+	d = netz->devicelist();
+	int i = 0;
+	while (d!=NULL)
+	{
+		if (d->kind == aswitch)
+		{
+			Check(i, d->swstate==high);
+			i++;
+		}
+		d = d->next;
+	}
+}
+
+void SwitchesCheckListBox::OnSwitchChanged(wxCommandEvent& event)
+{
+	int changedI = event.GetInt();
+	int i = 0;
+	devlink targetD = NULL, d = netz->devicelist();
+	while (d!=NULL)
+	{
+		if (d->kind == aswitch)
+		{
+			if (i==changedI)
+				targetD = d;
+			i++;
+		}
+		d = d->next;
+	}
+	if (targetD==NULL)
+	{
+		wxMessageDialog dlg(this, _("Tried to change unknown switch"), _("Error"), wxCANCEL | wxICON_ERROR);
+		dlg.ShowModal();
+		return;
+	}
+	if (IsChecked(changedI))
+		targetD->swstate = high;
+	else
+		targetD->swstate = low;
+}
+
+BEGIN_EVENT_TABLE(SwitchesCheckListBox, wxCheckListBox)
+	EVT_CHECKLISTBOX(wxID_ANY, SwitchesCheckListBox::OnSwitchChanged)
 END_EVENT_TABLE()
