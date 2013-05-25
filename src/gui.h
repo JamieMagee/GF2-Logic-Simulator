@@ -158,13 +158,23 @@ class AddMonitorsDialog: public wxDialog
 {
 public:
 	AddMonitorsDialog(wxWindow* parent, const wxString& title, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, names *names_mod = NULL, devices *devices_mod = NULL, monitor *monitor_mod = NULL, network *net_mod = NULL, long style = wxDEFAULT_DIALOG_STYLE);
-	virtual ~AddMonitorsDialog() {}
 private:
 	names *nmz;
 	devices *dmz;
 	monitor *mmz;
 	network *netz;
 	vector<outputinfo> availableOutputs;
+	wxListBox *lbox;
+	void OnOK(wxCommandEvent& event);
+	DECLARE_EVENT_TABLE()
+};
+
+class DelMonitorsDialog: public wxDialog
+{
+public:
+	DelMonitorsDialog(wxWindow* parent, const wxString& title, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, monitor *monitor_mod = NULL, long style = wxDEFAULT_DIALOG_STYLE);
+private:
+	monitor *mmz;
 	wxListBox *lbox;
 	void OnOK(wxCommandEvent& event);
 	DECLARE_EVENT_TABLE()

@@ -46,6 +46,7 @@ void monitor::remmonitor (name dev, name outp, bool& ok)
 		{
 			found = true;
 			mtab.erase(it);
+			break;
 		}
 	}
 	ok = found;
@@ -192,8 +193,12 @@ monitor::monitor (names* names_mod, network* network_mod)
   netz = network_mod;
 }
 
-
-
+// Returns the name of the monitored signal as a string
+string monitor::getsignalstring(int m)
+{
+	if (m<0 || m>=moncount()) return "";
+	return netz->getsignalstring(mtab[m].devid, mtab[m].op->id);
+}
 
 
 

@@ -82,23 +82,13 @@ void GLCanvasMonitorTrace::SimulationRun(int totalCycles_new, int continuedCycle
 
 void GLCanvasMonitorTrace::UpdateName()
 {
-	if (monId<0 || !nmz || !mmz)
+	if (!nmz || !mmz)
 	{
 		monName = wxT("");
 		monNameWidth = 0;
 		return;
 	}
-	name dev, outp;
-	mmz->getmonname(monId, dev, outp);
-	if (dev==blankname)
-	{
-		monName = wxT("");
-		monNameWidth = 0;
-		return;
-	}
-	monName = wxString(nmz->getnamestring(dev).c_str(), wxConvUTF8);
-	if (outp!=blankname)
-		monName += wxT(".") + wxString(nmz->getnamestring(outp).c_str(), wxConvUTF8);
+	monName = wxString(mmz->getsignalstring(monId).c_str(), wxConvUTF8);
 	monNameWidth = GetGlutTextWidth(monName, GLUT_BITMAP_HELVETICA_12);
 }
 
@@ -648,15 +638,16 @@ void MyFrame::OnButtonContinue(wxCommandEvent &event)
 
 void MyFrame::OnButtonAddMon(wxCommandEvent& event)
 {
+	int oldMonCount = mmz->moncount();
 	AddMonitorsDialog *dlg = new AddMonitorsDialog(this, _("Add monitors"), wxDefaultPosition, wxDefaultSize, nmz, dmz, mmz, netz, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
-	if (dlg->ShowModal()==wxID_OK)
+	if (dlg->ShowModal()==wxID_OK && oldMonCount!=mmz->moncount())
 	{
 		canvas->MonitorsChanged();
 		if (totalCycles)
 		{
 			// Disable the continue button, since if the simulation is continued the displayed sample times for the new monitors will be incorrect
 			simctrl_continue->Disable();
-			cout << wxString(_("Monitor added, run simulation again to see updated signals")).mb_str() << endl;
+			cout << wxString(wxPLURAL("Monitor added, run simulation again to see updated signals", "Monitors added, run simulation again to see updated signals", mmz->moncount()-oldMonCount)).mb_str() << endl;
 		}
 	}
 	dlg->Destroy();
@@ -664,7 +655,12 @@ void MyFrame::OnButtonAddMon(wxCommandEvent& event)
 
 void MyFrame::OnButtonDelMon(wxCommandEvent& event)
 {
-	;
+	DelMonitorsDialog *dlg = new DelMonitorsDialog(this, _("Remove monitors"), wxDefaultPosition, wxDefaultSize, mmz, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
+	if (dlg->ShowModal()==wxID_OK)
+	{
+		canvas->MonitorsChanged();
+	}
+	dlg->Destroy();
 }
 
 void MyFrame::OnSpin(wxSpinEvent &event)
@@ -773,7 +769,6 @@ AddMonitorsDialog::AddMonitorsDialog(wxWindow* parent, const wxString& title, co
 	lbox = new wxListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, displayedOutputs, wxLB_EXTENDED | wxLB_NEEDED_SB);
 	topsizer->Add(lbox, 1, wxALL | wxEXPAND, 10);
 	topsizer->Add(CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxEXPAND, 10);
-	//SetSizeHints(400, 400);
 	SetSizerAndFit(topsizer);
 }
 
@@ -792,4 +787,50 @@ void AddMonitorsDialog::OnOK(wxCommandEvent& event)
 
 BEGIN_EVENT_TABLE(AddMonitorsDialog, wxDialog)
 	EVT_BUTTON(wxID_OK, AddMonitorsDialog::OnOK)
+END_EVENT_TABLE();
+
+
+
+DelMonitorsDialog::DelMonitorsDialog(wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, monitor *monitor_mod, long style):
+	wxDialog(parent, wxID_ANY, title, pos, size, style)
+{
+	SetIcon(wxIcon(wx_icon));
+	mmz = monitor_mod;
+
+	// Copy monitor names into a wxArrayString to pass to the listbox
+	int monCount = mmz->moncount();
+	wxArrayString monitorList;
+	monitorList.Alloc(monCount);
+	for (int i=0; i<monCount; i++)
+	{
+		monitorList.Add(wxString(mmz->getsignalstring(i).c_str(), wxConvUTF8));
+	}
+
+	// Create controls
+	wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
+	topsizer->Add(new wxStaticText(this, wxID_ANY, _("Select monitors to remove:")), 0, wxLEFT | wxRIGHT | wxTOP, 10);
+	lbox = new wxListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, monitorList, wxLB_EXTENDED | wxLB_NEEDED_SB);
+	topsizer->Add(lbox, 1, wxALL | wxEXPAND, 10);
+	topsizer->Add(CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxEXPAND, 10);
+	SetSizerAndFit(topsizer);
+}
+
+void DelMonitorsDialog::OnOK(wxCommandEvent& event)
+{
+	wxArrayInt selections;
+	lbox->GetSelections(selections);
+	bool ok;
+	name dev, outp;
+	// Remove selected monitors
+	// Note loop direction - remmonitor deletes an entry and shifts monitors into the space, changing the IDs of later monitors. Therefore remove monitors with a higher ID (towards the end of the listbox) first.
+	for (int i=selections.GetCount()-1; i>=0; i--)
+	{
+		mmz->getmonname(selections[i], dev, outp);
+		mmz->remmonitor(dev, outp, ok);
+	}
+	EndModal(wxID_OK);
+}
+
+BEGIN_EVENT_TABLE(DelMonitorsDialog, wxDialog)
+	EVT_BUTTON(wxID_OK, DelMonitorsDialog::OnOK)
 END_EVENT_TABLE()
