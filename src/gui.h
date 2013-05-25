@@ -112,10 +112,12 @@ class MyGLCanvas: public wxGLCanvas, public wxScrollHelperNative
  public:
   MyGLCanvas(circuit* circ, wxWindow *parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = 0, const wxString& name = wxT("MyGLCanvas"));
   ~MyGLCanvas();
-  void Render(wxString text=wxT("")); // function to draw canvas contents
+  void Render(); // function to draw canvas contents
   void OnMonitorSamplesChanged();
   void OnMonitorsChanged();
   void UpdateMinCanvasSize();
+  void SetErrorMessage(wxString txt);
+  void ClearErrorMessage();
  private:
   bool init;                         // has the GL context been initialised?
   circuit* c;
@@ -125,6 +127,8 @@ class MyGLCanvas: public wxGLCanvas, public wxScrollHelperNative
   void OnSize(wxSizeEvent& event);   // callback for when canvas is resized
   void OnPaint(wxPaintEvent& event); // callback for when canvas is exposed
   void OnMouse(wxMouseEvent& event); // callback for mouse events inside canvas
+  void DrawInfoTextCentre(wxString txt, bool isError = false);
+  wxString errorMessage;
   int scrollX, scrollY;
   int minXScale, maxXScale;
 public:

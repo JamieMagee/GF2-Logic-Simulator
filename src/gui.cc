@@ -269,6 +269,7 @@ MyGLCanvas::MyGLCanvas(circuit* circ, wxWindow *parent, wxWindowID id,
 	{
 		c->monitorsChanged.Attach(this, &MyGLCanvas::OnMonitorsChanged);
 		c->monitorSamplesChanged.Attach(this, &MyGLCanvas::OnMonitorSamplesChanged);
+		c->monitorSamplesChanged.Attach(this, &MyGLCanvas::ClearErrorMessage);
 		OnMonitorsChanged();
 	}
 	SetScrollRate(10,10);
@@ -296,6 +297,8 @@ void MyGLCanvas::ScrollWindow(int dx, int dy, const wxRect *rect)
 void MyGLCanvas::UpdateMinCanvasSize()
 {
 	int totalCycles = c->GetTotalCycles();
+	if (!mons.size())
+		totalCycles = 0;//If all monitors have been deleted, don't reserve horizontal space
 	// Make sure all the traces fit in the canvas
 	int xOffset = maxMonNameWidth+5;
 	int maxXTextWidth = ceil(log10(totalCycles))*8;// estimate of max x axis scale text width
@@ -353,7 +356,7 @@ WXLRESULT MyGLCanvas::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam,WXLPARAM lParam
 // end copied from wxScrolledWindow
 
 
-void MyGLCanvas::Render(wxString text)
+void MyGLCanvas::Render()
 {
 	unsigned int i;
 
@@ -408,20 +411,54 @@ void MyGLCanvas::Render(wxString text)
 			mons[i].DrawName(this, visibleRegion);
 		}
 	}
+	else if (errorMessage != wxT(""))
+	{
+		DrawInfoTextCentre(errorMessage, true);
+	}
+	else if (c->netz()->devicelist()==NULL)
+	{
+		DrawInfoTextCentre(_("No circuit loaded"));
+	}
 	else if (c->mmz()->moncount()==0)
 	{
-		glColor3f(0.5, 0.0, 0.0);
-		DrawGlutText(5, 10, wxT("No monitors"));
+		DrawInfoTextCentre(_("No monitors"));
 	}
 	else
 	{
-		glColor3f(0.8, 0.0, 0.0);
-		DrawGlutText(5, 10, wxT("No simulation results to display"));
+		DrawInfoTextCentre(_("No simulation results. Use the run or continue buttons."));
 	}
 
 	// We've been drawing to the back buffer, flush the graphics pipeline and swap the back buffer to the front
 	glFlush();
 	SwapBuffers();
+}
+
+void MyGLCanvas::SetErrorMessage(wxString txt)
+{
+	errorMessage = txt;
+}
+
+void MyGLCanvas::ClearErrorMessage()
+{
+	errorMessage = wxT("");
+}
+
+void MyGLCanvas::DrawInfoTextCentre(wxString txt, bool isError)
+{
+	int canvasHeight = GetClientSize().GetHeight();
+	int canvasWidth = GetClientSize().GetWidth();
+	int textWidth = GetGlutTextWidth(txt);
+	wxRect background(canvasWidth/2-textWidth/2-15, canvasHeight/2-15, textWidth+30, 30);
+	glColor4f(0.7, 0.7, 1.0, 0.3);
+	glBegin(GL_QUADS);
+	wxRect_GlVertex(background);
+	glEnd();
+	glColor4f(0.0, 0.0, 0.7, 0.3);
+	glBegin(GL_LINE_LOOP);
+	wxRect_GlVertex(background);
+	glEnd();
+	glColor4f(0.0, 0.0, 0.0, 1.0);
+	DrawGlutText(canvasWidth/2-textWidth/2, canvasHeight/2-4, txt);
 }
 
 void MyGLCanvas::InitGL()
@@ -446,13 +483,8 @@ void MyGLCanvas::InitGL()
 void MyGLCanvas::OnPaint(wxPaintEvent& event)
   // Callback function for when the canvas is exposed
 {
-  int w, h;
-  wxString text;
-
-  wxPaintDC dc(this); // required for correct refreshing under MS windows
-  GetClientSize(&w, &h);
-  text.Printf(wxT("Canvas redrawn by OnPaint callback, canvas size is %d by %d"), w, h);
-  Render(text);
+	wxPaintDC dc(this); // required for correct refreshing under MS windows
+	Render();
 }
 
 void MyGLCanvas::OnSize(wxSizeEvent& event)
@@ -476,7 +508,7 @@ void MyGLCanvas::OnMouse(wxMouseEvent& event)
   if (event.Dragging()) text.Printf(wxT("Mouse dragged to %d %d"), event.m_x, h-event.m_y);
   if (event.Leaving()) text.Printf(wxT("Mouse left window at %d %d"), event.m_x, h-event.m_y);
 
-  if (event.ButtonDown() || event.ButtonUp() || event.Dragging() || event.Leaving()) Render(text);
+  //if (event.ButtonDown() || event.ButtonUp() || event.Dragging() || event.Leaving()) Render(text);
 }
 
 
@@ -629,6 +661,7 @@ bool MyFrame::loadFile(const char * filename)
 	{
 		// scroll to the start of the output so that the first error message (which may have caused any subsequent error messages) is visible
 		outputTextCtrl->ShowPosition(0);
+		canvas->SetErrorMessage(_("Failed to load file"));
 	}
 	
 	delete pmz;
