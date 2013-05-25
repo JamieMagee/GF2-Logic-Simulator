@@ -1,0 +1,27 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+ 
+% Blank line between paragraphs instead of indenting the first line
+\usepackage{parskip}
+\setlength{\parskip}{\baselineskip}
+
+% Squash a bit more text onto a page
+\usepackage{geometry}
+\geometry{verbose,tmargin=20mm,bmargin=20mm,lmargin=25mm,rmargin=25mm}
+
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{verbatim}
+\lstset { %
+    language=C++,
+    backgroundcolor=\color{black!5}, % set backgroundcolor
+    basicstyle=\footnotesize,% basic font setting
+}
+
+% Indent verbatim environments
+\makeatletter \def\verbatim@processline{\hspace*{2em}\the\verbatim@line\par}\makeatother
+
+\begin{document}
+\lstinputlisting{../../../../../../Documents/GitHub/turnt-octo-archer/src/names.cc}
+\end{document}
