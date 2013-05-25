@@ -31,17 +31,15 @@ int GetGlutTextWidth(wxString txt, void *font=NULL);
 void DrawGlutText(int x, int y, wxString txt, void *font=NULL);
 
 class MyGLCanvas;
-class SimCtrls;
 
 void wxRect_GlVertex(const wxRect& r);
 
 class GLCanvasMonitorTrace
 {
-	friend class MyGLCanvas;
 public:
 	GLCanvasMonitorTrace();
-	GLCanvasMonitorTrace(int newMonId, monitor *monitor_mod, names *names_mod);
-	void SetModules(monitor *monitor_mod, names *names_mod);
+	GLCanvasMonitorTrace(int newMonId, monitor *monitor_mod);
+	void SetModules(monitor *monitor_mod);
 	// Get or set the monitor id (the "n" in "n'th monitor" in monitor class calls, also determines position)
 	int GetMonitorId();
 	void SetMonitorId(int newMonId);
@@ -52,22 +50,30 @@ public:
 	void DrawName(MyGLCanvas *canvas, const wxRect& visibleRegion);
 	// Get the width in pixels of the name, used by MyGLCanvas.Render() to determine how much space to leave between the traces and the edge of the canvas
 	int GetNameWidth();
-	// Set the geometry and positioning of the monitor trace. xOffset and yOffset are the top left corner of the bounding box of the first trace. xScale is the x-axis scale (the number of pixels per cycle). height is the height of the signal trace itself, padding the distance between the top of the signal trace and the edge of the graph background, and spacing the vertical distance between centre lines of consecutive monitors.
-	void SetGeometry(int xOffset_new, int yOffset_new, double xScale_new, int sigHeight_new, int padding_new, int spacing_new, int xBgName_new, int axisLabelInterval_new);
+	// Set the geometry and positioning of the monitor trace. 
+	// xOffset - the x position of the graph origin
+	// yCentre - the y position of the centre of the drawn signal (halfway between high and low signal levels)
+	// xScale - the x-axis scale (the number of pixels per cycle). 
+	// height - the height of the signal trace line itself, 
+	// padding - the distance between the top of the signal trace and the edge of the graph background
+	// spacing - the vertical distance between centre lines of consecutive monitor traces. 
+	// xBgName - the distance between the edge of the screen and the faint signal name drawn on top of the traces when the text to the left is invisible.
+	void SetGeometry(int xOffset_new, int yCentre_new, double xScale_new, int sigHeight_new, int padding_new, int spacing_new, int xBgName_new, int axisLabelInterval_new);
 private:
 	int monId;
-	monitor *mmz; // pointer to monitor class, used to extract signal traces
-	names *nmz; // pointer to names class, used to extract signal names
-	wxString monName;
-	int monNameWidth;
-	bool geometrySet;
+	monitor *mmz;// pointer to monitor class, used to extract signal traces and names
+	wxString monName;// cached monitor name, to avoid constructing it again every time the signal is drawn
+	int monNameWidth;// width in pixels of monitor name
+	bool geometrySet;// whether SetGeometry() has been called
+
+	// variables controlling position and size of the trace, see SetGeometry() for details
 	int xOffset, yCentre, sigHeight, padding, spacing, xBgName;
 	int axisLabelInterval;// cycles between numbers on x axis
 	double xScale;
-	wxRect backgroundRegion;
+
 	void UpdateName();// Update monName and monNameWidth
 	int continuedCycles;// how many simulation cycles were completed last time the run or continue button was used
-	int totalCycles;// how many simulation cycles have been completed
+	int totalCycles;// how many simulation cycles have been completed in total
 };
 
 class MyFrame: public wxFrame
@@ -109,19 +115,17 @@ class MyFrame: public wxFrame
 class MyGLCanvas: public wxGLCanvas, public wxScrollHelperNative
 {
  public:
-  MyGLCanvas(wxWindow *parent, wxWindowID id = wxID_ANY, monitor* monitor_mod = NULL, names* names_mod = NULL,
-	     const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = 0,
-	     const wxString& name = wxT("MyGLCanvas")); // constructor
+  MyGLCanvas(wxWindow *parent, wxWindowID id = wxID_ANY, monitor* monitor_mod = NULL, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = 0, const wxString& name = wxT("MyGLCanvas"));
   void Render(wxString text=wxT("")); // function to draw canvas contents
   void SimulationRun(int totalCycles_new, int continuedCycles_new);
   void MonitorsChanged();
   void UpdateMinCanvasSize();
+	void SetModules(monitor* monitor_mod);
  private:
   bool init;                         // has the GL context been initialised?
   int continuedCycles;// how many simulation cycles were completed last time the run or continue button was used
   int totalCycles;// how many simulation cycles have been completed
-  monitor *mmz;                      // pointer to monitor class, used to extract signal traces
-  names *nmz;                        // pointer to names class, used to extract signal names
+  monitor *mmz;
   int maxMonNameWidth;
   vector<GLCanvasMonitorTrace> mons;
   void InitGL();                     // function to initialise GL context

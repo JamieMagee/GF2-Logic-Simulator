@@ -46,14 +46,14 @@ void wxRect_GlVertex(const wxRect& r)
 
 // GLCanvasMonitorTrace - class to handle drawing of one monitor trace
 GLCanvasMonitorTrace::GLCanvasMonitorTrace() :
-	monId(-1), mmz(NULL), nmz(NULL), monName(wxT("")), monNameWidth(0), geometrySet(false)
+	monId(-1), mmz(NULL), monName(wxT("")), monNameWidth(0), geometrySet(false)
 {}
 
-GLCanvasMonitorTrace::GLCanvasMonitorTrace(int newMonId, monitor *monitor_mod, names *names_mod) :
+GLCanvasMonitorTrace::GLCanvasMonitorTrace(int newMonId, monitor *monitor_mod) :
 	geometrySet(false)
 {
 	SetMonitorId(newMonId);
-	SetModules(monitor_mod, names_mod);
+	SetModules(monitor_mod);
 }
 
 int GLCanvasMonitorTrace::GetMonitorId()
@@ -67,10 +67,9 @@ void GLCanvasMonitorTrace::SetMonitorId(int newMonId)
 	UpdateName();
 }
 
-void GLCanvasMonitorTrace::SetModules(monitor *monitor_mod, names *names_mod)
+void GLCanvasMonitorTrace::SetModules(monitor *monitor_mod)
 {
 	mmz = monitor_mod;
-	nmz = names_mod;
 	UpdateName();
 }
 
@@ -82,7 +81,7 @@ void GLCanvasMonitorTrace::SimulationRun(int totalCycles_new, int continuedCycle
 
 void GLCanvasMonitorTrace::UpdateName()
 {
-	if (!nmz || !mmz)
+	if (!mmz)
 	{
 		monName = wxT("");
 		monNameWidth = 0;
@@ -112,7 +111,7 @@ void GLCanvasMonitorTrace::SetGeometry(int xOffset_new, int yCentre_new, double 
 
 void GLCanvasMonitorTrace::Draw(MyGLCanvas *canvas, const wxRect& visibleRegion)
 {
-	if (!mmz || !canvas || monId<0 || monId>=mmz->moncount()) return;
+	if (!mmz || !canvas || monId<0 || monId>=mmz->moncount() || !geometrySet) return;
 
 	if (!mmz->getsamplecount(monId))
 	{
@@ -125,7 +124,7 @@ void GLCanvasMonitorTrace::Draw(MyGLCanvas *canvas, const wxRect& visibleRegion)
 		continuedCycles = mmz->getsamplecount(monId);
 
 	wxRect backgroundRegion(xOffset, yCentre-sigHeight/2-padding, ceil(xScale*totalCycles), sigHeight+padding*2);
-	wxRect traceRegion = backgroundRegion.Intersect(visibleRegion);// this will be slightly different when cycle numbers are added to the axis
+	wxRect traceRegion = wxRect(xOffset, yCentre-sigHeight/2-padding-11, ceil(xScale*totalCycles), sigHeight+padding*2+11).Intersect(visibleRegion);// includes cycle numbers on the axis
 	if (traceRegion.IsEmpty()) return;
 	wxRect clippedbg = backgroundRegion.Intersect(visibleRegion);
 
@@ -232,6 +231,7 @@ void GLCanvasMonitorTrace::Draw(MyGLCanvas *canvas, const wxRect& visibleRegion)
 
 void GLCanvasMonitorTrace::DrawName(MyGLCanvas *canvas, const wxRect& visibleRegion)
 {
+	if (!geometrySet) return;
 	if (xOffset < visibleRegion.x+xBgName)
 	{
 		glColor4f(0.0, 0.0, 0.0, 0.4);
@@ -254,17 +254,15 @@ END_EVENT_TABLE()
   
 int wxglcanvas_attrib_list[5] = {WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16, 0};
 
-MyGLCanvas::MyGLCanvas(wxWindow *parent, wxWindowID id, monitor* monitor_mod, names* names_mod,
+MyGLCanvas::MyGLCanvas(wxWindow *parent, wxWindowID id, monitor* monitor_mod,
 	const wxPoint& pos, const wxSize& size, long style, const wxString& name):
     wxGLCanvas(parent, id, pos, size, style, name, wxglcanvas_attrib_list),
 	wxScrollHelperNative(this), scrollX(0), scrollY(0)
   // Constructor - initialises private variables
 {
-	mmz = monitor_mod;
-	nmz = names_mod;
 	init = false;
 	continuedCycles = totalCycles = 0;
-	MonitorsChanged();
+	SetModules(monitor_mod);
 	SetScrollRate(10,10);
 	minXScale = 2;
 	maxXScale = 50;
@@ -309,7 +307,7 @@ void MyGLCanvas::MonitorsChanged()
 	maxMonNameWidth = 0;
 	for (int i=0; i<monCount; i++)
 	{
-		mons[i].SetModules(mmz, nmz);
+		mons[i].SetModules(mmz);
 		mons[i].SetMonitorId(i);
 		mons[i].SimulationRun(totalCycles, continuedCycles);
 		if (mons[i].GetNameWidth()>maxMonNameWidth)
@@ -318,6 +316,11 @@ void MyGLCanvas::MonitorsChanged()
 	UpdateMinCanvasSize();
 }
 
+void MyGLCanvas::SetModules(monitor* monitor_mod)
+{
+	mmz = monitor_mod;
+	MonitorsChanged();
+}
 
 // copied from wxScrolledWindow:
 #ifdef __WXMSW__
@@ -350,6 +353,7 @@ void MyGLCanvas::Render(wxString text)
 	glClear(GL_COLOR_BUFFER_BIT);
 	if ((totalCycles > 0) && (mmz->moncount() > 0))
 	{
+		// Scale traces (within limits) to fit the size of the canvas
 		int monCount = mmz->moncount();
 		int canvasHeight = GetClientSize().GetHeight();
 		int canvasWidth = GetClientSize().GetWidth();
@@ -357,15 +361,15 @@ void MyGLCanvas::Render(wxString text)
 		if (spacing>200) spacing = 200;
 		if (spacing<50) spacing = 50;
 		int height = 0.8*(spacing-14);
-
 		int xOffset = maxMonNameWidth+10;
-		wxRect visibleRegion(0,0,canvasWidth,canvasHeight);
-
 		double xScale = double(canvasWidth-xOffset-10)/totalCycles;
 		if (xScale<minXScale) xScale = minXScale;
 		if (xScale>50) xScale = 50;
 
+		wxRect visibleRegion(0,0,canvasWidth,canvasHeight);
+
 		// Work out the best interval to use between displayed cycle numbers on the x axis
+		// Intervals will be 1, 2, or 5 * pow(10,n) cycles between displayed numbers, where n>=0
 		int minAxisLabelIntervalPixels = ceil(ceil(log10(totalCycles))*8*2);
 		int base = 1;
 		int baseMultiples[] = {1,2,5};
@@ -507,20 +511,19 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	wxBoxSizer *topsizer = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer *leftsizer = new wxBoxSizer(wxVERTICAL);
 
-	canvas = new MyGLCanvas(this, wxID_ANY, mmz, nmz, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+	canvas = new MyGLCanvas(this, wxID_ANY, mmz, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
 	leftsizer->Add(canvas, 3, wxEXPAND | wxALL, 10);
 
-	// Create the log textbox, mainly for displaying error messages from the parser
-	// Captures everything sent to cout
+	// Create the log textbox, mainly for displaying error messages from the parser, captures everything sent to cout
 	// wxTE_DONTWRAP means that a horizontal scrollbar will be used instead of wrapping, so that the position of an error can be indicated correctly
 	outputTextCtrl = new wxTextCtrl(this, OUTPUT_TEXTCTRL_ID, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY | wxTE_DONTWRAP);
 
-	// Set to a monospace font, so that the position of an error can be indicated correctly
+	// Set log textbox to a monospace font, so that the position of an error can be indicated correctly
 	wxTextAttr outputTextAttr = outputTextCtrl->GetDefaultStyle();
 	outputTextAttr.SetFont(wxFont(10, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
 	outputTextCtrl->SetDefaultStyle(outputTextAttr);
 
-	// Redirect all text sent to cout to the outputTextCtrl textbox
+	// Redirect all text sent to cout to the log textbox
 	outputTextRedirect = new wxStreamToTextRedirector(outputTextCtrl);
 	leftsizer->Add(outputTextCtrl, 1, wxEXPAND | wxALL, 10);
 	topsizer->Add(leftsizer, 4, wxEXPAND | wxALL, 10);
@@ -629,14 +632,14 @@ void MyFrame::OnButtonRun(wxCommandEvent &event)
 }
 
 void MyFrame::OnButtonContinue(wxCommandEvent &event)
-  // Callback for the run simulation button
+  // Callback for the continue simulation button
 {
 	int n, ncycles;
 	runnetwork(spin->GetValue());
 	canvas->SimulationRun(totalCycles, continuedCycles);
 }
 
-void MyFrame::OnButtonAddMon(wxCommandEvent& event)
+void MyFrame::OnButtonAddMon(wxCommandEvent& event)// "Add monitors" button clicked
 {
 	int oldMonCount = mmz->moncount();
 	AddMonitorsDialog *dlg = new AddMonitorsDialog(this, _("Add monitors"), wxDefaultPosition, wxDefaultSize, nmz, dmz, mmz, netz, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
@@ -653,7 +656,7 @@ void MyFrame::OnButtonAddMon(wxCommandEvent& event)
 	dlg->Destroy();
 }
 
-void MyFrame::OnButtonDelMon(wxCommandEvent& event)
+void MyFrame::OnButtonDelMon(wxCommandEvent& event)// "Remove monitors" button clicked
 {
 	DelMonitorsDialog *dlg = new DelMonitorsDialog(this, _("Remove monitors"), wxDefaultPosition, wxDefaultSize, mmz, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
 	if (dlg->ShowModal()==wxID_OK)
