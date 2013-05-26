@@ -21,11 +21,8 @@ scanner::~scanner()
 
 void scanner::getsymbol(symbol& s, name& id, int& num)
 {
-	num = 0;
-	s = badsym;
 	cursymlen = 0;
 	skipspaces();
-	skipcomments();
 	if (eofile) s = eofsym;
 	else
 	{
@@ -62,6 +59,10 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
 						break;
 					case '.':
 						s = dot;
+						break;
+					case '/':
+						skipcomments();
+						getsymbol(s, id, num);
 						break;
 					default:
 						s = badsym;
@@ -139,21 +140,16 @@ void scanner::skipspaces()
 
 void scanner::skipcomments()
 {
-	if (curch == '/')
+	getch();
+	if (curch == '*')
 	{
 		getch();
-		if (curch == '*')
+		while (!(prevch == '*' && curch == '/'))
 		{
 			getch();
-			while (!(prevch == '*' && curch == '/'))
-			{
-				getch();
-				if (eofile) break;
-			}
-			getch();
-			getch();
-			getch(); //Get to next useful char
+			if (eofile) break;
 		}
+		getch(); //Get to next useful char
 	}
 }
 
