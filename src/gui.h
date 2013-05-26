@@ -8,6 +8,7 @@
 #include <wx/listbox.h>
 #include <wx/checklst.h>
 #include <wx/scrolwin.h>
+#include <wx/panel.h>
 #include "names.h"
 #include "devices.h"
 #include "monitor.h"
@@ -93,7 +94,11 @@ class MyFrame: public wxFrame
   wxTextCtrl *outputTextCtrl;             // textbox to display messages sent to cout (e.g. error messages from scanner and parser)
   wxStreamToTextRedirector *outputTextRedirect;
   SwitchesCheckListBox *switchesCtrl;
-  wxButton *simctrl_continue;
+	wxPanel *simctrls_container;
+	wxButton *simctrl_run;
+	wxButton *simctrl_continue;
+	wxButton *monitors_add_btn;
+	wxButton *monitors_rem_btn;
 	circuit* c;
 
   void OnExit(wxCommandEvent& event);     // callback for exit menu item
@@ -103,6 +108,7 @@ class MyFrame: public wxFrame
   void OnButtonContinue(wxCommandEvent& event);
 	void OnButtonAddMon(wxCommandEvent& event);
 	void OnButtonDelMon(wxCommandEvent& event);
+	void UpdateControlStates();
  
   DECLARE_EVENT_TABLE()
 };

@@ -425,7 +425,7 @@ void MyGLCanvas::Render()
 	}
 	else
 	{
-		DrawInfoTextCentre(_("No simulation results. Use the run or continue buttons."));
+		DrawInfoTextCentre(_("No simulation results. Use the run button."));
 	}
 
 	// We've been drawing to the back buffer, flush the graphics pipeline and swap the back buffer to the front
@@ -436,6 +436,7 @@ void MyGLCanvas::Render()
 void MyGLCanvas::SetErrorMessage(wxString txt)
 {
 	errorMessage = txt;
+	Render();
 }
 
 void MyGLCanvas::ClearErrorMessage()
@@ -449,11 +450,13 @@ void MyGLCanvas::DrawInfoTextCentre(wxString txt, bool isError)
 	int canvasWidth = GetClientSize().GetWidth();
 	int textWidth = GetGlutTextWidth(txt);
 	wxRect background(canvasWidth/2-textWidth/2-15, canvasHeight/2-15, textWidth+30, 30);
-	glColor4f(0.7, 0.7, 1.0, 0.3);
+	if (isError) glColor4f(1.0, 0.7, 0.7, 0.3);
+	else glColor4f(0.7, 0.7, 1.0, 0.3);
 	glBegin(GL_QUADS);
 	wxRect_GlVertex(background);
 	glEnd();
-	glColor4f(0.0, 0.0, 0.7, 0.3);
+	if (isError) glColor4f(0.7, 0.0, 0.0, 0.3);
+	else glColor4f(0.0, 0.0, 0.7, 0.3);
 	glBegin(GL_LINE_LOOP);
 	wxRect_GlVertex(background);
 	glEnd();
@@ -539,18 +542,20 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
   }
 	c = new circuit(names_mod, devices_mod, monitor_mod, net_mod);
   
-  wxMenu *fileMenu = new wxMenu;
-  fileMenu->Append(wxID_OPEN);
-  fileMenu->AppendSeparator();
-  fileMenu->Append(wxID_ABOUT, _("&About"));
-  fileMenu->Append(wxID_EXIT, _("&Quit"));
-  wxMenuBar *menuBar = new wxMenuBar;
-  menuBar->Append(fileMenu, _("&File"));
-  SetMenuBar(menuBar);
+	// Menu items
+	wxMenu *fileMenu = new wxMenu;
+	fileMenu->Append(wxID_OPEN);
+	fileMenu->AppendSeparator();
+	fileMenu->Append(wxID_ABOUT, _("&About"));
+	fileMenu->Append(wxID_EXIT, _("&Quit"));
+	wxMenuBar *menuBar = new wxMenuBar;
+	menuBar->Append(fileMenu, _("&File"));
+	SetMenuBar(menuBar);
 
 	wxBoxSizer *topsizer = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer *leftsizer = new wxBoxSizer(wxVERTICAL);
 
+	// Canvas for drawing monitor traces
 	canvas = new MyGLCanvas(c, this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
 	leftsizer->Add(canvas, 3, wxEXPAND | wxALL, 10);
 
@@ -568,44 +573,60 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	leftsizer->Add(outputTextCtrl, 1, wxEXPAND | wxALL, 10);
 	topsizer->Add(leftsizer, 4, wxEXPAND | wxALL, 10);
 
-
+	// Simulation controls box
 	wxBoxSizer *sidesizer = new wxBoxSizer(wxVERTICAL);
-	wxStaticBoxSizer *simctrls_sizer = new wxStaticBoxSizer(wxVERTICAL, this, _("Simulation"));
+	simctrls_container = new wxPanel(this, wxID_ANY);
+	wxStaticBoxSizer *simctrls_sizer = new wxStaticBoxSizer(wxVERTICAL, simctrls_container, _("Simulation"));
 	wxBoxSizer *simctrls_cycles_sizer = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer *simctrls_button_sizer = new wxBoxSizer(wxHORIZONTAL);
 
-	simctrls_button_sizer->Add(new wxButton(this, SIMCTRL_BUTTON_RUN_ID, _("Run")), 0, wxALL, 10);
-	simctrl_continue = new wxButton(this, SIMCTRL_BUTTON_CONT_ID, _("Continue"));
+	// Run and continue simulation buttons
+	simctrl_run = new wxButton(simctrls_container, SIMCTRL_BUTTON_RUN_ID, _("Run"));
+	simctrl_continue = new wxButton(simctrls_container, SIMCTRL_BUTTON_CONT_ID, _("Continue"));
+	simctrls_button_sizer->Add(simctrl_run, 0, wxALL, 10);
 	simctrls_button_sizer->Add(simctrl_continue, 0, wxALL, 10);
-	simctrls_cycles_sizer->Add(new wxStaticText(this, wxID_ANY, _("Cycles")), 0, wxALL|wxALIGN_CENTER_VERTICAL, 10);
-	spin = new wxSpinCtrl(this, MY_SPINCNTRL_ID, wxString(wxT("42")));
+	// Simulation cycle number spinner
+	simctrls_cycles_sizer->Add(new wxStaticText(simctrls_container, wxID_ANY, _("Cycles")), 0, wxALL|wxALIGN_CENTER_VERTICAL, 10);
+	spin = new wxSpinCtrl(simctrls_container, MY_SPINCNTRL_ID, wxString(wxT("42")));
 	spin->SetRange(1,1000000);
 	simctrls_cycles_sizer->Add(spin, 0, wxALL, 10);
 
 	simctrls_sizer->Add(simctrls_cycles_sizer);
 	simctrls_sizer->Add(simctrls_button_sizer);
+	simctrls_container->SetSizerAndFit(simctrls_sizer);
 
+	// Buttons to open add/remove monitor dialogs
 	wxStaticBoxSizer *edit_sizer = new wxStaticBoxSizer(wxVERTICAL, this, _("Edit circuit"));
-	edit_sizer->Add(new wxButton(this, MONITORS_ADD_BUTTON_ID, _("Add monitors")), 0, (wxALL & ~wxBOTTOM) | wxEXPAND, 10);
-	edit_sizer->Add(new wxButton(this, MONITORS_DEL_BUTTON_ID, _("Remove monitors")), 0, (wxALL & ~wxTOP) | wxEXPAND, 10);
+	monitors_add_btn = new wxButton(this, MONITORS_ADD_BUTTON_ID, _("Add monitors"));
+	monitors_rem_btn = new wxButton(this, MONITORS_DEL_BUTTON_ID, _("Remove monitors"));
+	edit_sizer->Add(monitors_add_btn, 0, (wxALL & ~wxBOTTOM) | wxEXPAND, 10);
+	edit_sizer->Add(monitors_rem_btn, 0, (wxALL & ~wxTOP) | wxEXPAND, 10);
 
+	// wxCheckListBox that allows switch states to be changed 
 	wxStaticBoxSizer *switches_sizer = new wxStaticBoxSizer(wxVERTICAL, this, _("Switches"));
 	switchesCtrl = new SwitchesCheckListBox(c, this, SWITCHES_CTRL_ID, wxDefaultPosition, wxDefaultSize, wxLB_NEEDED_SB);
 	switches_sizer->Add(switchesCtrl, 1, wxEXPAND | wxALL, 10);
 
 
-	sidesizer->Add(simctrls_sizer, 0, wxALL, 10);
+	sidesizer->Add(simctrls_container, 0, wxALL, 10);
 	sidesizer->Add(edit_sizer, 0, wxEXPAND | wxALL, 10);
 	sidesizer->Add(switches_sizer, 1, wxEXPAND | wxALL, 10);
-	//sidesizer->Add(new wxTextCtrl(this, MY_TEXTCTRL_ID, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER), 0 , wxALL, 10);
 	topsizer->Add(sidesizer, 0, wxEXPAND | wxALIGN_CENTER);
 
 	SetSizeHints(400, 400);
 	SetSizer(topsizer);
+
+	c->circuitChanged.Attach(this, &MyFrame::UpdateControlStates);
+	c->monitorsChanged.Attach(this, &MyFrame::UpdateControlStates);
+	c->monitorSamplesChanged.Attach(this, &MyFrame::UpdateControlStates);
+	UpdateControlStates();
 }
 
 MyFrame::~MyFrame()
 {
+	c->circuitChanged.Detach(this);
+	c->monitorsChanged.Detach(this);
+	c->monitorSamplesChanged.Detach(this);
 	delete outputTextRedirect;
 }
 
@@ -649,9 +670,14 @@ bool MyFrame::loadFile(const char * filename)
 		c->netz()->checknetwork(result);
 	}
 
-	//TODO: maybe display a messagebox here or disable a few UI controls (like the Run button) if reading failed
 	if (!result)
+	{
 		cout << "Failed to load file" << endl;
+		c->Clear();
+
+		// scroll to the start of the output so that the first error message (which may have caused any subsequent error messages) is visible
+		outputTextCtrl->ShowPosition(0);
+	}
 
 	c->circuitChanged.Trigger();
 	c->monitorsChanged.Trigger();
@@ -659,15 +685,42 @@ bool MyFrame::loadFile(const char * filename)
 
 	if (!result)
 	{
-		// scroll to the start of the output so that the first error message (which may have caused any subsequent error messages) is visible
-		outputTextCtrl->ShowPosition(0);
 		canvas->SetErrorMessage(_("Failed to load file"));
 	}
-	
+
 	delete pmz;
 	delete smz;
 
 	return result;
+}
+
+void MyFrame::UpdateControlStates()
+{
+	// Update enabled/disabled state of controls
+	if (c->netz()->devicelist()==NULL)
+	{
+		// If there are no devices, disable simulation controls and add/remove monitor buttons
+		simctrls_container->Disable();
+		monitors_add_btn->Disable();
+		monitors_rem_btn->Disable();
+	}
+	else
+	{
+		// The circuit contains some devices, so enable the simulation controls and monitor add button
+		simctrls_container->Enable();
+		monitors_add_btn->Enable();
+		// Only enable the remove monitors button if some monitors exist
+		if (c->mmz()->moncount()>0)
+			monitors_rem_btn->Enable();
+		else
+			monitors_rem_btn->Disable();
+		// Disable the continue button if the run button has not been used first
+		// Note: it does not get enabled here. The add monitor button disables it
+		// after adding monitors, to force the use of the run button. Enabling it here
+		// could undo that. Instead the continue button is enabled by using the run button.
+		if (c->GetTotalCycles()==0)
+			simctrl_continue->Disable();
+	}
 }
 
 void MyFrame::OnButtonRun(wxCommandEvent &event)
