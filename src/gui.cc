@@ -317,24 +317,6 @@ void MyGLCanvas::OnMonitorsChanged()
 	UpdateMinCanvasSize();
 }
 
-// copied from wxScrolledWindow:
-#ifdef __WXMSW__
-WXLRESULT MyGLCanvas::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam,WXLPARAM lParam)
-{
-    WXLRESULT rc = wxPanel::MSWWindowProc(nMsg, wParam, lParam);
-#ifndef __WXWINCE__
-    // we need to process arrows ourselves for scrolling
-    if ( nMsg == WM_GETDLGCODE )
-    {
-        rc |= DLGC_WANTARROWS;
-    }
-#endif
-    return rc;
-}
-#endif // __WXMSW__
-// end copied from wxScrolledWindow
-
-
 void MyGLCanvas::Render()
 {
 	unsigned int i;

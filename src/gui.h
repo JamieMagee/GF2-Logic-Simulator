@@ -140,12 +140,7 @@ class MyGLCanvas: public wxGLCanvas, public wxScrollHelperNative
 public:
   virtual void ScrollWindow(int dx, int dy, const wxRect* rect = (wxRect *)NULL);
 
-  // copied from wxScrolledWindow
-#ifdef __WXMSW__
-    virtual WXLRESULT MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam);
-#endif // __WXMSW__
-  WX_FORWARD_TO_SCROLL_HELPER()
-  // end copied from wxScrolledWindow
+  WX_FORWARD_TO_SCROLL_HELPER() // copied from wxScrolledWindow
 
 private:
   DECLARE_EVENT_TABLE()
