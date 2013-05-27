@@ -141,6 +141,7 @@ END \n\
 	expected.push_back(ScannerExpectSym(__LINE__, numsym, "", 0, SCANEXPECT_MATCH_NUM));
 	expected.push_back(ScannerExpectSym(__LINE__, semicol));
 	expected.push_back(ScannerExpectSym(__LINE__, endsym));
+	expected.push_back(ScannerExpectSym(__LINE__, eofsym));
 	checkSyms("test 1", inputTxt, expected);
 
 	inputTxt = "\
@@ -149,6 +150,7 @@ SWITCH S1:0;\n\
   /* test */END \n\
 /* test */    /* test2 */CONNECTIONS\n\
 END\n\
+/ \n\
 ";
 	expected.resize(0);
 	expected.push_back(ScannerExpectSym(__LINE__, devsym));
@@ -159,6 +161,9 @@ END\n\
 	expected.push_back(ScannerExpectSym(__LINE__, semicol));
 	expected.push_back(ScannerExpectSym(__LINE__, endsym));
 	expected.push_back(ScannerExpectSym(__LINE__, consym));
+	expected.push_back(ScannerExpectSym(__LINE__, endsym));
+	expected.push_back(ScannerExpectSym(__LINE__, badsym));
+	expected.push_back(ScannerExpectSym(__LINE__, eofsym));
 	checkSyms("test 2", inputTxt, expected);
 
 	inputTxt = "\
@@ -186,7 +191,7 @@ void ScannerTests::checkSyms(string testDescription, string inputTxt, vector<Sca
 	f.open(fileName.c_str(), ios::out | ios::trunc);
 	f << inputTxt;
 	f.close();
-	// TODO: check file was written correctly
+
 	names *nmz = new names();
 	scanner *smz = new scanner(nmz, fileName.c_str());
 	bool ok = true;
@@ -212,7 +217,7 @@ void ScannerTests::checkSyms(string testDescription, string inputTxt, vector<Sca
 	}
 	if (ok) testSucceeded(testDescription);
 
-	remove("scannertest.tmp.gf2");
+	remove(fileName.c_str());
 }
 
 ScannerExpectSym::ScannerExpectSym(int lineNum_in, symbol sym, string txt, int num, int flags_in) :
