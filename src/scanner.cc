@@ -21,6 +21,7 @@ scanner::~scanner()
 
 void scanner::getsymbol(symbol& s, name& id, int& num)
 {
+	s = badsym;
 	cursymlen = 0;
 	skipspaces();
 	if (eofile) s = eofsym;
@@ -50,26 +51,35 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
 				{
 					case '=':
 						s = equals;
+						getch();
 						break;
 					case ';':
 						s = semicol;
+						getch();
 						break;
 					case ':':
 						s = colon;
+						getch();
 						break;
 					case '.':
 						s = dot;
+						getch();
 						break;
 					case '/':
-						skipcomments();
-						getsymbol(s, id, num);
+						getch();
+						if (curch == '*')
+						{
+							getch();
+							skipcomments();
+							getsymbol(s, id, num);
+						}
 						break;
 					default:
 						s = badsym;
+						getch();
 						break;
 				}
 				cursymlen = 1;
-				getch();
 			}
 		}
 	}
@@ -131,7 +141,7 @@ void scanner::getname(name& id)
 
 void scanner::skipspaces()
 {
-	while (isspace(curch))
+	while (isspace(curch) || curch == '\n')
 	{
 		getch();
 		if (eofile) break;
@@ -140,17 +150,12 @@ void scanner::skipspaces()
 
 void scanner::skipcomments()
 {
-	getch();
-	if (curch == '*')
+	while (!(prevch == '*' && curch == '/'))
 	{
 		getch();
-		while (!(prevch == '*' && curch == '/'))
-		{
-			getch();
-			if (eofile) break;
-		}
-		getch(); //Get to next useful char
+		if (eofile) break;
 	}
+	getch(); //Get to next useful char
 }
 
 string scanner::getline()
