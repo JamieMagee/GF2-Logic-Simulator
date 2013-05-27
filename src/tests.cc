@@ -182,6 +182,15 @@ END\n\
 	expected.push_back(ScannerExpectSym(__LINE__, eofsym));
 	checkSyms("test 3", inputTxt, expected);
 
+	inputTxt = "CONNECTIONS";
+	expected.resize(0);
+	expected.push_back(ScannerExpectSym(__LINE__, consym));
+	checkSyms("single word", inputTxt, expected);
+
+	inputTxt = "12345";
+	expected.resize(0);
+	expected.push_back(ScannerExpectSym(__LINE__, numsym, "", 12345, SCANEXPECT_MATCH_NUM));
+	checkSyms("single number", inputTxt, expected);
 }
 
 void ScannerTests::checkSyms(string testDescription, string inputTxt, vector<ScannerExpectSym>& expected)
