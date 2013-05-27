@@ -117,7 +117,7 @@ void scanner::getnumber(int& number)
 {
 	number = 0;
 	cursymlen = 0;
-	while (isdigit(curch))
+	while (isdigit(curch) && !eofile)
 	{
 		number *= 10;
 		number += (int(curch) - int('0'));
@@ -130,7 +130,7 @@ void scanner::getname(name& id)
 {
 	namestring str;
 	cursymlen = 0;
-	while (isalnum(curch))
+	while (isalnum(curch) && !eofile)
 	{
 		str.push_back(curch);
 		cursymlen++;
