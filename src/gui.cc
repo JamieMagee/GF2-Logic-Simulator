@@ -251,7 +251,7 @@ MyGLCanvas::MyGLCanvas(circuit* circ, wxWindow *parent, wxWindowID id,
 		c->monitorSamplesChanged.Attach(this, &MyGLCanvas::ClearErrorMessage);
 		OnMonitorsChanged();
 	}
-	SetScrollRate(1,10);
+	SetScrollRate(10,10);
 	minXScale = 2;
 	maxXScale = 50;
 }
@@ -265,12 +265,22 @@ MyGLCanvas::~MyGLCanvas()
 	}
 }
 
+void MyGLCanvas::Redraw()
+{
+	// Redraw the contents of the canvas
+	// This might look bizarre, but it seems to work everywhere tested (linux, and a cross compiled executable running in wine)
+	// Removing any of these calls mean the canvas is sometimes not redrawn when running in wine
+	Refresh();
+	Update();
+	Refresh();
+}
+
 void MyGLCanvas::ScrollWindow(int dx, int dy, const wxRect *rect)
 {
 	// override ScrollWindow(), since MyGLCanvas does its own scrolling by offsetting all drawn points and clipping
 	scrollX += dx;
 	scrollY += dy;
-	Refresh();
+	Redraw();
 }
 
 void MyGLCanvas::UpdateMinCanvasSize()
@@ -296,7 +306,7 @@ void MyGLCanvas::OnMonitorSamplesChanged()
 	UpdateMinCanvasSize();
 	// Scroll to the most recently simulated cycles
 	Scroll(GetVirtualSize().GetWidth()-GetClientSize().GetWidth(),-1);
-	Render();
+	Redraw();
 }
 
 // Notify of a change to the active monitors
@@ -315,6 +325,7 @@ void MyGLCanvas::OnMonitorsChanged()
 			maxMonNameWidth = mons[i].GetNameWidth();
 	}
 	UpdateMinCanvasSize();
+	Redraw();
 }
 
 void MyGLCanvas::Render()
@@ -398,7 +409,7 @@ void MyGLCanvas::SetErrorMessage(wxString txt)
 {
 	// Set an error message to be displayed in the centre of the canvas
 	errorMessage = txt;
-	Render();
+	Redraw();
 }
 
 void MyGLCanvas::ClearErrorMessage()
@@ -459,8 +470,7 @@ void MyGLCanvas::OnSize(wxSizeEvent& event)
 {
   wxGLCanvas::OnSize(event); // required on some platforms
   init = false;
-  Refresh(); // required by some buggy nvidia graphics drivers,
-  Update();  // harmless on other platforms!
+  Redraw();// required by some buggy nvidia graphics drivers, harmless on other platforms!
 }
 
 void MyGLCanvas::OnMouse(wxMouseEvent& event)
@@ -516,16 +526,19 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	menuBar->Append(fileMenu, _("&File"));
 	SetMenuBar(menuBar);
 
+	// Everything is contained in a wxPanel for improved appearance in wine/windows, as
+	// described in http://wiki.wxwidgets.org/WxFAQ
+	wxPanel* mainPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
 	wxBoxSizer *topsizer = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer *leftsizer = new wxBoxSizer(wxVERTICAL);
 
 	// Canvas for drawing monitor traces
-	canvas = new MyGLCanvas(c, this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+	canvas = new MyGLCanvas(c, mainPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
 	leftsizer->Add(canvas, 3, wxEXPAND | wxALL, 10);
 
 	// Create the log textbox, mainly for displaying error messages from the parser, captures everything sent to cout
 	// wxTE_DONTWRAP means that a horizontal scrollbar will be used instead of wrapping, so that the position of an error can be indicated correctly
-	outputTextCtrl = new wxTextCtrl(this, OUTPUT_TEXTCTRL_ID, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY | wxTE_DONTWRAP);
+	outputTextCtrl = new wxTextCtrl(mainPanel, OUTPUT_TEXTCTRL_ID, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY | wxTE_DONTWRAP);
 
 	// Set log textbox to a monospace font, so that the position of an error can be indicated correctly
 	wxTextAttr outputTextAttr = outputTextCtrl->GetDefaultStyle();
@@ -539,7 +552,7 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 
 	// Simulation controls box
 	wxBoxSizer *sidesizer = new wxBoxSizer(wxVERTICAL);
-	simctrls_container = new wxPanel(this, wxID_ANY);
+	simctrls_container = new wxPanel(mainPanel, wxID_ANY);
 	wxStaticBoxSizer *simctrls_sizer = new wxStaticBoxSizer(wxVERTICAL, simctrls_container, _("Simulation"));
 	wxBoxSizer *simctrls_cycles_sizer = new wxBoxSizer(wxHORIZONTAL);
 	wxBoxSizer *simctrls_button_sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -560,15 +573,15 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	simctrls_container->SetSizerAndFit(simctrls_sizer);
 
 	// Buttons to open add/remove monitor dialogs
-	wxStaticBoxSizer *edit_sizer = new wxStaticBoxSizer(wxVERTICAL, this, _("Edit circuit"));
-	monitors_add_btn = new wxButton(this, MONITORS_ADD_BUTTON_ID, _("Add monitors"));
-	monitors_rem_btn = new wxButton(this, MONITORS_DEL_BUTTON_ID, _("Remove monitors"));
+	wxStaticBoxSizer *edit_sizer = new wxStaticBoxSizer(wxVERTICAL, mainPanel, _("Edit circuit"));
+	monitors_add_btn = new wxButton(mainPanel, MONITORS_ADD_BUTTON_ID, _("Add monitors"));
+	monitors_rem_btn = new wxButton(mainPanel, MONITORS_DEL_BUTTON_ID, _("Remove monitors"));
 	edit_sizer->Add(monitors_add_btn, 0, (wxALL & ~wxBOTTOM) | wxEXPAND, 10);
 	edit_sizer->Add(monitors_rem_btn, 0, (wxALL & ~wxTOP) | wxEXPAND, 10);
 
 	// wxCheckListBox that allows switch states to be changed 
-	wxStaticBoxSizer *switches_sizer = new wxStaticBoxSizer(wxVERTICAL, this, _("Switches"));
-	switchesCtrl = new SwitchesCheckListBox(c, this, SWITCHES_CTRL_ID, wxDefaultPosition, wxDefaultSize, wxLB_NEEDED_SB);
+	wxStaticBoxSizer *switches_sizer = new wxStaticBoxSizer(wxVERTICAL, mainPanel, _("Switches"));
+	switchesCtrl = new SwitchesCheckListBox(c, mainPanel, SWITCHES_CTRL_ID, wxDefaultPosition, wxDefaultSize, wxLB_NEEDED_SB);
 	switches_sizer->Add(switchesCtrl, 1, wxEXPAND | wxALL, 10);
 
 
@@ -578,7 +591,7 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	topsizer->Add(sidesizer, 0, wxEXPAND | wxALIGN_CENTER);
 
 	SetSizeHints(400, 400);
-	SetSizer(topsizer);
+	mainPanel->SetSizer(topsizer);
 
 	c->circuitChanged.Attach(this, &MyFrame::UpdateControlStates);
 	c->monitorsChanged.Attach(this, &MyFrame::UpdateControlStates);

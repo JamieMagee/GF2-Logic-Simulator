@@ -134,6 +134,7 @@ class MyGLCanvas: public wxGLCanvas, public wxScrollHelperNative
   void OnPaint(wxPaintEvent& event); // callback for when canvas is exposed
   void OnMouse(wxMouseEvent& event); // callback for mouse events inside canvas
   void DrawInfoTextCentre(wxString txt, bool isError = false);
+  void Redraw();
   wxString errorMessage;
   int scrollX, scrollY;
   int minXScale, maxXScale;
