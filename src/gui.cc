@@ -688,9 +688,13 @@ void MyFrame::UpdateControlStates()
 	}
 	else
 	{
-		// The circuit contains some devices, so enable the simulation controls and monitor add button
+		// The circuit contains some devices, so enable the simulation controls
 		simctrls_container->Enable();
-		monitors_add_btn->Enable();
+		// Only enable the add monitors button if some unmonitored outputs exist
+		if (c->GetUnmonitoredOutputs())
+			monitors_add_btn->Enable();
+		else
+			monitors_add_btn->Disable();
 		// Only enable the remove monitors button if some monitors exist
 		if (c->mmz()->moncount()>0)
 			monitors_rem_btn->Enable();
@@ -742,10 +746,6 @@ void MyFrame::OnButtonDelMon(wxCommandEvent& event)// "Remove monitors" button c
 }
 
 
-bool outputinfo_namestrcmp(const outputinfo a, const outputinfo b)
-{
-	return (a.namestr<b.namestr);
-}
 
 AddMonitorsDialog::AddMonitorsDialog(circuit* circ, wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
 	wxDialog(parent, wxID_ANY, title, pos, size, style)
@@ -753,39 +753,9 @@ AddMonitorsDialog::AddMonitorsDialog(circuit* circ, wxWindow* parent, const wxSt
 	SetIcon(wxIcon(wx_icon));
 
 	c = circ;
-	monitor* mmz = c->mmz();
+	oldMonCount = c->mmz()->moncount();
 
-	int monCount = mmz->moncount();
-	oldMonCount = monCount;
-	devlink d = c->netz()->devicelist();
-	while (d!=NULL)
-	{
-		outplink o = d->olist;
-		while (o!=NULL)
-		{
-			bool isMonitored = false;
-			name monDev, monOut;
-			for (int i=0; i<monCount; i++)
-			{
-				mmz->getmonname(i, monDev, monOut);
-				if (monDev==d->id && monOut==o->id)
-				{
-					isMonitored = true;
-					break;
-				}
-			}
-			if (!isMonitored)
-			{
-				outputinfo outinf;
-				outinf.devname = d->id;
-				outinf.outpname = o->id;
-				outinf.namestr = c->netz()->getsignalstring(d->id, o->id);
-				availableOutputs.push_back(outinf);
-			}
-			o = o->next;
-		}
-		d = d->next;
-	}
+	c->GetUnmonitoredOutputs(&availableOutputs);
 	sort(availableOutputs.begin(), availableOutputs.end(), outputinfo_namestrcmp);
 
 	wxArrayString displayedOutputs;

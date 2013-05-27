@@ -107,3 +107,55 @@ bool circuit::Simulate(int ncycles, bool resetBefore)
 	monitorSamplesChanged.Trigger();
 	return ok;
 }
+
+bool outputinfo_namestrcmp(const outputinfo a, const outputinfo b)
+{
+	return (a.namestr<b.namestr);
+}
+
+bool circuit::GetUnmonitoredOutputs(vector<outputinfo> * unmonitoredOutputsRet)
+{
+	vector<outputinfo> unmonitoredOutputs;
+
+	int monCount = mmz()->moncount();
+	devlink d = netz()->devicelist();
+	// Loop through devices
+	while (d!=NULL)
+	{
+		// Loop through device outputs
+		outplink o = d->olist;
+		while (o!=NULL)
+		{
+			// Check whether this output is currently being monitored
+			bool isMonitored = false;
+			name monDev, monOut;
+			for (int i=0; i<monCount; i++)
+			{
+				mmz()->getmonname(i, monDev, monOut);
+				if (monDev==d->id && monOut==o->id)
+				{
+					isMonitored = true;
+					break;
+				}
+			}
+			if (!isMonitored)
+			{
+				outputinfo outinf;
+				outinf.devname = d->id;
+				outinf.outpname = o->id;
+				outinf.namestr = netz()->getsignalstring(d->id, o->id);
+				unmonitoredOutputs.push_back(outinf);
+			}
+			o = o->next;
+		}
+		d = d->next;
+	}
+
+	// If a pointer to a vector was supplied, put the list of unmonitored outputs in there
+	if (unmonitoredOutputsRet)
+		unmonitoredOutputsRet->swap(unmonitoredOutputs);
+
+	// Return true if there are some unmonitored outputs in the circuit
+	return (unmonitoredOutputs.size()>0);
+}
+

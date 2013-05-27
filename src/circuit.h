@@ -7,10 +7,17 @@
 #include "monitor.h"
 #include "observer.h"
 
+
+struct outputinfo
+{
+	name devname, outpname;
+	string namestr;
+};
+bool outputinfo_namestrcmp(const outputinfo a, const outputinfo b);// to alphabetically sort a vector<outputinfo>
+
 // This class is a more convenient way of passing around a set of names, monitors, devices, and network modules. 
 // It also handles observers for changes to the circuit.
 // It provides a home for a few functions that are more closely related to the circuit itself than to the GUI or MyFrame, such as running the network
-
 class circuit
 {
 private:
@@ -38,6 +45,9 @@ public:
 	void ResetMonitors();
 	// Simulate the logic circuit, optionally clearing monitors beforehand
 	bool Simulate(int ncycles, bool resetBefore=true);
+	// GetUnmonitoredOutputs returns true if there are unmonitored outputs in the circuit
+	//   unmonitoredOutputsRet is an optional pointer to a vector to hold the list of unmonitored outputs
+	bool GetUnmonitoredOutputs(vector<outputinfo> * unmonitoredOutputsRet=NULL);
 
 	ObserverSubject monitorsChanged;// addition or removal of monitors
 	ObserverSubject circuitChanged;// changes to devices, device properties, and connections

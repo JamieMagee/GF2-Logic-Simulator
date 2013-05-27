@@ -155,12 +155,6 @@ private:
 
 
 
-struct outputinfo
-{
-	name devname, outpname;
-	string namestr;
-};
-
 class AddMonitorsDialog: public wxDialog
 {
 public:
