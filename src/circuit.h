@@ -8,7 +8,7 @@
 #include "observer.h"
 
 // This class is a more convenient way of passing around a set of names, monitors, devices, and network modules. 
-// It also handles observers for changes to the circuit, and has a few wrapper functions that just call another function in one of the modules then trigger observers 
+// It also handles observers for changes to the circuit.
 // It provides a home for a few functions that are more closely related to the circuit itself than to the GUI or MyFrame, such as running the network
 
 class circuit

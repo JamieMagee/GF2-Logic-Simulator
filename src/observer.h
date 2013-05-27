@@ -5,6 +5,7 @@
 #include <iostream>
 using namespace std;
 
+// Abstract base class for storing callback functions
 class ObserverCallbackBase
 {
 public:
@@ -13,12 +14,14 @@ public:
 	virtual ~ObserverCallbackBase() {}
 };
 
+// Derived class for storing callbacks, using templates to allow member functions in different classes of the form "void SomeClass:func()"
+// to be called without needing a different derived ObserverCallback class for each SomeClass
 template <class T>
 class ObserverCallback : public ObserverCallbackBase
 {
 private:
-	T* targetObject;
-	void (T::*targetFunc)();
+	T* targetObject;//pointer to the object which will have a member function called
+	void (T::*targetFunc)();//pointer to the member function to call
 public:
 	ObserverCallback(T* obj, void (T::*func)())
 	{
@@ -27,10 +30,12 @@ public:
 	}
 	virtual void* GetTarget()
 	{
+		// Return the pointer to the target object, used in ObserverSubject.Detach() to check whether this callback is for the object being detached
 		return targetObject;
 	}
 	virtual void Run()
 	{
+		// Run the callback function
 		(targetObject->*targetFunc)();
 	}
 };
@@ -96,34 +101,6 @@ public:
 	}
 };
 
-/*
-Example usage:
-	class TestClass
-	{
-		ObserverSubject* s;
-		string t = txt;
-		TestClass(ObserverSubject* subj, string txt)
-		{
-			s = subj;
-			s->Attach(this,&TestClass::testfunc);
-		}
-		~TestClass()
-		{
-			s->Detach(this);
-		}
-		void testfunc()
-		{
-			//do stuff
-			cout << t << endl;
-		}
-	};
-
-
-	ObserverSubject subj;
-	TestClass* foo = new TestClass(&subj, "foo");
-	TestClass* bar = new TestClass(&subj, "bar");
-	subj.Trigger();// stuff is done, once in each test class
-
-*/
+// Example usage in observer-test.cc
 
 #endif

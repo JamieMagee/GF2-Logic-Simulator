@@ -10,6 +10,7 @@
 
 using namespace std;
 
+// Get the width in pixels of some text when drawn using a particular font (font defaults to GLUT_BITMAP_HELVETICA_12)
 int GetGlutTextWidth(wxString txt, void *font)
 {
 	int width = 0;
@@ -19,6 +20,7 @@ int GetGlutTextWidth(wxString txt, void *font)
 	return width;
 }
 
+// Draws some text at the given position (font defaults to GLUT_BITMAP_HELVETICA_12)
 void DrawGlutText(int x, int y, wxString txt, void *font)
 {
 	if (!font) font = GLUT_BITMAP_HELVETICA_12;
@@ -36,6 +38,8 @@ void DrawGlutText(int x, int y, wxString txt, void *font)
 		glutBitmapCharacter(font, txt[i]);
 }
 
+// Call glVertex for the positions of the corners of a wxRect
+// This makes drawing boxes a bit simpler
 void wxRect_GlVertex(const wxRect& r)
 {
 	glVertex2i(r.x, r.y);
@@ -127,47 +131,22 @@ void GLCanvasMonitorTrace::Draw(MyGLCanvas *canvas, const wxRect& visibleRegion)
 		continuedCycles = sampleCount;
 
 	wxRect backgroundRegion(xOffset, yCentre-sigHeight/2-padding, ceil(xScale*totalCycles), sigHeight+padding*2);
-	wxRect traceRegion = wxRect(xOffset, yCentre-sigHeight/2-padding-11, ceil(xScale*totalCycles), sigHeight+padding*2+11).Intersect(visibleRegion);// includes cycle numbers on the axis
-	if (traceRegion.IsEmpty()) return;
-	wxRect clippedbg = backgroundRegion.Intersect(visibleRegion);
+	wxRect traceRegion = wxRect(xOffset, yCentre-sigHeight/2-padding-11, ceil(xScale*totalCycles), sigHeight+padding*2+11);// includes cycle numbers on the axis
+	if (traceRegion.Intersect(visibleRegion).IsEmpty()) return;
+	wxRect clippedbg = backgroundRegion;
+	clippedbg.Intersect(visibleRegion);
 
 	// background colour
 	glBegin(GL_QUADS);
 	glColor4f(0.0, 0.5, 0.0, 0.08);
-	wxRect_GlVertex(backgroundRegion.Intersect(visibleRegion));
+	wxRect_GlVertex(clippedbg);
 	glEnd();
 
 	// border
 	glColor4f(0.0, 0.7, 0.0, 0.4);
-	if (clippedbg==backgroundRegion)
-	{
-		// if the whole backgroundRegion is in the visible region, draw the whole border
-		glBegin(GL_LINE_LOOP);
-		wxRect_GlVertex(backgroundRegion);
-		glEnd();
-	}
-	else
-	{
-		// otherwise just draw part of it
-		glBegin(GL_LINES);
-		// horizontal lines
-		glVertex2i(clippedbg.x, clippedbg.y);
-		glVertex2i(clippedbg.x+clippedbg.width, clippedbg.y);
-		glVertex2i(clippedbg.x, clippedbg.y+clippedbg.height);
-		glVertex2i(clippedbg.x+clippedbg.width, clippedbg.y+clippedbg.height);
-		// vertical lines if they are in the visible region
-		if (backgroundRegion.x >= visibleRegion.x)
-		{
-			glVertex2i(clippedbg.x, clippedbg.y+1);
-			glVertex2i(clippedbg.x, clippedbg.y+clippedbg.height-1);
-		}
-		if (backgroundRegion.x+backgroundRegion.width <= visibleRegion.x+visibleRegion.width)
-		{
-			glVertex2i(clippedbg.x+clippedbg.width, clippedbg.y+1);
-			glVertex2i(clippedbg.x+clippedbg.width, clippedbg.y+clippedbg.height-1);
-		}
-		glEnd();
-	}
+	glBegin(GL_LINE_LOOP);
+	wxRect_GlVertex(backgroundRegion);
+	glEnd();
 
 	// actual signal trace
 	if (xScale>5) glLineWidth(2);
@@ -272,7 +251,7 @@ MyGLCanvas::MyGLCanvas(circuit* circ, wxWindow *parent, wxWindowID id,
 		c->monitorSamplesChanged.Attach(this, &MyGLCanvas::ClearErrorMessage);
 		OnMonitorsChanged();
 	}
-	SetScrollRate(10,10);
+	SetScrollRate(1,10);
 	minXScale = 2;
 	maxXScale = 50;
 }
@@ -435,6 +414,7 @@ void MyGLCanvas::Render()
 
 void MyGLCanvas::SetErrorMessage(wxString txt)
 {
+	// Set an error message to be displayed in the centre of the canvas
 	errorMessage = txt;
 	Render();
 }
@@ -446,6 +426,8 @@ void MyGLCanvas::ClearErrorMessage()
 
 void MyGLCanvas::DrawInfoTextCentre(wxString txt, bool isError)
 {
+	// Draw a message in a box in the centre of the canvas
+	// isError makes it a red box
 	int canvasHeight = GetClientSize().GetHeight();
 	int canvasWidth = GetClientSize().GetWidth();
 	int textWidth = GetGlutTextWidth(txt);
@@ -639,14 +621,14 @@ void MyFrame::OnExit(wxCommandEvent &event)
 void MyFrame::OnAbout(wxCommandEvent &event)
   // Callback for the about menu item
 {
-  wxMessageDialog about(this, wxT("Logic simulator\nIIA GF2 Team 8\n2013"), _("About Logsim"), wxICON_INFORMATION | wxOK);
+  wxMessageDialog about(this, _("Logic simulator\nIIA GF2 Team 8\n2013"), _("About Logsim"), wxICON_INFORMATION | wxOK);
   about.ShowModal();
 }
 
 void MyFrame::OnOpenFile(wxCommandEvent &event)
   // Callback for the File -> Open menu item
 {
-	wxFileDialog openFileDialog(this, wxT("Open logic circuit"), wxT(""), wxT(""), wxT("Logic circuit files (*.gf2)|*.gf2|All files (*.*)|*.*"), wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_CHANGE_DIR);
+	wxFileDialog openFileDialog(this, _("Open logic circuit"), wxT(""), wxT(""), _("Logic circuit files (*.gf2)|*.gf2|All files (*.*)|*.*"), wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_CHANGE_DIR);
 	if (openFileDialog.ShowModal() == wxID_CANCEL)
 		return; // cancelled, don't open a file
 	loadFile(openFileDialog.GetPath().mb_str());
