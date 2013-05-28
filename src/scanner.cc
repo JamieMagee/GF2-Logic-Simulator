@@ -89,7 +89,7 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
 void scanner::writelineerror()
 {
 	string errorptr;
-	for (int i = 0; i < (line.length() - cursymlen); i++)
+	for (int i = 0; i < ((int)line.length() - cursymlen); i++)
 	{
 		errorptr.push_back(' ');
 	}

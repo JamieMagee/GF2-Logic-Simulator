@@ -9,59 +9,86 @@ using namespace std;
 bool parser::readin(void)
 {
 	//EBNF: specfile = devices connections monitors
-	smz->getsymbol(cursym, curname, curint);
-	if (cursym == devsym)
+	bool deviceDone = 0, connectionDone =0, monitorDone=0;
+	while (cursym!=eofsym)
 	{
-		deviceList();
+		smz->getsymbol(cursym, curname, curint);
+		if (cursym == devsym)
+		{
+			if (deviceDone)
+			{
+				erz->newError(25);//Must only be one devices list
+			}
+			devicePresent = 0;
+			deviceDone = 1;
+			deviceList();
+			smz->getsymbol(cursym, curname, curint);
+		}
+		else if (cursym == consym)
+		{
+			if (!deviceDone)
+			{
+				erz->newError(0); //must have device list first
+			}
+			if (connectionDone)
+			{
+				erz->newError(28);//Must only be one connections list
+			}
+			connectionDone=1;
+			connectionList();
+			smz->getsymbol(cursym, curname, curint);
+		}
+		else if (cursym == monsym)
+		{
+			if (!deviceDone | !connectionDone)
+			{
+				erz->newError(2); //Must have monitor list last
+			}
+			if (monitorDone)
+			{
+				erz->newError(29);//Must only be one Monitors list
+			}
+			monitorDone = 1;
+			monitorList();
+		}
+		else
+		{
+			while (cursym != devsym && cursym != consym && cursym != monsym && cursym != eofsym)
+			{
+				smz->getsymbol(cursym, curname, curint);
+			}
+		}	
 	}
-	else
-	{
-		erz->newError(0); //must have device list first
-		//cout << "must have device list first" << endl;
-	}
-	smz->getsymbol(cursym, curname, curint);
-	if (cursym == consym)
-	{
-		connectionList();
-	}
-	else
-	{
-		erz->newError(1); //must have connection list second
-		//cout << "must have connection list second" << endl;
-	}
-	smz->getsymbol(cursym, curname, curint);
-	if (cursym == monsym)
-	{
-		monitorList();
-	}
-	else
-	{
-		erz->newError(2); //must have monitor list last
-		//cout << "must have monitor list last" << endl;
-	}
-	netz->checknetwork(correctOperation);
-	return (correctOperation /*&& anyErrors*/);
+		if(!deviceDone | !connectionDone | !monitorDone)
+			{
+				erz->newError(26);//There must be one of each type of block, initialised with DEVICES, CONNECTIONS and MONITORS
+			}
+		netz->checknetwork(correctOperation);
+		return (correctOperation /*&& anyErrors*/);
 }
 
 void parser::deviceList()
 {
 	//EBNF: devices = 'DEVICES' dev {';' dev} ';' 'END'
-	smz->getsymbol(cursym, curname, curint);
-	if (cursym == classsym)
-	{
-		newDevice(curname);
+	if (!devicePresent){
+		smz->getsymbol(cursym, curname, curint);
+		if (cursym == classsym)
+		{
+			newDevice(curname);
+			devicePresent = 1;
+		}
+		else if (cursym == endsym)
+		{
+			erz->newError(3); //must have at least one device
+			//cout << "must have at least one device" << endl;
+		}
+		else
+		{
+			erz->newError(4); //need a device type
+			//cout << "need a device type" << endl;
+		}
+		smz->getsymbol(cursym, curname, curint);
 	}
-	else if (cursym == endsym)
-	{
-		erz->newError(3); //must have at least one device
-		//cout << "must have at least one device" << endl;
-	}
-	else
-	{
-		erz->newError(4); //need a device type
-		//cout << "need a device type" << endl;
-	}
-	smz->getsymbol(cursym, curname, curint);
 	while (cursym == semicol)
 	{
 		smz->getsymbol(cursym, curname, curint);
@@ -80,11 +107,21 @@ void parser::deviceList()
 		}
 		smz->getsymbol(cursym, curname, curint);
 	}
-	erz->newError(24);//new device must have a name or must end with END not semicolon
-	deviceList();
-	//smz->getsymbol(cursym, curname, curint);
-	
+	erz->newError(24);//must end line in semicolon
+	while (cursym !=semicol && cursym !=endsym && cursym != eofsym)
+	{
+		smz->getsymbol(cursym, curname, curint);
+	}
+	if (cursym == semicol)
+	{
+		deviceList();
+	}
+	if (cursym == endsym)
+	{
+		return;
+	}
 }
+
 
 void parser::newDevice(int deviceType)
 {
