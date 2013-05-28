@@ -152,9 +152,9 @@ void parser::newDevice(int deviceType)
 									//cout << "OR gate with name integer " << devName << " and " << curint << " input(s)" << endl;
 									break;
 								case 9:
-									break;
 									dmz->makedevice(norgate, devName, curint, correctOperation);//create nor gate with curint and devName
 									//cout << "NOR gate with name integer " << devName << " and " << curint << " input(s)" << endl;
+									break;
 								default:
 									cout << "How on earth have you managed to get here?" << endl;
 							}
