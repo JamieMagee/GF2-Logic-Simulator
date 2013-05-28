@@ -172,3 +172,25 @@ bool circuit::IsDeviceNameValid(string devname)
 	}
 	return true;
 }
+
+void circuit::RemoveDevice(devlink d)
+{
+	if (!d) return;
+
+	// Remove monitors first
+	outplink o = d->olist;
+	bool ok;
+	while (o != NULL)
+	{
+		mmz()->remmonitor(d->id, o->id, ok);
+		o = o->next;
+	}
+
+	// Disconnect, release memory, and remove from linked list of devices
+	netz()->deletedevice(d);
+
+	circuitChanged.Trigger();
+	monitorsChanged.Trigger();
+}
+
+

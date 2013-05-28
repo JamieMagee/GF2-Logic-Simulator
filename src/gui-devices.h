@@ -102,6 +102,7 @@ private:
 	wxButton* updateBtn;
 	void UpdateApplyButtonState();
 	void OnInputChanged(wxCommandEvent& event);
+	void OnDeleteButton(wxCommandEvent& event);
 	void OnApply(wxCommandEvent& event);
 	void ShowErrorMsg(wxString txt);
 	DECLARE_EVENT_TABLE()

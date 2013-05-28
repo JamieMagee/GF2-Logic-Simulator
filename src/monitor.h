@@ -55,9 +55,6 @@ class monitor {
   // Returns the number of samples recorded by the n'th monitor
   int getsamplecount(int m);
 
-  // Change a device name for all monitors
-  void ChangeDeviceName(name oldname, name newname);
-
   void resetmonitor (void);
     /* Initialises monitor memory in preparation for a new output sequence */
  

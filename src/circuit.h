@@ -60,6 +60,7 @@ public:
 	int GetTotalCycles(){ return totalCycles; }
 	int GetContinuedCycles(){ return continuedCycles; }
 	static bool IsDeviceNameValid(string devname);
+	void RemoveDevice(devlink d);
 	
 };
 

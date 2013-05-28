@@ -24,7 +24,7 @@ DevicesDialog::DevicesDialog(circuit* circ, wxWindow* parent, wxWindowID id, con
 	deviceListSizer->Add(devListBox, 1, wxALL | wxEXPAND, 10);
 	
 	topsizer->Add(deviceListSizer, 1, wxEXPAND, 0);
-	topsizer->Add(mainSizer, 4, wxEXPAND, 0);
+	topsizer->Add(mainSizer, 3, wxEXPAND, 0);
 	
 	//topsizer->Add(CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxEXPAND, 10);
 	SetSizerAndFit(topsizer);
@@ -142,6 +142,14 @@ DeviceDetailsPanel::DeviceDetailsPanel(circuit* circ, SelectedDevice* selectedDe
 	SetSizerAndFit(mainSizer);
 }
 
+void DeviceDetailsPanel::OnDeleteButton(wxCommandEvent& event)
+{
+	if (!c || !selectedDev || !selectedDev->Get()) return;
+
+	devlink d = selectedDev->Get();
+	c->RemoveDevice(d);
+}
+
 void DeviceDetailsPanel::OnApply(wxCommandEvent& event)
 {
 	if (!c || !selectedDev || !selectedDev->Get()) return;
@@ -213,6 +221,7 @@ void DeviceDetailsPanel::OnInputChanged(wxCommandEvent& event)
 BEGIN_EVENT_TABLE(DeviceDetailsPanel, wxPanel)
 	EVT_TEXT(wxID_ANY, DeviceDetailsPanel::OnInputChanged)
 	EVT_BUTTON(DEVICES_APPLY_BUTTON_ID, DeviceDetailsPanel::OnApply)
+	EVT_BUTTON(DEVICES_DELETE_BUTTON_ID, DeviceDetailsPanel::OnDeleteButton)
 END_EVENT_TABLE()
 
 

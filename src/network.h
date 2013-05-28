@@ -85,6 +85,12 @@ class network {
   string getsignalstring(devlink dev, inplink i);
   /* Returns the string corresponding to the given device and pin          */
 
+  // Disconnects all inputs connected to the given output
+  void disconnectoutput(outplink o);
+  
+  // Deletes a device (after disconnecting the outputs)
+  void deletedevice(devlink dTarget);
+
  private:
   devlink devs;          // the list of devices
   devlink lastdev;       // last device in list of devices
