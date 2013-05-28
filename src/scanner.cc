@@ -94,7 +94,7 @@ void scanner::writelineerror()
 		errorptr.push_back(' ');
 	}
 	errorptr.push_back('^');
-	cout << "Line " << linenum << ":" << endl;
+	cout << "Line " << linenum << ":";
 	cout << getline() << endl;		//Outputs current line
 	cout << errorptr << endl;	//Outputs a caret at the error
 }

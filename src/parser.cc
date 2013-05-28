@@ -228,7 +228,7 @@ void parser::newDevice(int deviceType)
 
 void parser::connectionList()
 {
-	//EBNF: connections = 'CONNECTIONS' [con] {';' con} 'END'
+	//EBNF: connections = 'CONNECTIONS' {con ';'} 'END' 
 	smz->getsymbol(cursym, curname, curint);
 	if (cursym == endsym)
 	{
@@ -344,7 +344,7 @@ void parser::newConnection()
 
 void parser::monitorList()
 {
-	//EBNF: monitors = 'MONITORS' [mon] {';' mon} 'END'
+	//EBNF: monitors = 'MONITORS' {mon ';'} 'END'
 	smz->getsymbol(cursym, curname, curint);
 	if (cursym == endsym)
 	{
