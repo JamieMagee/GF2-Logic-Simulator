@@ -22,7 +22,6 @@ bool parser::readin(void)
 			devicePresent = 0;
 			deviceDone = 1;
 			deviceList();
-			smz->getsymbol(cursym, curname, curint);
 		}
 		else if (cursym == consym)
 		{
@@ -36,7 +35,6 @@ bool parser::readin(void)
 			}
 			connectionDone=1;
 			connectionList();
-			smz->getsymbol(cursym, curname, curint);
 		}
 		else if (cursym == monsym)
 		{
