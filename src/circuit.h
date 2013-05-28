@@ -59,6 +59,7 @@ public:
 	network* netz(){ return network_mod; }
 	int GetTotalCycles(){ return totalCycles; }
 	int GetContinuedCycles(){ return continuedCycles; }
+	static bool IsDeviceNameValid(string devname);
 	
 };
 

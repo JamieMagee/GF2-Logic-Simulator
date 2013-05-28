@@ -4,7 +4,7 @@
 using namespace std;
 
 //typedef enum {aswitch, aclock, andgate, nandgate, orgate,norgate, xorgate, dtype, baddevice} devicekind;
-string devicenamestrings[baddevice] = {"switch", "clock", "AND gate", "NAND gate", "OR gate", "NOR gate", "XOR gate", "DTYPE"};
+wxString devicenamestrings[baddevice] = {_("Switch"), _("Clock"), _("AND gate"), _("NAND gate"), _("OR gate"), _("NOR gate"), _("XOR gate"), _("D-type flip-flop")};
 
 DevicesDialog::DevicesDialog(circuit* circ, wxWindow* parent, wxWindowID id, const wxString& title, devlink d) :
 	wxDialog(parent, id, title, wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
@@ -60,6 +60,7 @@ void DevicesDialog::OnDeviceSelectionChanged()
 	}
 	mainSizer->Insert(0, detailsPanel, 0, wxEXPAND | wxALL, 10);
 	Layout();
+	Fit();
 
 
 	cout << "Changed";
@@ -103,15 +104,115 @@ DeviceDetailsPanel::DeviceDetailsPanel(circuit* circ, SelectedDevice* selectedDe
 	c = circ;
 
 	mainSizer = new wxStaticBoxSizer(wxVERTICAL, this, _("Device details"));
-	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
-	//topsizer->Add(new wxButton(this, wxID_ANY, _("Test button")), 0, wxALL | wxEXPAND, 10);
-	sizer1->Add(new wxStaticText(this, wxID_ANY, _("device info goes here")), 0, wxALL | wxEXPAND, 10);
-	mainSizer->Add(sizer1);
+	devicekind dk = baddevice;
+	devlink d = selectedDev->Get();
+	if (d)
+	{
+		dk = d->kind;
+
+		wxBoxSizer* buttonsSizer = new wxBoxSizer(wxHORIZONTAL);
+		gridsizer = new wxGridBagSizer();
+		wxString kindtext = wxT("Unknown device");
+		if (dk>=0 && dk<baddevice)
+			kindtext = devicenamestrings[dk];
+		
+		gridsizer->Add(new wxStaticText(this, wxID_ANY, _("Device type:")), wxGBPosition(0,0), wxDefaultSpan, (wxALL & ~wxRIGHT) | wxALIGN_CENTER_VERTICAL, 10);
+		gridsizer->Add(new wxStaticText(this, wxID_ANY, kindtext), wxGBPosition(0,1), wxDefaultSpan, wxALL | wxALIGN_CENTER_VERTICAL, 10);
+		gridsizer->Add(new wxStaticText(this, wxID_ANY, _("Name:")), wxGBPosition(0,3), wxDefaultSpan, (wxALL & ~wxRIGHT) | wxALIGN_CENTER_VERTICAL, 10);
+		devicenameCtrl = new wxTextCtrl(this, DEVICENAME_TEXTCTRL_ID, wxString(c->nmz()->getnamestring(d->id).c_str(), wxConvUTF8));
+		gridsizer->Add(devicenameCtrl, wxGBPosition(0,4), wxDefaultSpan, wxALL | wxEXPAND | wxALIGN_CENTER_VERTICAL, 10);
+		gridsizer->AddGrowableCol(1,3);
+		gridsizer->AddGrowableCol(4,5);
+		mainSizer->Add(gridsizer, 0, wxEXPAND);
+
+		CreateExtraFields();
+
+		buttonsSizer->AddStretchSpacer();
+		buttonsSizer->Add(new wxButton(this, DEVICES_DELETE_BUTTON_ID, _("Delete device")), 0, (wxALL & ~wxLEFT) | wxEXPAND, 10);
+		updateBtn = new wxButton(this, DEVICES_APPLY_BUTTON_ID, _("Apply changes"));
+		updateBtn->Disable();
+		buttonsSizer->Add(updateBtn, 0, (wxALL & ~wxLEFT) | wxEXPAND, 10);
+		mainSizer->Add(buttonsSizer, 0, wxEXPAND);
+	}
+	else
+	{
+		mainSizer->Add(new wxStaticText(this, wxID_ANY, _("No device selected")));
+	}
+
 	SetSizerAndFit(mainSizer);
 }
 
-BEGIN_EVENT_TABLE(DeviceDetailsPanel, wxPanel)
+void DeviceDetailsPanel::OnApply(wxCommandEvent& event)
+{
+	if (!c || !selectedDev || !selectedDev->Get()) return;
 
+	devlink d = selectedDev->Get();
+	bool changedSomething = false;
+
+	if (wxString(c->nmz()->getnamestring(d->id).c_str(), wxConvUTF8) != devicenameCtrl->GetValue())
+	{
+		name newname = c->nmz()->lookup(string(devicenameCtrl->GetValue().mb_str()));
+		if (devicenameCtrl->GetValue() == wxT(""))
+		{
+			ShowErrorMsg(_("Device name cannot be blank"));
+		}
+		else if (!isalpha(devicenameCtrl->GetValue()[0]))
+		{
+			ShowErrorMsg(_("Device name must start with a letter"));
+		}
+		else if (!circuit::IsDeviceNameValid(string(devicenameCtrl->GetValue().mb_str())))
+		{
+			ShowErrorMsg(_("Device name must contain only letters and numbers"));
+		}
+		else if (newname<=lastreservedname)
+		{
+			ShowErrorMsg(_("Device name cannot be a reserved word"));
+		}
+		else if (c->netz()->finddevice(newname)!=NULL)
+		{
+			ShowErrorMsg(_("Could not rename device, as a device already exists with that name"));
+		}
+		else
+		{
+			d->id = newname;
+			changedSomething = true;
+		}
+	}
+
+	OnApply_ExtraFields(changedSomething);
+	if (changedSomething)
+	{
+		c->circuitChanged.Trigger();
+		c->monitorsChanged.Trigger();
+		UpdateApplyButtonState();
+	}
+}
+
+void DeviceDetailsPanel::ShowErrorMsg(wxString txt)
+{
+	wxMessageDialog dlg(this, txt, _("Error"), wxCANCEL | wxICON_ERROR);
+	dlg.ShowModal();
+}
+
+void DeviceDetailsPanel::UpdateApplyButtonState()
+{
+	updateBtn->Disable();
+	if (c && selectedDev && selectedDev->Get())
+	{
+		if (wxString(c->nmz()->getnamestring(selectedDev->Get()->id).c_str(), wxConvUTF8) != devicenameCtrl->GetValue())
+			updateBtn->Enable();
+		UpdateApplyButtonState_ExtraFields();
+	}
+}
+
+void DeviceDetailsPanel::OnInputChanged(wxCommandEvent& event)
+{
+	UpdateApplyButtonState();
+}
+
+BEGIN_EVENT_TABLE(DeviceDetailsPanel, wxPanel)
+	EVT_TEXT(wxID_ANY, DeviceDetailsPanel::OnInputChanged)
+	EVT_BUTTON(DEVICES_APPLY_BUTTON_ID, DeviceDetailsPanel::OnApply)
 END_EVENT_TABLE()
 
 

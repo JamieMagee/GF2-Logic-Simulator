@@ -159,3 +159,16 @@ bool circuit::GetUnmonitoredOutputs(vector<outputinfo> * unmonitoredOutputsRet)
 	return (unmonitoredOutputs.size()>0);
 }
 
+bool circuit::IsDeviceNameValid(string devname)
+{
+	// Checks syntax of a device name string (but not whether a device already exists with that name)
+	if (!devname.length())
+		return false;
+	if (!isalpha(devname[0]))
+		return false;
+	for (string::iterator it=devname.begin(); it<devname.end(); ++it)
+	{
+		if (!isalpha(*it) && !isdigit(*it)) return false;
+	}
+	return true;
+}

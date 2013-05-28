@@ -6,6 +6,7 @@
 #include <wx/listbox.h>
 #include <wx/panel.h>
 #include <wx/combobox.h>
+#include <wx/gbsizer.h>
 #include "network.h"
 #include "circuit.h"
 #include "observer.h"
@@ -13,7 +14,16 @@
 #include <vector>
 using namespace std;
 
-extern string devicenamestrings[baddevice];
+enum
+{
+	DEVICES_APPLY_BUTTON_ID = wxID_HIGHEST + 1,
+	DEVICES_DELETE_BUTTON_ID,
+	DEVICES_ADDCONN_BUTTON_ID,
+	DEVICES_DELCONN_BUTTON_ID,
+	DEVICENAME_TEXTCTRL_ID
+};
+
+extern wxString devicenamestrings[baddevice];
 
 class SelectedDevice
 {
@@ -81,9 +91,19 @@ class DeviceDetailsPanel: public wxPanel
 public:
 	DeviceDetailsPanel(circuit* circ, SelectedDevice* selectedDev_in, wxWindow* parent, wxWindowID id = wxID_ANY);
 private:
+	virtual void CreateExtraFields() {};
+	virtual void UpdateApplyButtonState_ExtraFields() {};
+	virtual void OnApply_ExtraFields(bool& changedSomething) {};
 	SelectedDevice* selectedDev;
 	circuit* c;
 	wxStaticBoxSizer* mainSizer;
+	wxGridBagSizer* gridsizer;
+	wxTextCtrl* devicenameCtrl;
+	wxButton* updateBtn;
+	void UpdateApplyButtonState();
+	void OnInputChanged(wxCommandEvent& event);
+	void OnApply(wxCommandEvent& event);
+	void ShowErrorMsg(wxString txt);
 	DECLARE_EVENT_TABLE()
 };
 

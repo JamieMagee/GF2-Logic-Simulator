@@ -22,7 +22,7 @@ void monitor::makemonitor (name dev, name outp, bool& ok)
 		if (ok)
 		{
 			moninfo mon;
-			mon.devid = dev;
+			mon.d = d;
 			mon.op = o;
 			mtab.push_back(mon);
 		}
@@ -42,7 +42,7 @@ void monitor::remmonitor (name dev, name outp, bool& ok)
     found = false;
 	for (montable::iterator it=mtab.begin(); it!=mtab.end(); ++it)
 	{
-		if ((it->devid == dev) && (it->op->id == outp))
+		if ((it->d->id == dev) && (it->op->id == outp))
 		{
 			found = true;
 			mtab.erase(it);
@@ -82,7 +82,7 @@ asignal monitor::getmonsignal (int n)
  */
 void monitor::getmonname (int n, name& dev, name& outp)
 {
-  dev = mtab[n].devid;
+  dev = mtab[n].d->id;
   outp = mtab[n].op->id;
 }
 
@@ -197,7 +197,7 @@ monitor::monitor (names* names_mod, network* network_mod)
 string monitor::getsignalstring(int m)
 {
 	if (m<0 || m>=moncount()) return "";
-	return netz->getsignalstring(mtab[m].devid, mtab[m].op->id);
+	return netz->getsignalstring(mtab[m].d->id, mtab[m].op->id);
 }
 
 
