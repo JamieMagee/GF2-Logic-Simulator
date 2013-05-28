@@ -36,10 +36,12 @@ error::error(scanner* scanner_mod)  /* the constructor */
 	errorlist.push_back("Error 0x0017: Bad device monitor"); //23
 	errorlist.push_back("Error 0x0018: Need semicolon at end of line"); //24
 	errorlist.push_back("Error 0x0019: Must only be one devices list"); //25
-	errorlist.push_back("Error 0x001A: There must be one of each type of block, initialised with 'DEVICES', 'CONNECTIONS' and 'MONITORS'");//26
+	errorlist.push_back("Error 0x001A: There must be one 'DEVICES' block, it may not have been initialised properly");//26
 	errorlist.push_back("Error 0x001B: Devices block must be initialised with 'DEVICES'"); //27
 	errorlist.push_back("Error 0x001C: Must only be one connections list"); //28
 	errorlist.push_back("Error 0x001D: Must only be one monitors list"); //29
+	errorlist.push_back("Error 0x001E: There must be one 'CONNECTIONS' block, it may not have been initialised properly");//30
+	errorlist.push_back("Error 0x001F: There must be one 'MONITOR' block, it may not have been initialised properly");//31
 	
 	errorCount = 0;
 	warningCount = 0;
@@ -50,8 +52,8 @@ error::error(scanner* scanner_mod)  /* the constructor */
 void error::newError(int errorCode){
 	if (errorCode>=0 && errorCode < errorlist.size())
 	{
-		cout << errorlist[errorCode] << endl;
 		smz->writelineerror();
+		cout << errorlist[errorCode] << endl;
 		errorCount ++;
 	}
 	else{

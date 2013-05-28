@@ -59,10 +59,18 @@ bool parser::readin(void)
 			}
 		}	
 	}
-		if(!deviceDone | !connectionDone | !monitorDone)
+		if(!deviceDone)
 			{
-				erz->newError(26);//There must be one of each type of block, initialised with DEVICES, CONNECTIONS and MONITORS
+				erz->newError(26);//There must be a DEVICES block, it may not have been initialised properly
 			}
+		if(!connectionDone)
+		{
+			erz->newError(30);//There must be a CONNECTIONS block, it may not have been initialised properly
+		}
+		if (!monitorDone)
+		{
+			erz->newError(30);//There must be a MONITORS block, it may not have been initialised properly
+		}
 		netz->checknetwork(correctOperation);
 		return (correctOperation /*&& anyErrors*/);
 }
