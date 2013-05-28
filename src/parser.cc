@@ -380,7 +380,6 @@ void parser::monitorList()
 		else
 		{
 			erz->newError(20);//monitor must start with the name of a device
-			//cout << "monitor must start with the name of a device" << endl;
 		}
 		smz->getsymbol(cursym, curname, curint);
 	}

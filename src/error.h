@@ -10,6 +10,7 @@ class error{
 		int errorCount;
 		int warningCount;
 		vector<errorstring> errorlist;
+		vector<errorstring> warninglist;
 		scanner* smz;
 	public:
 		error(scanner* scanner_mod);

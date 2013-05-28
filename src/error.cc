@@ -43,8 +43,12 @@ error::error(scanner* scanner_mod)  /* the constructor */
 	errorlist.push_back("Error 0x001E: There must be one 'CONNECTIONS' block, it may not have been initialised properly");//30
 	errorlist.push_back("Error 0x001F: There must be one 'MONITOR' block, it may not have been initialised properly");//31
 	errorlist.push_back("Error 0x0020: Block must be terminated with 'END'");//32
+	
 	errorCount = 0;
 	warningCount = 0;
+	
+	warninglist.push_back("Warning 0x0000: You have not specfied any conenctions. Please check this is what is required");//0
+	warninglist.push_back("Warning 0x0001: You have not specfied any monitors. Please check this is what is required");//1
 	
 	smz = scanner_mod;
 }
@@ -62,6 +66,7 @@ void error::newError(int errorCode){
 }
 
 void error::newWarning(int warningCode){
+	cout << warninglist[warningCode] << endl; //don't display where warning occurs
 	warningCount ++;
 }
 
