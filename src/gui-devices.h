@@ -27,8 +27,11 @@ public:
 	}
 	void Set(devlink d)
 	{
-		selected = d;
-		changed.Trigger();
+		if (d!=selected)
+		{
+			selected = d;
+			changed.Trigger();
+		}
 	}
 };
 
@@ -36,7 +39,6 @@ struct DeviceInfo
 {
 	devlink d;
 	string devname;
-	string devdescription;
 };
 
 class DeviceKindComboBox: public wxComboBox
@@ -47,9 +49,18 @@ class DeviceKindComboBox: public wxComboBox
 class DevicesListBox: public wxListBox
 {
 public:
-	DevicesListBox(circuit* circ, SelectedDevice* selectDev, wxWindow* parent, wxWindowID id);
+	DevicesListBox(circuit* circ, SelectedDevice* selectedDev_in, wxWindow* parent, wxWindowID id);
+	~DevicesListBox();
+	void OnCircuitChanged();
+	void OnDeviceSelectionChanged();
+	void ReleasePointers();
 private:
+	SelectedDevice* selectedDev;
+	circuit* c;
 	vector<DeviceInfo> devs;
+	bool isSetting;
+	void OnLBoxSelectionChanged(wxCommandEvent& event);
+	DECLARE_EVENT_TABLE()
 };
 
 // List of all inputs on a device and which output each is connected to, with buttons to add/remove connections
@@ -67,7 +78,13 @@ class DeviceOutputPanel: public wxPanel
 // For devicekinds with nothing configurable: xorgate, dtype
 class DeviceDetailsPanel: public wxPanel
 {
-	;
+public:
+	DeviceDetailsPanel(circuit* circ, SelectedDevice* selectedDev_in, wxWindow* parent, wxWindowID id = wxID_ANY);
+private:
+	SelectedDevice* selectedDev;
+	circuit* c;
+	wxStaticBoxSizer* mainSizer;
+	DECLARE_EVENT_TABLE()
 };
 
 // For devicekinds: andgate, nandgate, orgate, norgate
@@ -104,15 +121,16 @@ class DevicesDialog: public wxDialog
 {
 public:
 	DevicesDialog(circuit* circ, wxWindow* parent, wxWindowID id, const wxString& title, devlink d=NULL);
-	void OnDeviceSelect();
+	void OnDeviceSelectionChanged();
 	~DevicesDialog();
 private:
 	circuit* c;
-	SelectedDevice selectedDev;
+	SelectedDevice* selectedDev;
 	DevicesListBox* devListBox;
 	DeviceDetailsPanel* detailsPanel;
 	DeviceInputsPanel* inputsPanel;
 	vector<DeviceOutputPanel*> outputPanels;
+	wxBoxSizer* mainSizer;
 
 	void DestroyDeviceWidgets();
 	DECLARE_EVENT_TABLE()
