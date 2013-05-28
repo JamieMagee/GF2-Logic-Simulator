@@ -9,11 +9,11 @@ using namespace std;
 bool parser::readin(void)
 {
 	//EBNF: specfile = devices connections monitors
-	bool deviceDone = 0, connectionDone =0, monitorDone=0;
+	bool deviceDone = 0, connectionDone = 0, monitorDone = 0;
 	cursym = badsym;
-	while (cursym!=eofsym)
+	while (cursym != eofsym)
 	{
-		if(cursym != devsym && cursym != consym && cursym != monsym)
+		if (cursym != devsym && cursym != consym && cursym != monsym)
 		{
 			smz->getsymbol(cursym, curname, curint);
 		}
@@ -37,8 +37,8 @@ bool parser::readin(void)
 			{
 				erz->newError(28);//Must only be one connections list
 			}
-			connectionPresent=0;
-			connectionDone=1;
+			connectionPresent = 0;
+			connectionDone = 1;
 			connectionList();
 		}
 		else if (cursym == monsym)
@@ -51,7 +51,7 @@ bool parser::readin(void)
 			{
 				erz->newError(29);//Must only be one Monitors list
 			}
-			monitorPresent=0;
+			monitorPresent = 0;
 			monitorDone = 1;
 			monitorList();
 		}
@@ -61,29 +61,30 @@ bool parser::readin(void)
 			{
 				smz->getsymbol(cursym, curname, curint);
 			}
-		}	
+		}
 	}
-		if(!deviceDone)
-			{
-				erz->newError(26);//There must be a DEVICES block, it may not have been initialised properly
-			}
-		if(!connectionDone)
-		{
-			erz->newError(30);//There must be a CONNECTIONS block, it may not have been initialised properly
-		}
-		if (!monitorDone)
-		{
-			erz->newError(31);//There must be a MONITORS block, it may not have been initialised properly
-		}
-		netz->checknetwork(correctOperation);
-		anyErrors = erz->anyErrors();
-		return (correctOperation && !anyErrors);
+	if (!deviceDone)
+	{
+		erz->newError(26);//There must be a DEVICES block, it may not have been initialised properly
+	}
+	if (!connectionDone)
+	{
+		erz->newError(30);//There must be a CONNECTIONS block, it may not have been initialised properly
+	}
+	if (!monitorDone)
+	{
+		erz->newError(31);//There must be a MONITORS block, it may not have been initialised properly
+	}
+	netz->checknetwork(correctOperation);
+	anyErrors = erz->anyErrors();
+	return (correctOperation && !anyErrors);
 }
 
 void parser::deviceList()
 {
 	//EBNF: devices = 'DEVICES' dev {';' dev} ';' 'END'
-	if (!devicePresent){
+	if (!devicePresent)
+	{
 		smz->getsymbol(cursym, curname, curint);
 		if (cursym == classsym)
 		{
@@ -116,14 +117,14 @@ void parser::deviceList()
 			erz->newError(32);//Block must be terminated with 'END'
 			return;
 		}
-		else 
+		else
 		{
 			erz->newError(5);//Expecting device name or END after semicolon (device name must start with letter)
 		}
 		smz->getsymbol(cursym, curname, curint);
 	}
 	erz->newError(24);//must end line in semicolon
-	while (cursym !=semicol && cursym !=endsym && cursym != eofsym)
+	while (cursym != semicol && cursym != endsym && cursym != eofsym)
 	{
 		smz->getsymbol(cursym, curname, curint);
 	}
@@ -235,7 +236,7 @@ void parser::newDevice(int deviceType)
 
 void parser::connectionList()
 {
-	//EBNF: connections = 'CONNECTIONS' {con ';'} 'END' 
+	//EBNF: connections = 'CONNECTIONS' {con ';'} 'END'
 	if (!connectionPresent)
 	{
 		smz->getsymbol(cursym, curname, curint);
@@ -278,7 +279,7 @@ void parser::connectionList()
 		smz->getsymbol(cursym, curname, curint);
 	}
 	erz->newError(24);//must end line in semicolon
-	while (cursym !=semicol && cursym !=endsym && cursym != eofsym)
+	while (cursym != semicol && cursym != endsym && cursym != eofsym)
 	{
 		smz->getsymbol(cursym, curname, curint);
 	}
@@ -295,7 +296,7 @@ void parser::connectionList()
 void parser::newConnection()
 {
 	//EBNF: con = devicename'.'input '=' devicename['.'output]
-	if (smz->defnames->namelength (curname) != 0)
+	if (smz->defnames->namelength(curname) != 0)
 	{
 		connectionInName = curname;
 		smz->getsymbol(cursym, curname, curint);
@@ -309,7 +310,7 @@ void parser::newConnection()
 				if (cursym == equals) //SEARCH - you have got to here
 				{
 					smz->getsymbol(cursym, curname, curint);
-					if (smz->defnames->namelength (curname) != 0)
+					if (smz->defnames->namelength(curname) != 0)
 					{
 						connectionOutName = curname;
 						devlink devtype = netz->finddevice(curname);
@@ -342,7 +343,7 @@ void parser::newConnection()
 				}
 				else
 				{
-					erz->newError(16);//Must specify output to connect to input with equals sign 
+					erz->newError(16);//Must specify output to connect to input with equals sign
 				}
 			}
 			else
@@ -375,7 +376,7 @@ void parser::monitorList()
 		else if (cursym == namesym)
 		{
 			newMonitor();
-			monitorPresent=1;
+			monitorPresent = 1;
 		}
 		else
 		{
@@ -406,7 +407,7 @@ void parser::monitorList()
 		smz->getsymbol(cursym, curname, curint);
 	}
 	erz->newError(24);//must end line in semicolon
-	while (cursym !=semicol && cursym !=endsym && cursym != eofsym)
+	while (cursym != semicol && cursym != endsym && cursym != eofsym)
 	{
 		smz->getsymbol(cursym, curname, curint);
 	}
@@ -423,7 +424,7 @@ void parser::monitorList()
 void parser::newMonitor()
 {
 	//EBNF: mon = devicename['.'output]
-	if (smz->defnames->namelength (curname) != 0)
+	if (smz->defnames->namelength(curname) != 0)
 	{
 		monitorName = curname;
 		devlink devtype = netz->finddevice(curname);
@@ -445,7 +446,7 @@ void parser::newMonitor()
 					erz->newError(22);	//Expect a dot after dtype
 				}
 			default:
-				mmz->makemonitor(monitorName, blankname, correctOperation);								
+				mmz->makemonitor(monitorName, blankname, correctOperation);
 				return;
 		}
 	}

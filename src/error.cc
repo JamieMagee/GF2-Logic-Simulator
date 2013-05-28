@@ -43,63 +43,75 @@ error::error(scanner* scanner_mod)  /* the constructor */
 	errorlist.push_back("Error 0x001E: There must be one 'CONNECTIONS' block, it may not have been initialised properly");//30
 	errorlist.push_back("Error 0x001F: There must be one 'MONITOR' block, it may not have been initialised properly");//31
 	errorlist.push_back("Error 0x0020: Block must be terminated with 'END'");//32
-	
 	errorCount = 0;
 	warningCount = 0;
-	
 	warninglist.push_back("Warning 0x0000: You have not specfied any conenctions. Please check this is what is required");//0
 	warninglist.push_back("Warning 0x0001: You have not specfied any monitors. Please check this is what is required");//1
-	
 	smz = scanner_mod;
 }
 
-void error::newError(int errorCode){
-	if (errorCode>=0 && errorCode < errorlist.size())
+void error::newError(int errorCode)
+{
+	if (errorCode >= 0 && errorCode < errorlist.size())
 	{
 		smz->writelineerror();
 		cout << errorlist[errorCode] << endl;
 		errorCount ++;
 	}
-	else{
+	else
+	{
 		cout << "Internal software error: Error code " << errorCode << " does not exist" << endl;
 	}
 }
 
-void error::newWarning(int warningCode){
+void error::newWarning(int warningCode)
+{
 	cout << warninglist[warningCode] << endl; //don't display where warning occurs
 	warningCount ++;
 }
 
-bool error::anyErrors(){
-	if (errorCount==0){
-		if (warningCount==1){
+bool error::anyErrors()
+{
+	if (errorCount == 0)
+	{
+		if (warningCount == 1)
+		{
 			cout << "There are no errors and 1 warning" << endl;
 		}
-		if (warningCount>1){
+		if (warningCount > 1)
+		{
 			cout << "There are no errors and " << warningCount << " warnings" << endl;
 		}
 		return 0;
 	}
-	if (errorCount==1){
-		if (warningCount==0){
+	if (errorCount == 1)
+	{
+		if (warningCount == 0)
+		{
 			cout << "There is 1 error" << endl;
 		}
-		else if (warningCount==1){
+		else if (warningCount == 1)
+		{
 			cout << "There is 1 error and 1 warning" << endl;
 		}
-		else if (warningCount>1){
+		else if (warningCount > 1)
+		{
 			cout << "There is 1 error and " << warningCount << "warnings" << endl;
 		}
 		return 1;
 	}
-	if (errorCount>1){
-				if (warningCount==0){
+	if (errorCount > 1)
+	{
+		if (warningCount == 0)
+		{
 			cout << "There are " << errorCount << " errors" << endl;
 		}
-		else if (warningCount==1){
+		else if (warningCount == 1)
+		{
 			cout << "There are " << errorCount << " errors and 1 warning" << endl;
 		}
-		else if (warningCount>1){
+		else if (warningCount > 1)
+		{
 			cout << "There are " << errorCount << " errors and " << warningCount << "warnings" << endl;
 		}
 		return 1;
