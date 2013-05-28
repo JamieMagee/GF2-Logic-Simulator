@@ -76,8 +76,8 @@ bool parser::readin(void)
 			erz->newError(31);//There must be a MONITORS block, it may not have been initialised properly
 		}
 		netz->checknetwork(correctOperation);
-		erz->anyErrors();
-		return (correctOperation && anyErrors);
+		anyErrors = erz->anyErrors();
+		return (correctOperation && !anyErrors);
 }
 
 void parser::deviceList()
