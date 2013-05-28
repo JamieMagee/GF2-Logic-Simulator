@@ -20,6 +20,7 @@ class MyApp: public wxApp
   monitor *mmz;  // pointer to the monitor class
   scanner *smz;  // pointer to the scanner class
   parser *pmz;   // pointer to the parser class
+  error *erz; // pointer to the error class
 };
 
 #endif /* logsim_h */

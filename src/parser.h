@@ -12,7 +12,6 @@ using namespace std;
 
 class parser {
  private:
-  void error ();
   void deviceList();
   void connectionList();
   void monitorList();
@@ -46,7 +45,8 @@ class parser {
   parser (network* network_mod,
 	  devices* devices_mod,
 	  monitor* monitor_mod,
-	  scanner* scanner_mod);
+	  scanner* scanner_mod,
+	  error* error_mod);
     /* the constructor takes pointers to various other classes as parameters */
 };
 

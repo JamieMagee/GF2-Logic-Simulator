@@ -16,6 +16,7 @@ class error{
 		int warningCount;
 		vector<errorstring> errorlist;	
 	public:
+		error();
 		void newError(int errorCode);
 		void newWarning(int warningCode);
 		void countError();//counts total number of errors and 

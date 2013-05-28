@@ -19,11 +19,13 @@ bool MyApp::OnInit()
 
   // Construct the six classes required by the innards of the logic simulator
   nmz = new names();
+  erz = new error();
   netz = new network(nmz);
   dmz = new devices(nmz, netz);
   mmz = new monitor(nmz, netz);
   smz = new scanner(nmz, wxString(argv[1]).mb_str());
-  pmz = new parser(netz, dmz, mmz, smz);
+  pmz = new parser(netz, dmz, mmz, smz, erz);
+  
 
 	//TODO: remove this when the scanner and parser work
 	if (argc == 2 && wxString(argv[1]) == wxT("builtin-example"))
