@@ -123,7 +123,7 @@ Comments start with \texttt{/*} and are terminated by the first \texttt{*/}. A \
 
 For all errors, the definition file will continue to be read as far as possible and further errors will be reported. However, running the simulation is not allowed until the errors have been fixed and the file loaded again. Duplicate connections or monitors result in a warning. Warnings still allow the simulation to be run. 
 
-If a semicolon is omitted, an error message should be printed and text should be skipped until the next semicolon is found. Scanning should then continue as normal. A missing semicolon will be detected by the occurrence of a syntax error. After reading as many symbols as are allowed by the syntax rules in a \texttt{dev}, \texttt{con} or \texttt{mon} statement, the next symbol expected is either \texttt{END} or a semicolon. If the next symbol is neither of these, then a semicolon has been omitted. 
+If a semicolon is omitted, an error message should be printed and text should be skipped until the next semicolon is found. Scanning should then continue as normal. A missing semicolon will be detected by the occurrence of a syntax error. After reading as many symbols as are allowed by the syntax rules in a \texttt{dev}, \texttt{con} or \texttt{mon} statement, the next symbol expected is a semicolon. If the next symbol isn't a semicolon, then a semicolon has been omitted. 
 
 If a \texttt{dev}, \texttt{con}, or \texttt{mon} statement does not conform to the correct syntax, then it will be ignored, an error message will be printed, and scanning will continue after the next semicolon. 
 
@@ -172,10 +172,10 @@ For all errors, the error message will include the line number and indicate the 
 
 
 \subsection{Example definition file for XOR gate circuit}
-\lstinputlisting[language=logicdef]{../examples/xor.txt}
+\lstinputlisting[language=logicdef]{../examples/xor.gf2}
 
 \subsection{Example definition file for 4 bit adder circuit}
-\lstinputlisting[language=logicdef]{../examples/4bitadder.txt}
+\lstinputlisting[language=logicdef]{../examples/4bitadder.gf2}
 
 \section{Appendix: EBNF}
 \verbatiminput{../docs/ebnf.txt}

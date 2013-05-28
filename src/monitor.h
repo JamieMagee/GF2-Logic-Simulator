@@ -5,6 +5,7 @@
 #include "network.h"
 #include "devices.h"
 #include <vector>
+#include <string>
 using namespace std;
 
 const int maxmonitors = 10;      /* max number of monitor points */
@@ -48,6 +49,12 @@ class monitor {
   void getmonname (int n, name& dev, name& outp);
     /* Returns name of n'th monitor.                                       */
 
+  // Returns the name of the monitored signal as a string
+  string getsignalstring(int m);
+
+  // Returns the number of samples recorded by the n'th monitor
+  int getsamplecount(int m);
+  
   void resetmonitor (void);
     /* Initialises monitor memory in preparation for a new output sequence */
  

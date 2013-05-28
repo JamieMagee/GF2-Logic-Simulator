@@ -205,3 +205,32 @@ network::network (names* names_mod)
   lastdev = NULL;
 }
 
+string network::getsignalstring(name dev, name p)
+{
+	if (dev==blankname)
+		return "";
+	string str = nmz->getnamestring(dev);
+	if (p != blankname)
+		str += "." + nmz->getnamestring(p);
+	return str;
+}
+
+string network::getsignalstring(devlink d, outplink o)
+{
+	if (d==NULL)
+		return "";
+	name opn = blankname;
+	if (o==NULL)
+		return getsignalstring(d->id);
+	return getsignalstring(d->id, o->id);
+}
+
+string network::getsignalstring(devlink d, inplink i)
+{
+	if (d==NULL)
+		return "";
+	name opn = blankname;
+	if (i==NULL)
+		return getsignalstring(d->id);
+	return getsignalstring(d->id, i->id);
+}

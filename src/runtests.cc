@@ -14,7 +14,7 @@ bool runTestSet(const string& testSetName, bool& testsAllPassed)
 	Tests *t;
 	if (testSetName=="names")
 		t = new NamesTests();
-	if (testSetName=="scanner")
+	else if (testSetName=="scanner")
 		t = new ScannerTests();
 	else
 		return false;

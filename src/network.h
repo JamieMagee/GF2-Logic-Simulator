@@ -2,6 +2,9 @@
 #define network_h
 
 #include "names.h"
+#include <string>
+
+using namespace std;
 
 /* Network specification */
 
@@ -76,6 +79,11 @@ class network {
  
   network (names* names_mod);
   /* Called on system initialisation.                                      */
+
+  string getsignalstring(name dev, name p=blankname);
+  string getsignalstring(devlink dev, outplink o);
+  string getsignalstring(devlink dev, inplink i);
+  /* Returns the string corresponding to the given device and pin          */
 
  private:
   devlink devs;          // the list of devices

@@ -15,6 +15,7 @@ class scanner
 {
 	public:
 		symbol s;
+		names* defnames;//Pointer to instance of names class
 
 		scanner (names* names_mod,		//Pointer to names class
 				 const char* defname);	//Name of file being read
@@ -33,7 +34,6 @@ class scanner
 		int linenum;	//Number of lines in definition file
 		int cursymlen;	//Length of current symbol. Used for error printing
 		string line;	//Current line contents. Used for error printing
-		names* defnames;//Pointer to instance of names class
 
 
 		void getch();	//Gets next input character

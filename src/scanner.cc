@@ -21,11 +21,9 @@ scanner::~scanner()
 
 void scanner::getsymbol(symbol& s, name& id, int& num)
 {
-	num = 0;
 	s = badsym;
 	cursymlen = 0;
 	skipspaces();
-	skipcomments();
 	if (eofile) s = eofsym;
 	else
 	{
@@ -53,22 +51,35 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
 				{
 					case '=':
 						s = equals;
+						getch();
 						break;
 					case ';':
 						s = semicol;
+						getch();
 						break;
 					case ':':
 						s = colon;
+						getch();
 						break;
 					case '.':
 						s = dot;
+						getch();
+						break;
+					case '/':
+						getch();
+						if (curch == '*')
+						{
+							getch();
+							skipcomments();
+							getsymbol(s, id, num);
+						}
 						break;
 					default:
 						s = badsym;
+						getch();
 						break;
 				}
 				cursymlen = 1;
-				getch();
 			}
 		}
 	}
@@ -94,13 +105,7 @@ void scanner::getch()
 	if (curch == '\n')
 	{
 		linenum++;
-		eoline = true;
-	}
-	if (eoline)
-	{
-		line.clear();	// Clear string to start new line
-		//skipspaces();
-		eoline = false;
+		line.clear();
 	}
 	if (prevch != '\n')
 	{
@@ -112,7 +117,7 @@ void scanner::getnumber(int& number)
 {
 	number = 0;
 	cursymlen = 0;
-	while (isdigit(curch))
+	while (isdigit(curch) && !eofile)
 	{
 		number *= 10;
 		number += (int(curch) - int('0'));
@@ -125,7 +130,7 @@ void scanner::getname(name& id)
 {
 	namestring str;
 	cursymlen = 0;
-	while (isalnum(curch))
+	while (isalnum(curch) && !eofile)
 	{
 		str.push_back(curch);
 		cursymlen++;
@@ -136,7 +141,7 @@ void scanner::getname(name& id)
 
 void scanner::skipspaces()
 {
-	while (isspace(curch))
+	while (isspace(curch) || curch == '\n')
 	{
 		getch();
 		if (eofile) break;
@@ -145,19 +150,12 @@ void scanner::skipspaces()
 
 void scanner::skipcomments()
 {
-	if (curch == '/')
+	while (!(prevch == '*' && curch == '/'))
 	{
 		getch();
-		if (curch == '*')
-		{
-			getch();
-			while (prevch != '*' && curch != '/')
-			{
-				getch();
-				if (eofile) break;
-			}
-		}
+		if (eofile) break;
 	}
+	getch(); //Get to next useful char
 }
 
 string scanner::getline()

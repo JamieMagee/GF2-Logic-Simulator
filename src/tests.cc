@@ -121,6 +121,8 @@ ScannerTests::ScannerTests()
 	title = "scanner module";
 }
 
+string scannerSymStrings[] = {"namesym", "numsym", "devsym", "consym", "monsym", "endsym", "classsym", "iosym", "colon", "semicol", "equals", "dot", "badsym", "eofsym"};
+
 void ScannerTests::tests()
 {
 	vector<ScannerExpectSym> expected;
@@ -139,12 +141,16 @@ END \n\
 	expected.push_back(ScannerExpectSym(__LINE__, numsym, "", 0, SCANEXPECT_MATCH_NUM));
 	expected.push_back(ScannerExpectSym(__LINE__, semicol));
 	expected.push_back(ScannerExpectSym(__LINE__, endsym));
-	checkSyms("example passing test", inputTxt, expected);
+	expected.push_back(ScannerExpectSym(__LINE__, eofsym));
+	checkSyms("test 1", inputTxt, expected);
 
 	inputTxt = "\
 DEVICES\n\
 SWITCH S1:0;\n\
-END \n\
+  /* test */END \n\
+/* test */    /* test2 */CONNECTIONS\n\
+END\n\
+/ \n\
 ";
 	expected.resize(0);
 	expected.push_back(ScannerExpectSym(__LINE__, devsym));
@@ -154,7 +160,11 @@ END \n\
 	expected.push_back(ScannerExpectSym(__LINE__, numsym, "", 0, SCANEXPECT_MATCH_NUM));
 	expected.push_back(ScannerExpectSym(__LINE__, semicol));
 	expected.push_back(ScannerExpectSym(__LINE__, endsym));
-	checkSyms("example failing test", inputTxt, expected);
+	expected.push_back(ScannerExpectSym(__LINE__, consym));
+	expected.push_back(ScannerExpectSym(__LINE__, endsym));
+	expected.push_back(ScannerExpectSym(__LINE__, badsym));
+	expected.push_back(ScannerExpectSym(__LINE__, eofsym));
+	checkSyms("test 2", inputTxt, expected);
 
 	inputTxt = "\
 DEVICES \n\
@@ -170,8 +180,17 @@ END\n\
 	expected.push_back(ScannerExpectSym(__LINE__, semicol));
 	expected.push_back(ScannerExpectSym(__LINE__, endsym));
 	expected.push_back(ScannerExpectSym(__LINE__, eofsym));
-	checkSyms("example crashing test", inputTxt, expected);
+	checkSyms("test 3", inputTxt, expected);
 
+	inputTxt = "CONNECTIONS";
+	expected.resize(0);
+	expected.push_back(ScannerExpectSym(__LINE__, consym));
+	checkSyms("single word", inputTxt, expected);
+
+	inputTxt = "12345";
+	expected.resize(0);
+	expected.push_back(ScannerExpectSym(__LINE__, numsym, "", 12345, SCANEXPECT_MATCH_NUM));
+	checkSyms("single number", inputTxt, expected);
 }
 
 void ScannerTests::checkSyms(string testDescription, string inputTxt, vector<ScannerExpectSym>& expected)
@@ -181,7 +200,7 @@ void ScannerTests::checkSyms(string testDescription, string inputTxt, vector<Sca
 	f.open(fileName.c_str(), ios::out | ios::trunc);
 	f << inputTxt;
 	f.close();
-	// TODO: check file was written correctly
+
 	names *nmz = new names();
 	scanner *smz = new scanner(nmz, fileName.c_str());
 	bool ok = true;
@@ -190,6 +209,8 @@ void ScannerTests::checkSyms(string testDescription, string inputTxt, vector<Sca
 	int num;
 	for (int i=0; i<expected.size(); i++)
 	{
+		id = blankname;
+		num = 0;
 		smz->getsymbol(sym, id, num);
 		if (!expected[i].matches(nmz, sym, id, num))
 		{
@@ -199,13 +220,13 @@ void ScannerTests::checkSyms(string testDescription, string inputTxt, vector<Sca
 		if (debug || !ok)
 		{
 			expected[i].write();
-			cout << "Actual symbol " << sym << " " << nmz->getnamestring(id) << " " << num << endl;
+			cout << "Actual symbol: " << scannerSymStrings[sym] << ", text '" << nmz->getnamestring(id) << "', num " << num << endl;
 		}
 		if (!ok) break;
 	}
 	if (ok) testSucceeded(testDescription);
 
-	remove("scannertest.tmp.gf2");
+	remove(fileName.c_str());
 }
 
 ScannerExpectSym::ScannerExpectSym(int lineNum_in, symbol sym, string txt, int num, int flags_in) :
@@ -234,8 +255,7 @@ bool ScannerExpectSym::matches(names *nmz, symbol sym, name id, int num)
 void ScannerExpectSym::write()
 {
 	cout << "from tests line " << lineNum << ": expected symbol ";
-	// TODO: strings instead of numbers?
-	cout << expectedSym;
+	cout << scannerSymStrings[expectedSym];
 	if (flags & SCANEXPECT_MATCH_TXT)
 		cout << " with text '" << expectedTxt << "'";
 	if (flags & SCANEXPECT_MATCH_NUM)

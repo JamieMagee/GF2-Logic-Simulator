@@ -46,6 +46,7 @@ void monitor::remmonitor (name dev, name outp, bool& ok)
 		{
 			found = true;
 			mtab.erase(it);
+			break;
 		}
 	}
 	ok = found;
@@ -122,11 +123,25 @@ void monitor::recordsignals (void)
  */
 bool monitor::getsignaltrace(int m, int c, asignal &s)
 {
-  if ((c < cycles) && (m < moncount ())) {
+  if ((c < cycles) && (m < moncount ()) && c<mtab[m].disp.size()) {
     s = mtab[m].disp[c];
     return true;
   }
   return false;
+}
+
+/***********************************************************************
+ *
+ * Get number of recorded cycles for the monitor, returns -1 if invalid
+ * monitor.
+ *
+ */
+int monitor::getsamplecount(int m)
+{
+  if (m < moncount ()) {
+    return mtab[m].disp.size();
+  }
+  return -1;
 }
 
 /***********************************************************************
@@ -178,8 +193,12 @@ monitor::monitor (names* names_mod, network* network_mod)
   netz = network_mod;
 }
 
-
-
+// Returns the name of the monitored signal as a string
+string monitor::getsignalstring(int m)
+{
+	if (m<0 || m>=moncount()) return "";
+	return netz->getsignalstring(mtab[m].devid, mtab[m].op->id);
+}
 
 
 
