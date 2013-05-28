@@ -34,6 +34,7 @@ error::error(scanner* scanner_mod)  /* the constructor */
 	errorlist.push_back("Error 121: Monitor must start with the name of a device or end of device list must be terminated with END (not semicolon)"); //21
 	errorlist.push_back("Error 122: Expect a dot after DTYPE as must specify output to monitor in monitor list"); //22
 	errorlist.push_back("Error 123: Bad device monitor"); //23
+	errorlist.push_back("Error 124: Need semicolon at end of line"); //24
 	
 	errorCount = 0;
 	warningCount = 0;

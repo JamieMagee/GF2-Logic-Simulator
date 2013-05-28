@@ -80,6 +80,10 @@ void parser::deviceList()
 		}
 		smz->getsymbol(cursym, curname, curint);
 	}
+	erz->newError(24);//new device must have a name or must end with END not semicolon
+	deviceList();
+	//smz->getsymbol(cursym, curname, curint);
+	
 }
 
 void parser::newDevice(int deviceType)
