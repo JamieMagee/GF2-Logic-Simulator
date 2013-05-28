@@ -68,9 +68,9 @@ Logic circuit definition files will have the extension \texttt{.gf2} and will ha
 
 \begin{verbatim}
 specfile = devices connections monitors
-devices = 'DEVICES' dev {';' dev} 'END'
-connections = 'CONNECTIONS' [con] {';' con} 'END' 
-monitors = 'MONITORS' [mon] {';' mon} 'END'
+devices = 'DEVICES' dev ';' {dev ';'} 'END'
+connections = 'CONNECTIONS' {con ';'} 'END' 
+monitors = 'MONITORS' [mon] {mon ';'} 'END'
 \end{verbatim} 
 
 \textbf{Semantics:} None.
