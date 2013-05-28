@@ -4,7 +4,7 @@ CXX = $(shell wx-config --cxx)
 
 SRC = logsim.cc names.cc scanner.cc network.cc parser.cc monitor.cc devices.cc userint.cc gui.cc guitest.cc
 
-L_OBJECTS = logsim.o names.o scanner.o network.o parser.o monitor.o devices.o userint.o gui.o circuit.o error.o
+L_OBJECTS = logsim.o names.o scanner.o network.o parser.o monitor.o devices.o userint.o gui.o circuit.o error.o gui-devices.o
 
 G_OBJECTS = guitest.o names.o network.o monitor.o devices.o gui.o scanner.o parser.o
 
@@ -52,3 +52,4 @@ parser.o: parser.h names.h scanner.h network.h devices.h monitor.h
 scanner.o: scanner.h names.h
 userint.o: userint.h names.h network.h devices.h monitor.h
 circuit.o: circuit.cc circuit.h observer.h
+gui-devices.o: gui-devices.h network.h

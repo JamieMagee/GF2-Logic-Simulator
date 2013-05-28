@@ -7,6 +7,7 @@
 #include <algorithm>
 #include "scanner.h"
 #include "parser.h"
+#include "gui-devices.h"
 
 using namespace std;
 
@@ -500,6 +501,7 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_BUTTON(SIMCTRL_BUTTON_CONT_ID, MyFrame::OnButtonContinue)
   EVT_BUTTON(MONITORS_ADD_BUTTON_ID, MyFrame::OnButtonAddMon)
   EVT_BUTTON(MONITORS_DEL_BUTTON_ID, MyFrame::OnButtonDelMon)
+  EVT_BUTTON(DEVICES_EDIT_BUTTON_ID, MyFrame::OnButtonEditDevs)
 END_EVENT_TABLE()
   
 MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, const wxSize& size,
@@ -577,7 +579,8 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	monitors_add_btn = new wxButton(mainPanel, MONITORS_ADD_BUTTON_ID, _("Add monitors"));
 	monitors_rem_btn = new wxButton(mainPanel, MONITORS_DEL_BUTTON_ID, _("Remove monitors"));
 	edit_sizer->Add(monitors_add_btn, 0, (wxALL & ~wxBOTTOM) | wxEXPAND, 10);
-	edit_sizer->Add(monitors_rem_btn, 0, (wxALL & ~wxTOP) | wxEXPAND, 10);
+	edit_sizer->Add(monitors_rem_btn, 0, wxLEFT | wxRIGHT | wxEXPAND, 10);
+	edit_sizer->Add(new wxButton(mainPanel, DEVICES_EDIT_BUTTON_ID, _("Edit devices")), 0, (wxALL & ~wxTOP) | wxEXPAND, 10);
 
 	// wxCheckListBox that allows switch states to be changed 
 	wxStaticBoxSizer *switches_sizer = new wxStaticBoxSizer(wxVERTICAL, mainPanel, _("Switches"));
@@ -737,6 +740,13 @@ void MyFrame::OnButtonAddMon(wxCommandEvent& event)// "Add monitors" button clic
 void MyFrame::OnButtonDelMon(wxCommandEvent& event)// "Remove monitors" button clicked
 {
 	DelMonitorsDialog *dlg = new DelMonitorsDialog(c, this, _("Remove monitors"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
+	dlg->ShowModal();
+	dlg->Destroy();
+}
+
+void MyFrame::OnButtonEditDevs(wxCommandEvent& event)// "Edit devices" button clicked
+{
+	DevicesDialog *dlg = new DevicesDialog(c, this, wxID_ANY, _("Edit devices"));
 	dlg->ShowModal();
 	dlg->Destroy();
 }

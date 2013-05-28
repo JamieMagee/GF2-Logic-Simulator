@@ -1,0 +1,123 @@
+#ifndef gui_devices_h
+#define gui_devices_h
+
+#include <wx/wx.h>
+#include <wx/spinctrl.h>
+#include <wx/listbox.h>
+#include <wx/panel.h>
+#include <wx/combobox.h>
+#include "network.h"
+#include "circuit.h"
+#include "observer.h"
+#include <string>
+#include <vector>
+using namespace std;
+
+extern string devicenamestrings[baddevice];
+
+class SelectedDevice
+{
+private:
+	devlink selected;
+public:
+	ObserverSubject changed;
+	devlink Get()
+	{
+		return selected;
+	}
+	void Set(devlink d)
+	{
+		selected = d;
+		changed.Trigger();
+	}
+};
+
+struct DeviceInfo
+{
+	devlink d;
+	string devname;
+	string devdescription;
+};
+
+class DeviceKindComboBox: public wxComboBox
+{
+	;
+};
+
+class DevicesListBox: public wxListBox
+{
+public:
+	DevicesListBox(circuit* circ, SelectedDevice* selectDev, wxWindow* parent, wxWindowID id);
+private:
+	vector<DeviceInfo> devs;
+};
+
+// List of all inputs on a device and which output each is connected to, with buttons to add/remove connections
+class DeviceInputsPanel: public wxPanel
+{
+	//circuit* circ, devlink
+};
+
+// Lists the inputs of other devices that a particular device output is connected to, with buttons to add/remove connections
+class DeviceOutputPanel: public wxPanel
+{
+	//circuit* circ, devlink, outplink
+};
+
+// For devicekinds with nothing configurable: xorgate, dtype
+class DeviceDetailsPanel: public wxPanel
+{
+	;
+};
+
+// For devicekinds: andgate, nandgate, orgate, norgate
+class DeviceDetailsPanel_Gate: public DeviceDetailsPanel
+{
+	;
+};
+
+// For devicekind: aswitch
+class DeviceDetailsPanel_Switch: public DeviceDetailsPanel
+{
+	;
+};
+
+// For devicekind: aclock
+class DeviceDetailsPanel_Clock: public DeviceDetailsPanel
+{
+	;
+};
+
+// For a given input, allow an output to be chosen to connect to it
+class ConnectToInputDialog: public wxDialog
+{
+	;
+};
+
+// For a given output, allow input(s) to be chosen to connect to it
+class ConnectToOutputDialog: public wxDialog
+{
+	;
+};
+
+class DevicesDialog: public wxDialog
+{
+public:
+	DevicesDialog(circuit* circ, wxWindow* parent, wxWindowID id, const wxString& title, devlink d=NULL);
+	void OnDeviceSelect();
+	~DevicesDialog();
+private:
+	circuit* c;
+	SelectedDevice selectedDev;
+	DevicesListBox* devListBox;
+	DeviceDetailsPanel* detailsPanel;
+	DeviceInputsPanel* inputsPanel;
+	vector<DeviceOutputPanel*> outputPanels;
+
+	void DestroyDeviceWidgets();
+	DECLARE_EVENT_TABLE()
+};
+
+
+
+#endif /* gui_devices_h */

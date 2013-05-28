@@ -28,7 +28,8 @@ enum {
   SIMCTRL_BUTTON_CONT_ID,
   MONITORS_ADD_BUTTON_ID,
   MONITORS_DEL_BUTTON_ID,
-  SWITCHES_CTRL_ID
+  SWITCHES_CTRL_ID,
+  DEVICES_EDIT_BUTTON_ID
 }; // widget identifiers
 
 int GetGlutTextWidth(wxString txt, void *font=NULL);
@@ -108,6 +109,7 @@ class MyFrame: public wxFrame
   void OnButtonContinue(wxCommandEvent& event);
 	void OnButtonAddMon(wxCommandEvent& event);
 	void OnButtonDelMon(wxCommandEvent& event);
+	void OnButtonEditDevs(wxCommandEvent& event);
 	void UpdateControlStates();
  
   DECLARE_EVENT_TABLE()
