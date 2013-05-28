@@ -364,7 +364,8 @@ void devices::updateclocks (void)
  */
 void devices::executedevices (bool& ok)
 {
-  const int maxmachinecycles = 20;
+  int maxmachinecycles = 20;
+  int count = 0;
   devlink d;
   int machinecycle;
   if (debugging)
@@ -387,9 +388,11 @@ void devices::executedevices (bool& ok)
         case xorgate:  execxorgate (d);          break;
         case dtype:    execdtype (d);            break;     
       }
+      if (machinecycle==1) count++;
       if (debugging)
 	showdevice (d);
     }
+    if (machinecycle==1) maxmachinecycles = 20 + 2*count;
   } while ((! steadystate) && (machinecycle < maxmachinecycles));
   if (debugging)
     cout << "End of execution cycle" << endl;
