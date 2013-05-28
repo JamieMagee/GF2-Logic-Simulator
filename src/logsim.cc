@@ -19,7 +19,7 @@ bool MyApp::OnInit()
 
   // Construct the six classes required by the innards of the logic simulator
   nmz = new names();
-  erz = new error();
+  erz = new error(smz);
   netz = new network(nmz);
   dmz = new devices(nmz, netz);
   mmz = new monitor(nmz, netz);

@@ -639,7 +639,7 @@ bool MyFrame::loadFile(const char * filename)
 	c->Clear();
 
 	scanner *smz = new scanner(c->nmz(), filename);
-	error *erz = new error();
+	error *erz = new error(smz);
 	parser *pmz = new parser(c->netz(), c->dmz(), c->mmz(), smz, erz);
 	bool result = pmz->readin();
 

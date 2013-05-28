@@ -23,7 +23,7 @@ class scanner
 		void getsymbol(symbol& s,		//Symbol type read
 					   name& id,			//Return symbol name (if it has one)
 					   int& num);			//Return symbol value (if it's a number)
-		void getcurrentline();
+		void writelineerror();
 
 	private:
 		ifstream inf;	//Input file
@@ -35,12 +35,10 @@ class scanner
 		int cursymlen;	//Length of current symbol. Used for error printing
 		string line;	//Current line contents. Used for error printing
 
-
 		void getch();	//Gets next input character
 		void getnumber(int& number);	//Reads number from file
 		void getname(name& id); //Reads name from file
 		string getline();	//Reads the line
-		void writelineerror();	//Writes out an error with a caret pointer
 		void skipspaces(); //Skips spaces
 		void skipcomments(); //Skips comments
 };

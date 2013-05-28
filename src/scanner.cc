@@ -12,6 +12,7 @@ scanner::scanner(names* names_mod, const char* defname)
 		cout << "Error: cannot open file for reading" << endl;
 	}
 	eofile = (inf.get(curch) == 0);	//Get first character
+	linenum=1;
 }
 
 scanner::~scanner()
