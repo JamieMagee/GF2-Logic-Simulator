@@ -1,0 +1,41 @@
+/* An example circuit that causes the simulator to fail with the error message "Error: network is oscillating" */
+
+/* Lots of not gates connected in series */
+
+DEVICES
+CLOCK CLK1:5;
+NAND G1:1;
+NAND G2:1;
+NAND G3:1;
+NAND G4:1;
+NAND G5:1;
+NAND G6:1;
+NAND G7:1;
+NAND G8:1;
+NAND G9:1;
+NAND G10:1;
+NAND G11:1;
+NAND G12:1;
+NAND G13:1;
+END
+
+CONNECTIONS
+G1.I1 = CLK1;
+G2.I1 = G1;
+G3.I1 = G2;
+G4.I1 = G3;
+G5.I1 = G4;
+G6.I1 = G5;
+G7.I1 = G6;
+G8.I1 = G7;
+G9.I1 = G8;
+G10.I1 = G9;
+G11.I1 = G10;
+G12.I1 = G11;
+G13.I1 = G12;
+END
+
+MONITORS
+CLK1;
+G12;
+END
