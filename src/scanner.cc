@@ -94,7 +94,7 @@ void scanner::writelineerror()
 		errorptr.push_back(' ');
 	}
 	errorptr.push_back('^');
-	cout << "Line " << linenum << ":";
+	cout << "Line " << linenum << ":" << endl;
 	cout << getline() << endl;		//Outputs current line
 	cout << errorptr << endl;	//Outputs a caret at the error
 }
@@ -103,12 +103,12 @@ void scanner::getch()
 {
 	prevch = curch;
 	eofile = (inf.get(curch) == 0);	//get next character
-	if (curch == '\n')
+	if (prevch == '\n')
 	{
 		linenum++;
 		line.clear();
 	}
-	if (prevch != '\n')
+	else
 	{
 		line.push_back(prevch);
 	}
