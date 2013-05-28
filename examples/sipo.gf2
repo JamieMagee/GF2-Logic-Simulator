@@ -1,6 +1,8 @@
 DEVICES
 CLOCK CLK1:2;
 CLOCK CLK2:1;
+SWITCH S:0; /* Set switch */
+SWITCH R:0; /* Reset switch */
 DTYPE D1;
 DTYPE D2;
 DTYPE D3;
@@ -16,6 +18,14 @@ D1.CLK = CLK2;
 D2.CLK = CLK2;
 D3.CLK = CLK2;
 D4.CLK = CLK2;
+D1.SET = S;
+D2.SET = S;
+D3.SET = S;
+D4.SET = S;
+D1.CLEAR = R;
+D2.CLEAR = R;
+D3.CLEAR = R;
+D4.CLEAR = R;
 END
 
 MONITORS
