@@ -1,8 +1,8 @@
 specfile = devices connections monitors
 
-devices = 'DEVICES' dev {';' dev} 'END'
-connections = 'CONNECTIONS' [con] {';' con} 'END' 
-monitors = 'MONITORS' [mon] {';' mon} 'END'
+devices = 'DEVICES' dev ';' {dev ';'} 'END'
+connections = 'CONNECTIONS' {con ';'} 'END' 
+monitors = 'MONITORS' {mon ';'} 'END'
 
 dev = clock|switch|gate|dtype|xor
 con = devicename'.'input '=' devicename['.'output]
