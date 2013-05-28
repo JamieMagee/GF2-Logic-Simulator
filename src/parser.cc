@@ -90,13 +90,13 @@ void parser::newDevice(int deviceType)
 		name devName = curname;
 		if (deviceType == 10)
 		{
-			cout << "DTYPE with name integer " << devName << endl;
+			//cout << "DTYPE with name integer " << devName << endl;
 			dmz->makedevice(dtype, devName, 0, correctOperation);	//create DTYPE with name devName
 			return;
 		}
 		if (deviceType == 11)
 		{
-			cout << "XOR with name integer " << devName << endl;
+			//cout << "XOR with name integer " << devName << endl;
 			dmz->makedevice(xorgate, devName, 2, correctOperation); //create XOR with name devName
 			return;
 		}
@@ -112,7 +112,7 @@ void parser::newDevice(int deviceType)
 						if (curint > 0)
 						{
 							dmz->makedevice(aclock, devName, curint, correctOperation); //create clock with curint and devName
-							cout << "CLOCK with name integer " << devName << " and " << curint << " program cycles per clock cycle" << endl;
+							//cout << "CLOCK with name integer " << devName << " and " << curint << " program cycles per clock cycle" << endl;
 						}
 						else
 						{
@@ -123,7 +123,7 @@ void parser::newDevice(int deviceType)
 						if (curint == 1 || curint == 0)
 						{
 							dmz->makedevice(aswitch, devName, curint, correctOperation);//create switch with curint and devName
-							cout << "SWITCH with name integer " << devName << " and intial state " << curint << endl;
+							//cout << "SWITCH with name integer " << devName << " and intial state " << curint << endl;
 						}
 						else
 						{
@@ -140,20 +140,20 @@ void parser::newDevice(int deviceType)
 							{
 								case 6:
 									dmz->makedevice(andgate, devName, curint, correctOperation);//create and gate with curint and devName
-									cout << "AND gate with name integer " << devName << " and " << curint << " input(s)" << endl;
+									//cout << "AND gate with name integer " << devName << " and " << curint << " input(s)" << endl;
 									break;
 								case 7:
 									dmz->makedevice(nandgate, devName, curint, correctOperation);//create nand gate with curint and devName
-									cout << "NAND gate with name integer " << devName << " and " << curint << " input(s)" << endl;
+									//cout << "NAND gate with name integer " << devName << " and " << curint << " input(s)" << endl;
 									break;
 								case 8:
 									dmz->makedevice(orgate, devName, curint, correctOperation);//create or gate with curint and devName
-									cout << "OR gate with name integer " << devName << " and " << curint << " input(s)" << endl;
+									//cout << "OR gate with name integer " << devName << " and " << curint << " input(s)" << endl;
 									break;
 								case 9:
 									break;
 									dmz->makedevice(norgate, devName, curint, correctOperation);//create nor gate with curint and devName
-									cout << "NOR gate with name integer " << devName << " and " << curint << " input(s)" << endl;
+									//cout << "NOR gate with name integer " << devName << " and " << curint << " input(s)" << endl;
 								default:
 									cout << "How on earth have you managed to get here?" << endl;
 							}
@@ -239,19 +239,21 @@ void parser::newConnection()
 				if (cursym == equals) //SEARCH - you have got to here
 				{
 					smz->getsymbol(cursym, curname, curint);
-					if (smz->defnames->namelength (curname) != baddevice)
+					if (smz->defnames->namelength (curname) != 0)
 					{
 						connectionOutName = curname;
-						switch (curname)
+						devlink devtype = netz->finddevice(curname);
+						switch (devtype ? devtype->kind : baddevice)
 						{
-							case 10:
+							case 7:
 								smz->getsymbol(cursym, curname, curint);
 								if (cursym == dot)
 								{
 									smz->getsymbol(cursym, curname, curint);
 									if (cursym == iosym)
 									{
-										netz->makeconnection(connectionInName, inputPin, connectionOutName, cursym, correctOperation); //DAT NESTING
+										netz->makeconnection(connectionInName, inputPin, connectionOutName, curname, correctOperation); //DAT NESTING
+										//cout << "Connect " << smz->defnames->getnamestring(connectionInName) << "." << smz->defnames->getnamestring(inputPin) << " to " << smz->defnames->getnamestring(connectionOutName) << "." << smz->defnames->getnamestring(curname) << endl;
 										return;
 									}
 								}
@@ -262,6 +264,7 @@ void parser::newConnection()
 								}
 							default:
 								netz->makeconnection(connectionInName, inputPin, connectionOutName, blankname, correctOperation);
+								//cout << "Connect " << smz->defnames->getnamestring(connectionInName) << "." << smz->defnames->getnamestring(inputPin) << " to " << smz->defnames->getnamestring(connectionOutName) << endl;
 								return;
 						}
 					}
@@ -336,20 +339,21 @@ void parser::monitorList()
 
 void parser::newMonitor()
 {
-//EBNF: mon = devicename['.'output]
+	//EBNF: mon = devicename['.'output]
 	if (smz->defnames->namelength (curname) != 0)
 	{
 		monitorName = curname;
-		switch (curname)
+		devlink devtype = netz->finddevice(curname);
+		switch (devtype ? devtype->kind : baddevice)
 		{
-			case 10:
+			case 7:
 				smz->getsymbol(cursym, curname, curint);
 				if (cursym == dot)
 				{
 					smz->getsymbol(cursym, curname, curint);
 					if (cursym == iosym)
 					{
-						mmz->makemonitor(monitorName, cursym, correctOperation);
+						mmz->makemonitor(monitorName, curname, correctOperation);
 						return;
 					}
 				}
@@ -357,10 +361,9 @@ void parser::newMonitor()
 				{
 					error();	//Expect a dot after dtype
 					cout << "Expect a dot after dtype" << endl;
-					
 				}
 			default:
-				mmz->makemonitor(monitorName, blankname, correctOperation);
+				mmz->makemonitor(monitorName, blankname, correctOperation);								
 				return;
 		}
 	}

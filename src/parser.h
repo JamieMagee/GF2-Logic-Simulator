@@ -23,7 +23,7 @@ class parser {
   devices* dmz; 
   monitor* mmz;
   scanner* smz;
-  error* erz;
+  //error* erz;
   int curint;
   symbol cursym;
   name curname;
