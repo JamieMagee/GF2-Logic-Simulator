@@ -33,6 +33,8 @@ class parser {
   name connectionInName;
   name connectionOutName;
   bool devicePresent;
+  bool connectionPresent;
+  bool monitorPresent;
 
   /* put other stuff that the class uses internally here */
   /* also declare internal functions                     */

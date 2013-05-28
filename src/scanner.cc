@@ -163,7 +163,7 @@ string scanner::getline()
 {
 	if (s != semicol)
 	{
-		while (curch != ';' && !eofile)
+		while (curch != ';' && !eofile && curch != '\n')
 		{
 			getch();
 		}

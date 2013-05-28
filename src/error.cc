@@ -15,7 +15,7 @@ error::error(scanner* scanner_mod)  /* the constructor */
 	errorlist.push_back("Error 0x0002: Must have monitor list last (after devices list and connections) in definition file, initialised by 'MONITORS'"); //2
 	errorlist.push_back("Error 0x0003: Must have at least one device in devices list"); //3
 	errorlist.push_back("Error 0x0004: Need device type for device definition"); //4
-	errorlist.push_back("Error 0x0005: New device must have a name or must end with END not semicolon"); //5
+	errorlist.push_back("Error 0x0005: Expecting device name or END after semicolon (device name must start with letter)"); //5
 	errorlist.push_back("Error 0x0006: Clock must have intiger clock number greater than 0"); //6
 	errorlist.push_back("Error 0x0007: Switch must be set to either 0 or 1"); //7
 	errorlist.push_back("Error 0x0008: Must specify an intiger number of inputs between 1 and 16 to a GATE"); //8
@@ -34,7 +34,7 @@ error::error(scanner* scanner_mod)  /* the constructor */
 	errorlist.push_back("Error 0x0015: Monitor must start with the name of a device or end of device list must be terminated with END (not semicolon)"); //21
 	errorlist.push_back("Error 0x0016: Expect a dot after DTYPE as must specify output to monitor in monitor list"); //22
 	errorlist.push_back("Error 0x0017: Bad device monitor"); //23
-	errorlist.push_back("Error 0x0018: Need semicolon at end of line"); //24
+	errorlist.push_back("Error 0x0018: Need semicolon at end of previous line"); //24
 	errorlist.push_back("Error 0x0019: Must only be one devices list"); //25
 	errorlist.push_back("Error 0x001A: There must be one 'DEVICES' block, it may not have been initialised properly");//26
 	errorlist.push_back("Error 0x001B: Devices block must be initialised with 'DEVICES'"); //27
@@ -42,7 +42,7 @@ error::error(scanner* scanner_mod)  /* the constructor */
 	errorlist.push_back("Error 0x001D: Must only be one monitors list"); //29
 	errorlist.push_back("Error 0x001E: There must be one 'CONNECTIONS' block, it may not have been initialised properly");//30
 	errorlist.push_back("Error 0x001F: There must be one 'MONITOR' block, it may not have been initialised properly");//31
-	
+	errorlist.push_back("Error 0x0020: Block must be terminated with 'END'");//32
 	errorCount = 0;
 	warningCount = 0;
 	

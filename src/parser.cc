@@ -10,9 +10,13 @@ bool parser::readin(void)
 {
 	//EBNF: specfile = devices connections monitors
 	bool deviceDone = 0, connectionDone =0, monitorDone=0;
+	cursym = badsym;
 	while (cursym!=eofsym)
 	{
-		smz->getsymbol(cursym, curname, curint);
+		if(cursym != devsym && cursym != consym && cursym != monsym)
+		{
+			smz->getsymbol(cursym, curname, curint);
+		}
 		if (cursym == devsym)
 		{
 			if (deviceDone)
@@ -33,6 +37,7 @@ bool parser::readin(void)
 			{
 				erz->newError(28);//Must only be one connections list
 			}
+			connectionPresent=0;
 			connectionDone=1;
 			connectionList();
 		}
@@ -46,6 +51,7 @@ bool parser::readin(void)
 			{
 				erz->newError(29);//Must only be one Monitors list
 			}
+			monitorPresent=0;
 			monitorDone = 1;
 			monitorList();
 		}
@@ -106,10 +112,14 @@ void parser::deviceList()
 		{
 			return;
 		}
+		else if (cursym == consym | cursym == devsym | cursym == monsym)
+		{
+			erz->newError(32);//Block must be terminated with 'END'
+			return;
+		}
 		else 
 		{
-			erz->newError(5);//new device must have a name or must end with END not semicolon
-			//cout << "new device must have a name or must end with END not semicolon" << endl;
+			erz->newError(5);//Expecting device name or END after semicolon (device name must start with letter)
 		}
 		smz->getsymbol(cursym, curname, curint);
 	}
@@ -235,22 +245,26 @@ void parser::newDevice(int deviceType)
 void parser::connectionList()
 {
 	//EBNF: connections = 'CONNECTIONS' {con ';'} 'END' 
-	smz->getsymbol(cursym, curname, curint);
-	if (cursym == endsym)
+	if (!connectionPresent)
 	{
-		erz->newWarning(0);//No Connections
-		return;
+		smz->getsymbol(cursym, curname, curint);
+		if (cursym == endsym)
+		{
+			erz->newWarning(0);//No Connections
+			return;
+		}
+		else if (cursym == namesym)
+		{
+			newConnection();
+			connectionPresent = 1;
+		}
+		else
+		{
+			erz->newError(12);//connection must start with the name of a device
+			//cout << "connection must start with the name of a device" << endl;
+		}
+		smz->getsymbol(cursym, curname, curint);
 	}
-	else if (cursym == namesym)
-	{
-		newConnection();
-	}
-	else
-	{
-		erz->newError(12);//connection must start with the name of a device
-		//cout << "connection must start with the name of a device" << endl;
-	}
-	smz->getsymbol(cursym, curname, curint);
 	while (cursym == semicol)
 	{
 		smz->getsymbol(cursym, curname, curint);
@@ -268,6 +282,19 @@ void parser::connectionList()
 			//cout << "Connection must start with the name of a device or end of device list must be terminated with END (not semicolon)" << endl;
 		}
 		smz->getsymbol(cursym, curname, curint);
+	}
+	erz->newError(24);//must end line in semicolon
+	while (cursym !=semicol && cursym !=endsym && cursym != eofsym)
+	{
+		smz->getsymbol(cursym, curname, curint);
+	}
+	if (cursym == semicol)
+	{
+		connectionList();
+	}
+	if (cursym == endsym)
+	{
+		return;
 	}
 }
 
@@ -351,22 +378,26 @@ void parser::newConnection()
 void parser::monitorList()
 {
 	//EBNF: monitors = 'MONITORS' {mon ';'} 'END'
-	smz->getsymbol(cursym, curname, curint);
-	if (cursym == endsym)
+	if (!monitorPresent)
 	{
-		erz->newWarning(1);//No Monitors
-		return;
+		smz->getsymbol(cursym, curname, curint);
+		if (cursym == endsym)
+		{
+			erz->newWarning(1);//No Monitors
+			return;
+		}
+		else if (cursym == namesym)
+		{
+			newMonitor();
+			monitorPresent=1;
+		}
+		else
+		{
+			erz->newError(20);//monitor must start with the name of a device
+			//cout << "monitor must start with the name of a device" << endl;
+		}
+		smz->getsymbol(cursym, curname, curint);
 	}
-	else if (cursym == namesym)
-	{
-		newMonitor();
-	}
-	else
-	{
-		erz->newError(20);//monitor must start with the name of a device
-		//cout << "monitor must start with the name of a device" << endl;
-	}
-	smz->getsymbol(cursym, curname, curint);
 	while (cursym == semicol)
 	{
 		smz->getsymbol(cursym, curname, curint);
@@ -384,6 +415,19 @@ void parser::monitorList()
 			//cout << "monitor must start with the name of a device or end of device list must be terminated with END (not semicolon)" << endl;
 		}
 		smz->getsymbol(cursym, curname, curint);
+	}
+	erz->newError(24);//must end line in semicolon
+	while (cursym !=semicol && cursym !=endsym && cursym != eofsym)
+	{
+		smz->getsymbol(cursym, curname, curint);
+	}
+	if (cursym == semicol)
+	{
+		monitorList();
+	}
+	if (cursym == endsym)
+	{
+		return;
 	}
 }
 
