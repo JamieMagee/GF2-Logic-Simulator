@@ -76,7 +76,8 @@ bool parser::readin(void)
 			erz->newError(31);//There must be a MONITORS block, it may not have been initialised properly
 		}
 		netz->checknetwork(correctOperation);
-		return (correctOperation /*&& anyErrors*/);
+		erz->anyErrors();
+		return (correctOperation && anyErrors);
 }
 
 void parser::deviceList()
@@ -92,12 +93,10 @@ void parser::deviceList()
 		else if (cursym == endsym)
 		{
 			erz->newError(3); //must have at least one device
-			//cout << "must have at least one device" << endl;
 		}
 		else
 		{
 			erz->newError(4); //need a device type
-			//cout << "need a device type" << endl;
 		}
 		smz->getsymbol(cursym, curname, curint);
 	}
@@ -148,13 +147,11 @@ void parser::newDevice(int deviceType)
 		name devName = curname;
 		if (deviceType == 10)
 		{
-			//cout << "DTYPE with name integer " << devName << endl;
 			dmz->makedevice(dtype, devName, 0, correctOperation);	//create DTYPE with name devName
 			return;
 		}
 		if (deviceType == 11)
 		{
-			//cout << "XOR with name integer " << devName << endl;
 			dmz->makedevice(xorgate, devName, 2, correctOperation); //create XOR with name devName
 			return;
 		}
@@ -170,7 +167,6 @@ void parser::newDevice(int deviceType)
 						if (curint > 0)
 						{
 							dmz->makedevice(aclock, devName, curint, correctOperation); //create clock with curint and devName
-							//cout << "CLOCK with name integer " << devName << " and " << curint << " program cycles per clock cycle" << endl;
 						}
 						else
 						{
@@ -181,7 +177,6 @@ void parser::newDevice(int deviceType)
 						if (curint == 1 || curint == 0)
 						{
 							dmz->makedevice(aswitch, devName, curint, correctOperation);//create switch with curint and devName
-							//cout << "SWITCH with name integer " << devName << " and intial state " << curint << endl;
 						}
 						else
 						{
@@ -198,19 +193,15 @@ void parser::newDevice(int deviceType)
 							{
 								case 6:
 									dmz->makedevice(andgate, devName, curint, correctOperation);//create and gate with curint and devName
-									//cout << "AND gate with name integer " << devName << " and " << curint << " input(s)" << endl;
 									break;
 								case 7:
 									dmz->makedevice(nandgate, devName, curint, correctOperation);//create nand gate with curint and devName
-									//cout << "NAND gate with name integer " << devName << " and " << curint << " input(s)" << endl;
 									break;
 								case 8:
 									dmz->makedevice(orgate, devName, curint, correctOperation);//create or gate with curint and devName
-									//cout << "OR gate with name integer " << devName << " and " << curint << " input(s)" << endl;
 									break;
 								case 9:
 									dmz->makedevice(norgate, devName, curint, correctOperation);//create nor gate with curint and devName
-									//cout << "NOR gate with name integer " << devName << " and " << curint << " input(s)" << endl;
 									break;
 								default:
 									cout << "How on earth have you managed to get here?" << endl;
@@ -261,7 +252,6 @@ void parser::connectionList()
 		else
 		{
 			erz->newError(12);//connection must start with the name of a device
-			//cout << "connection must start with the name of a device" << endl;
 		}
 		smz->getsymbol(cursym, curname, curint);
 	}
@@ -276,10 +266,14 @@ void parser::connectionList()
 		{
 			return;
 		}
+		else if (cursym == consym | cursym == devsym | cursym == monsym)
+		{
+			erz->newError(32);//Block must be terminated with 'END'
+			return;
+		}
 		else
 		{
 			erz->newError(13);//connection must start with the name of a device or end of device list must be terminated with END (not semicolon)
-			//cout << "Connection must start with the name of a device or end of device list must be terminated with END (not semicolon)" << endl;
 		}
 		smz->getsymbol(cursym, curname, curint);
 	}
@@ -328,50 +322,42 @@ void parser::newConnection()
 									smz->getsymbol(cursym, curname, curint);
 									if (cursym == iosym)
 									{
-										netz->makeconnection(connectionInName, inputPin, connectionOutName, curname, correctOperation); //DAT NESTING
-										//cout << "Connect " << smz->defnames->getnamestring(connectionInName) << "." << smz->defnames->getnamestring(inputPin) << " to " << smz->defnames->getnamestring(connectionOutName) << "." << smz->defnames->getnamestring(curname) << endl;
+										netz->makeconnection(connectionInName, inputPin, connectionOutName, curname, correctOperation);
 										return;
 									}
 								}
 								else
 								{
 									erz->newError(14);	//Expect a dot after dtype
-									//cout << "Expect a dot after dtype" << endl;
 								}
 							default:
 								netz->makeconnection(connectionInName, inputPin, connectionOutName, blankname, correctOperation);
-								//cout << "Connect " << smz->defnames->getnamestring(connectionInName) << "." << smz->defnames->getnamestring(inputPin) << " to " << smz->defnames->getnamestring(connectionOutName) << endl;
 								return;
 						}
 					}
 					else
 					{
 						erz->newError(15); //Device does not exist
-						//cout << "Device does not exist" << endl;
 					}
 				}
 				else
 				{
 					erz->newError(16);//Must specify output to connect to input with equals sign 
-					//cout << " " << endl;
 				}
 			}
 			else
 			{
 				erz->newError(17);//specify valid input gate after dot
-				//cout << "specify input gate after dot" << endl;
 			}
 		}
 		else
 		{
 			erz->newError(18);//need to seperate connection input with a '.' (or need to specify input)
-			//cout << " " << endl;
 		}
 	}
 	else
 	{
 		erz->newError(19); //Device does not exist
-		//cout << "Device does not exist" << endl;
 	}
 }
 
@@ -409,10 +395,14 @@ void parser::monitorList()
 		{
 			return;
 		}
+		else if (cursym == consym | cursym == devsym | cursym == monsym)
+		{
+			erz->newError(32);//Block must be terminated with 'END'
+			return;
+		}
 		else
 		{
 			erz->newError(21);//monitor must start with the name of a device or end of device list must be terminated with END (not semicolon)
-			//cout << "monitor must start with the name of a device or end of device list must be terminated with END (not semicolon)" << endl;
 		}
 		smz->getsymbol(cursym, curname, curint);
 	}
@@ -454,7 +444,6 @@ void parser::newMonitor()
 				else
 				{
 					erz->newError(22);	//Expect a dot after dtype
-					//cout << "Expect a dot after dtype" << endl;
 				}
 			default:
 				mmz->makemonitor(monitorName, blankname, correctOperation);								
@@ -464,7 +453,6 @@ void parser::newMonitor()
 	else
 	{
 		erz->newError(23);
-		//cout << "Bad device monitor" << endl;
 	}
 }
 
