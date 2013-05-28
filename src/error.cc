@@ -43,8 +43,8 @@ error::error(scanner* scanner_mod)  /* the constructor */
 }
 
 void error::newError(int errorCode){
-	cout << errorlist[errorCode] << endl;
 	smz->writelineerror();
+	cout << errorlist[errorCode] << endl;
 	errorCount ++;
 	
 }
