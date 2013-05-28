@@ -69,7 +69,7 @@ bool parser::readin(void)
 		}
 		if (!monitorDone)
 		{
-			erz->newError(30);//There must be a MONITORS block, it may not have been initialised properly
+			erz->newError(31);//There must be a MONITORS block, it may not have been initialised properly
 		}
 		netz->checknetwork(correctOperation);
 		return (correctOperation /*&& anyErrors*/);
