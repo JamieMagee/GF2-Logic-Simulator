@@ -40,18 +40,17 @@ depend:
 
 # DO NOT DELETE
 
-devices.o: devices.h names.h network.h
-gui.o: gui.h names.h devices.h network.h monitor.h wx_icon.xpm circuit.h observer.h gui-devices.h
-guitest.o: guitest.h names.h devices.h network.h monitor.h gui.h
 logsim.o: logsim.h names.h devices.h network.h monitor.h parser.h scanner.h
-logsim.o: userint.h gui.h
-monitor.o: monitor.h names.h network.h devices.h
+logsim.o: error.h userint.h gui.h circuit.h observer.h
 names.o: names.h
-network.o: network.h names.h
-parser.o: parser.h names.h scanner.h network.h devices.h monitor.h
 scanner.o: scanner.h names.h
+network.o: network.h names.h
+parser.o: parser.h names.h scanner.h network.h devices.h monitor.h error.h
+monitor.o: monitor.h names.h network.h devices.h
+devices.o: devices.h names.h network.h
 userint.o: userint.h names.h network.h devices.h monitor.h
-circuit.o: circuit.cc circuit.h observer.h
-gui-devices.o: gui-devices.h network.h
-gui-misc.o: gui-misc.h
-gui-devices-infopanels.o: gui-devices-infopanels.h gui-misc.h
+gui.o: gui.h names.h devices.h network.h monitor.h circuit.h observer.h
+gui.o: wx_icon.xpm scanner.h parser.h error.h gui-devices.h
+gui.o: gui-devices-infopanels.h gui-misc.h gui-id.h
+guitest.o: guitest.h names.h devices.h network.h monitor.h gui.h circuit.h
+guitest.o: observer.h
