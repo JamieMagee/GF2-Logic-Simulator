@@ -54,7 +54,13 @@ public:
  
   void debug (bool on);
     /* Used to set debugging switch.                                       */
- 
+
+  // Changes the number of inputs for a gate
+  void SetGateInputCount(devlink d, int newCount);
+
+  // Gets the name for an input of a gate (n=1 -> 'I1', n=2 -> 'I2', etc)
+  name GetGateInputName(int n);
+
   devices (names* names_mod, network* net_mod);
     /* Called to initialise module.                                        */
 };

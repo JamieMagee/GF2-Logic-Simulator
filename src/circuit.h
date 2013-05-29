@@ -80,8 +80,6 @@ public:
 	int GetContinuedCycles(){ return continuedCycles; }
 	static bool IsDeviceNameValid(string devname);
 	void RemoveDevice(devlink d);
-	
 };
-
 
 #endif

@@ -173,7 +173,7 @@ bool circuit::GetUnmonitoredOutputs(vector<outputinfo> * unmonitoredOutputsRet)
 
 bool circuit::IsDeviceNameValid(string devname)
 {
-	// Checks syntax of a device name string (but not whether a device already exists with that name)
+	// Checks syntax of a device name string (but not whether a device already exists with that name or if it's a reserved word)
 	if (!devname.length())
 		return false;
 	if (!isalpha(devname[0]))
@@ -204,5 +204,3 @@ void circuit::RemoveDevice(devlink d)
 	circuitChanged.Trigger();
 	monitorsChanged.Trigger();
 }
-
-

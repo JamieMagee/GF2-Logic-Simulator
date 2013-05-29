@@ -40,6 +40,18 @@ struct devicerec {
 };
 typedef devicerec* devlink;
 
+template <class T>
+int GetLinkedListLength(T item)
+{
+	int count = 0;
+	while (item != NULL)
+	{
+		count++;
+		item = item->next;
+	}
+	return count;
+}
+
 class network {
   names* nmz;  // the instatiation of the names class that we are going to use.
 

@@ -2,10 +2,92 @@
 #include "network.h"
 #include "wx_icon.xpm"
 #include <algorithm>
+#include <climits>
 using namespace std;
 
 //typedef enum {aswitch, aclock, andgate, nandgate, orgate,norgate, xorgate, dtype, baddevice} devicekind;
-wxString devicenamestrings[baddevice] = {_("Switch"), _("Clock"), _("AND gate"), _("NAND gate"), _("OR gate"), _("NOR gate"), _("XOR gate"), _("D-type flip-flop")};
+wxString devicekindstrings[baddevice] = {_("Switch"), _("Clock"), _("AND gate"), _("NAND gate"), _("OR gate"), _("NOR gate"), _("XOR gate"), _("D-type flip-flop")};
+
+DevicekindDropdown::DevicekindDropdown(wxWindow* parent, wxWindowID id, vector<devicekind> filterDevicekinds) :
+	wxComboBox(parent, id, wxT(""), wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY)
+{
+	filter = filterDevicekinds;
+	for (int i=0; i<baddevice; i++)
+	{
+		if (filter.size()==0 || find(filter.begin(), filter.end(), devicekind(i)) != filter.end())
+			Append(devicekindstrings[i]);
+	}
+}
+
+devicekind DevicekindDropdown::GetDevicekind()
+{
+	if (GetSelection()==wxNOT_FOUND)
+		return baddevice;
+
+	for (int i=0; i<baddevice; i++)
+	{
+		if (devicekindstrings[i] == GetValue())
+			return devicekind(i);
+	}
+	return baddevice;
+}
+
+void DevicekindDropdown::SetDevicekind(devicekind dk)
+{
+	if (dk>=0 && dk<baddevice)
+	{
+		if (filter.size()==0 || find(filter.begin(), filter.end(), dk) != filter.end())
+			SetValue(devicekindstrings[dk]);
+	}
+}
+
+
+DeviceNameTextCtrl::DeviceNameTextCtrl(wxWindow* parent, wxWindowID id, const wxString& value) :
+	wxTextCtrl(parent, id, value)
+{}
+
+bool DeviceNameTextCtrl::CheckValid(circuit* c, bool errorDialog)
+{
+	if (!GetParent()) errorDialog = false;
+
+	if (GetValue() == wxT(""))
+	{
+		if (errorDialog) ShowErrorMsgDialog(GetParent(), _("Device name cannot be blank"));
+		return false;
+	}
+	if (!isalpha(GetValue()[0]))
+	{
+		if (errorDialog) ShowErrorMsgDialog(GetParent(), _("Device name must start with a letter"));
+		return false;
+	}
+	if (!circuit::IsDeviceNameValid(string(GetValue().mb_str())))
+	{
+		if (errorDialog) ShowErrorMsgDialog(GetParent(), _("Device name must contain only letters and numbers"));
+		return false;
+	}
+	if (c)
+	{
+		name newname = c->nmz()->cvtname(string(GetValue().mb_str()));
+		if (newname!=blankname && newname<=lastreservedname)
+		{
+			if (errorDialog) ShowErrorMsgDialog(GetParent(), _("Device name cannot be a reserved word"));
+			return false;
+		}
+		if (c->netz()->finddevice(newname)!=NULL)
+		{
+			if (errorDialog) ShowErrorMsgDialog(GetParent(), _("A device already exists with that name"));
+			return false;
+		}
+	}
+	return true;
+}
+
+
+void ShowErrorMsgDialog(wxWindow* parent, wxString txt)
+{
+	wxMessageDialog dlg(parent, txt, _("Error"), wxCANCEL | wxICON_ERROR);
+	dlg.ShowModal();
+}
 
 DevicesDialog::DevicesDialog(circuit* circ, wxWindow* parent, wxWindowID id, const wxString& title, devlink d) :
 	wxDialog(parent, id, title, wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
@@ -26,6 +108,7 @@ DevicesDialog::DevicesDialog(circuit* circ, wxWindow* parent, wxWindowID id, con
 	devListBox = new DevicesListBox(c, selectedDev, this, wxID_ANY);
 	devListBox->SetMinSize(wxSize(150,-1));
 	deviceListSizer->Add(devListBox, 1, wxALL | wxEXPAND, 10);
+	deviceListSizer->Add(new wxButton(this, DEVICECREATE_BUTTON_ID, _("Add device")), 0, (wxALL & ~wxTOP) | wxEXPAND, 10);
 
 	inputsPanel = new DeviceInputsPanel(c, selectedDev, this);
 	ioSizer->Add(inputsPanel, 1, wxEXPAND | wxALL, 5);
@@ -69,6 +152,14 @@ void DevicesDialog::OnDeviceSelectionChanged()
 	if (dk==xorgate || dk==dtype)
 	{
 		detailsPanel = new DeviceDetailsPanel(c, selectedDev, this);
+	}
+	else if (dk==aclock)
+	{
+		detailsPanel = new DeviceDetailsPanel_Clock(c, selectedDev, this);
+	}
+	else if (dk == andgate || dk == nandgate || dk == orgate || dk == norgate)
+	{
+		detailsPanel = new DeviceDetailsPanel_Gate(c, selectedDev, this);
 	}
 	else
 	{
@@ -119,8 +210,20 @@ void DevicesDialog::OnDeleteButton(wxCommandEvent& event)
 	c->RemoveDevice(d);
 }
 
+void DevicesDialog::OnCreateButton(wxCommandEvent& event)
+{
+	if (!c || !selectedDev) return;
+	NewDeviceDialog dlg(c, this, wxID_ANY, _("Create new device"));
+	if (dlg.ShowModal()==wxID_OK && dlg.newdev)
+	{
+		selectedDev->Set(dlg.newdev);
+		c->circuitChanged.Trigger();
+	}
+}
+
 BEGIN_EVENT_TABLE(DevicesDialog, wxDialog)
-	EVT_BUTTON(DEVICES_DELETE_BUTTON_ID, DevicesDialog::OnDeleteButton)
+	EVT_BUTTON(DEVICEDELETE_BUTTON_ID, DevicesDialog::OnDeleteButton)
+	EVT_BUTTON(DEVICECREATE_BUTTON_ID, DevicesDialog::OnCreateButton)
 END_EVENT_TABLE()
 
 
@@ -289,7 +392,7 @@ DeviceOutputPanel::DeviceOutputPanel(circuit* circ, outplink targetOutp, wxWindo
 	mainSizer->Add(monitorCheckbox, 0, wxALL, 10);
 	mainSizer->Add(new wxStaticText(this, wxID_ANY, _("Inputs connected to this output:")), 0, wxLEFT | wxRIGHT, 10);
 	lbox = new wxListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_NEEDED_SB | wxLB_EXTENDED);
-	lbox->SetMinSize(wxSize(150,100));
+	lbox->SetMinSize(wxSize(150,50));
 	mainSizer->Add(lbox, 1, wxEXPAND | wxLEFT | wxRIGHT, 10);
 	wxBoxSizer* buttonsSizer = new wxBoxSizer(wxHORIZONTAL);
 	btnAddConn = new wxButton(this, DEVICES_ADDCONN_BUTTON_ID, _("Connect"));
@@ -298,7 +401,6 @@ DeviceOutputPanel::DeviceOutputPanel(circuit* circ, outplink targetOutp, wxWindo
 	buttonsSizer->Add(btnDelConn, 1, wxEXPAND, 10);
 	mainSizer->Add(buttonsSizer, 0, wxEXPAND | (wxALL & ~wxTOP) , 10);
 	SetSizerAndFit(mainSizer);
-	FitInside();
 
 	c->circuitChanged.Attach(this, &DeviceOutputPanel::UpdateInps);
 	c->monitorsChanged.Attach(this, &DeviceOutputPanel::OnMonitorsChanged);
@@ -450,21 +552,47 @@ DeviceDetailsPanel::DeviceDetailsPanel(circuit* circ, SelectedDevice* selectedDe
 		gridsizer = new wxGridBagSizer();
 		wxString kindtext = wxT("Unknown device");
 		if (dk>=0 && dk<baddevice)
-			kindtext = devicenamestrings[dk];
+			kindtext = devicekindstrings[dk];
 		
 		gridsizer->Add(new wxStaticText(this, wxID_ANY, _("Device type:")), wxGBPosition(0,0), wxDefaultSpan, (wxALL & ~wxRIGHT) | wxALIGN_CENTER_VERTICAL, 10);
-		gridsizer->Add(new wxStaticText(this, wxID_ANY, kindtext), wxGBPosition(0,1), wxDefaultSpan, wxALL | wxALIGN_CENTER_VERTICAL, 10);
+		devicekindStaticText = new wxStaticText(this, wxID_ANY, kindtext);
+		gridsizer->Add(devicekindStaticText, wxGBPosition(0,1), wxDefaultSpan, wxALL | wxALIGN_CENTER_VERTICAL, 10);
 		gridsizer->Add(new wxStaticText(this, wxID_ANY, _("Name:")), wxGBPosition(0,3), wxDefaultSpan, (wxALL & ~wxRIGHT) | wxALIGN_CENTER_VERTICAL, 10);
 		devicenameCtrl = new wxTextCtrl(this, DEVICENAME_TEXTCTRL_ID, wxString(c->nmz()->getnamestring(d->id).c_str(), wxConvUTF8));
 		gridsizer->Add(devicenameCtrl, wxGBPosition(0,4), wxDefaultSpan, wxALL | wxEXPAND | wxALIGN_CENTER_VERTICAL, 10);
 		gridsizer->AddGrowableCol(1,3);
 		gridsizer->AddGrowableCol(4,5);
+
+		if (d->kind == aclock)
+		{
+			spinCtrl = new wxSpinCtrl(this);
+			spinCtrl->SetValue(selectedDev->Get()->frequency);
+			spinCtrl->SetRange(1,INT_MAX);
+			gridsizer->Add(new wxStaticText(this, wxID_ANY, _("Frequency:")), wxGBPosition(1,3), wxDefaultSpan, wxLEFT | wxBOTTOM | wxALIGN_CENTER_VERTICAL, 10);
+			gridsizer->Add(spinCtrl, wxGBPosition(1,4), wxDefaultSpan, (wxALL & ~wxTOP) | wxEXPAND | wxALIGN_CENTER_VERTICAL, 10);
+		}
+		else if (d->kind == andgate || d->kind == nandgate || d->kind == orgate || d->kind == norgate)
+		{
+			vector<devicekind> gateTypeChoices;
+			gateTypeChoices.push_back(andgate);
+			gateTypeChoices.push_back(nandgate);
+			gateTypeChoices.push_back(orgate);
+			gateTypeChoices.push_back(norgate);
+			gateTypeDropdown = new DevicekindDropdown(this, wxID_ANY, gateTypeChoices);
+			gateTypeDropdown->SetDevicekind(d->kind);
+			gridsizer->Add(new wxStaticText(this, wxID_ANY, _("Gate type:")), wxGBPosition(1,0), wxDefaultSpan, wxLEFT | wxBOTTOM | wxALIGN_CENTER_VERTICAL, 10);
+			gridsizer->Add(gateTypeDropdown, wxGBPosition(1,1), wxDefaultSpan, (wxALL & ~wxTOP) | wxEXPAND | wxALIGN_CENTER_VERTICAL, 10);
+
+			spinCtrl = new wxSpinCtrl(this);
+			spinCtrl->SetValue(GetLinkedListLength(selectedDev->Get()->ilist));
+			spinCtrl->SetRange(1,16);
+			gridsizer->Add(new wxStaticText(this, wxID_ANY, _("Inputs:")), wxGBPosition(1,3), wxDefaultSpan, wxLEFT | wxBOTTOM | wxALIGN_CENTER_VERTICAL, 10);
+			gridsizer->Add(spinCtrl, wxGBPosition(1,4), wxDefaultSpan, (wxALL & ~wxTOP) | wxEXPAND | wxALIGN_CENTER_VERTICAL, 10);
+		}
 		mainSizer->Add(gridsizer, 0, wxEXPAND);
 
-		CreateExtraFields();
-
 		buttonsSizer->AddStretchSpacer();
-		buttonsSizer->Add(new wxButton(this, DEVICES_DELETE_BUTTON_ID, _("Delete device")), 0, (wxALL & ~wxLEFT) | wxEXPAND, 10);
+		buttonsSizer->Add(new wxButton(this, DEVICEDELETE_BUTTON_ID, _("Delete device")), 0, (wxALL & ~wxLEFT) | wxEXPAND, 10);
 		updateBtn = new wxButton(this, DEVICES_APPLY_BUTTON_ID, _("Apply changes"));
 		updateBtn->Disable();
 		buttonsSizer->Add(updateBtn, 0, (wxALL & ~wxLEFT) | wxEXPAND, 10);
@@ -552,6 +680,51 @@ BEGIN_EVENT_TABLE(DeviceDetailsPanel, wxPanel)
 END_EVENT_TABLE()
 
 
+DeviceDetailsPanel_Clock::DeviceDetailsPanel_Clock(circuit* circ, SelectedDevice* selectedDev_in, wxWindow* parent, wxWindowID id) :
+	DeviceDetailsPanel(circ, selectedDev_in, parent, id)
+{}
+
+void DeviceDetailsPanel_Clock::UpdateApplyButtonState_ExtraFields()
+{
+	if (selectedDev->Get()->frequency != spinCtrl->GetValue())
+		updateBtn->Enable();
+}
+
+void DeviceDetailsPanel_Clock::OnApply_ExtraFields(bool& changedSomething)
+{
+	if (selectedDev->Get()->frequency != spinCtrl->GetValue())
+	{
+		selectedDev->Get()->frequency = spinCtrl->GetValue();
+		changedSomething = true;
+	}
+}
+
+DeviceDetailsPanel_Gate::DeviceDetailsPanel_Gate(circuit* circ, SelectedDevice* selectedDev_in, wxWindow* parent, wxWindowID id) :
+	DeviceDetailsPanel(circ, selectedDev_in, parent, id)
+{}
+
+void DeviceDetailsPanel_Gate::UpdateApplyButtonState_ExtraFields()
+{
+	if (GetLinkedListLength(selectedDev->Get()->ilist) != spinCtrl->GetValue())
+		updateBtn->Enable();
+	if (selectedDev->Get()->kind != gateTypeDropdown->GetDevicekind())
+		updateBtn->Enable();
+}
+
+void DeviceDetailsPanel_Gate::OnApply_ExtraFields(bool& changedSomething)
+{
+	if (GetLinkedListLength(selectedDev->Get()->ilist) != spinCtrl->GetValue())
+	{
+		c->dmz()->SetGateInputCount(selectedDev->Get(), spinCtrl->GetValue());
+		changedSomething = true;
+	}
+	if (selectedDev->Get()->kind != gateTypeDropdown->GetDevicekind())
+	{
+		selectedDev->Get()->kind = gateTypeDropdown->GetDevicekind();
+		devicekindStaticText->SetLabel(gateTypeDropdown->GetValue());
+		changedSomething = true;
+	}
+}
 
 
 ChooseOutputDialog::ChooseOutputDialog(circuit* circ, wxWindow* parent, wxWindowID id, const wxString& title, const wxString& description):
@@ -664,6 +837,49 @@ void ConnectToOutputDialog::OnOK(wxCommandEvent& event)
 
 BEGIN_EVENT_TABLE(ConnectToOutputDialog, wxDialog)
 	EVT_BUTTON(wxID_OK, ConnectToOutputDialog::OnOK)
+END_EVENT_TABLE()
+
+
+NewDeviceDialog::NewDeviceDialog(circuit* circ,wxWindow* parent, wxWindowID id, const wxString& title):
+	wxDialog(parent, id, title, wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
+{
+	SetIcon(wxIcon(wx_icon));
+
+	c = circ;
+
+	wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
+	topsizer->Add(new wxStaticText(this, wxID_ANY, _("New device name:")), 0, wxLEFT | wxRIGHT | wxTOP, 10);
+	devNameCtrl = new DeviceNameTextCtrl(this);
+	topsizer->Add(devNameCtrl, 0, wxALL | wxEXPAND, 10);
+	topsizer->Add(new wxStaticText(this, wxID_ANY, _("Device type:")), 0, wxLEFT | wxRIGHT | wxTOP, 10);
+	dkindDropdown = new DevicekindDropdown(this);
+	dkindDropdown->SetSelection(0);
+	topsizer->Add(dkindDropdown, 0, wxALL | wxEXPAND, 10);
+	topsizer->Add(CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxEXPAND, 10);
+	SetSizerAndFit(topsizer);
+}
+
+void NewDeviceDialog::OnOK(wxCommandEvent& event)
+{
+	if (!devNameCtrl->CheckValid(c, true))
+		return;
+
+	devicekind dk = dkindDropdown->GetDevicekind();
+	name devname = c->nmz()->lookup(string(devNameCtrl->GetValue().mb_str()));
+	bool ok;
+	if (dk==aswitch)
+		c->dmz()->makedevice(dk, devname, 1, ok);
+	else if (dk==aclock)
+		c->dmz()->makedevice(dk, devname, 5, ok);
+	else
+		c->dmz()->makedevice(dk, devname, 2, ok);
+
+	newdev = c->netz()->finddevice(devname);
+	EndModal(wxID_OK);
+}
+
+BEGIN_EVENT_TABLE(NewDeviceDialog, wxDialog)
+	EVT_BUTTON(wxID_OK, NewDeviceDialog::OnOK)
 END_EVENT_TABLE()
 
 

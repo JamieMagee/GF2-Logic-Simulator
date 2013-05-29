@@ -17,15 +17,15 @@ using namespace std;
 enum
 {
 	DEVICES_APPLY_BUTTON_ID = wxID_HIGHEST + 1,
-	DEVICES_CREATE_BUTTON_ID,
-	DEVICES_DELETE_BUTTON_ID,
+	DEVICECREATE_BUTTON_ID,
+	DEVICEDELETE_BUTTON_ID,
 	DEVICES_ADDCONN_BUTTON_ID,
 	DEVICES_DELCONN_BUTTON_ID,
 	DEVICENAME_TEXTCTRL_ID,
 	DEVICEOUTPUT_MONITOR_CB_ID
 };
 
-extern wxString devicenamestrings[baddevice];
+extern wxString devicekindstrings[baddevice];
 
 class SelectedDevice
 {
@@ -53,9 +53,38 @@ struct DeviceInfo
 	string devname;
 };
 
-class DeviceKindComboBox: public wxComboBox
+
+class DevicekindDropdown: public wxComboBox
 {
-	;
+public:
+	DevicekindDropdown(wxWindow* parent, wxWindowID id = wxID_ANY, vector<devicekind> filterDevicekinds = vector<devicekind>());
+	devicekind GetDevicekind();
+	void SetDevicekind(devicekind dk);
+private:
+	vector<devicekind> filter;
+};
+
+class DeviceNameTextCtrl: public wxTextCtrl
+{
+public:
+	DeviceNameTextCtrl(wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& value = wxT(""));
+	bool CheckValid(circuit* c, bool errorDialog=true);
+};
+
+void ShowErrorMsgDialog(wxWindow* parent, wxString txt);
+
+
+class NewDeviceDialog: public wxDialog
+{
+public:
+	NewDeviceDialog(circuit* circ, wxWindow* parent, wxWindowID id, const wxString& title);
+	devlink newdev;
+private:
+	circuit* c;
+	DevicekindDropdown* dkindDropdown;
+	DeviceNameTextCtrl* devNameCtrl;
+	void OnOK(wxCommandEvent& event);
+	DECLARE_EVENT_TABLE()
 };
 
 class DevicesListBox: public wxListBox
@@ -129,8 +158,7 @@ class DeviceDetailsPanel: public wxPanel
 {
 public:
 	DeviceDetailsPanel(circuit* circ, SelectedDevice* selectedDev_in, wxWindow* parent, wxWindowID id = wxID_ANY);
-private:
-	virtual void CreateExtraFields() {};
+protected:
 	virtual void UpdateApplyButtonState_ExtraFields() {};
 	virtual void OnApply_ExtraFields(bool& changedSomething) {};
 	SelectedDevice* selectedDev;
@@ -139,6 +167,11 @@ private:
 	wxGridBagSizer* gridsizer;
 	wxTextCtrl* devicenameCtrl;
 	wxButton* updateBtn;
+	wxStaticText* devicekindStaticText;
+
+	wxSpinCtrl* spinCtrl;
+	DevicekindDropdown* gateTypeDropdown;
+
 	void UpdateApplyButtonState();
 	void OnInputChanged(wxCommandEvent& event);
 	void OnApply(wxCommandEvent& event);
@@ -149,19 +182,23 @@ private:
 // For devicekinds: andgate, nandgate, orgate, norgate
 class DeviceDetailsPanel_Gate: public DeviceDetailsPanel
 {
-	;
+public:
+	DeviceDetailsPanel_Gate(circuit* circ, SelectedDevice* selectedDev_in, wxWindow* parent, wxWindowID id = wxID_ANY);
+protected:
+	virtual void UpdateApplyButtonState_ExtraFields();
+	virtual void OnApply_ExtraFields(bool& changedSomething);
 };
 
-// For devicekind: aswitch
-class DeviceDetailsPanel_Switch: public DeviceDetailsPanel
-{
-	;
-};
+// Could add one for devicekind=aswitch, but switch states are pretty easy to change anyway
 
 // For devicekind: aclock
 class DeviceDetailsPanel_Clock: public DeviceDetailsPanel
 {
-	;
+public:
+	DeviceDetailsPanel_Clock(circuit* circ, SelectedDevice* selectedDev_in, wxWindow* parent, wxWindowID id = wxID_ANY);
+protected:
+	virtual void UpdateApplyButtonState_ExtraFields();
+	virtual void OnApply_ExtraFields(bool& changedSomething);
 };
 
 
@@ -199,7 +236,6 @@ public:
 	DevicesDialog(circuit* circ, wxWindow* parent, wxWindowID id, const wxString& title, devlink d=NULL);
 	~DevicesDialog();
 	void OnDeviceSelectionChanged();
-	void OnDeleteButton(wxCommandEvent& event);
 private:
 	circuit* c;
 	SelectedDevice* selectedDev;
@@ -210,6 +246,8 @@ private:
 	wxBoxSizer* mainSizer;
 	wxBoxSizer* outputsSizer;
 	void DestroyDeviceWidgets();
+	void OnDeleteButton(wxCommandEvent& event);
+	void OnCreateButton(wxCommandEvent& event);
 	DECLARE_EVENT_TABLE()
 };
 
