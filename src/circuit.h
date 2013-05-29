@@ -8,9 +8,28 @@
 #include "observer.h"
 
 
+class CircuitElementInfo
+{
+public:
+	devlink d;
+	outplink o;
+	inplink i;
+	string namestr;
+	CircuitElementInfo() : d(NULL), o(NULL), i(NULL), namestr("") {}
+	CircuitElementInfo(devlink dev, string str="") : d(dev), o(NULL), i(NULL), namestr(str) {}
+	CircuitElementInfo(devlink dev, outplink outp, string str="") : d(dev), o(outp), i(NULL), namestr(str) {}
+	CircuitElementInfo(outplink outp, string str="") : d(outp->dev), o(outp), i(NULL), namestr(str) {}
+	CircuitElementInfo(devlink dev, inplink inp, string str="") : d(dev), o(NULL), i(inp), namestr(str) {}
+	
+};
+
+bool CircuitElementInfo_namestrcmp(const CircuitElementInfo a, const CircuitElementInfo b);// to alphabetically sort a vector<outputinfo>
+bool CircuitElementInfo_iconnect_namestrcmp(const CircuitElementInfo a, const CircuitElementInfo b);// to sort a vector<outputinfo> by input connected state then namestr
+
 struct outputinfo
 {
 	name devname, outpname;
+	outplink o;
 	string namestr;
 };
 bool outputinfo_namestrcmp(const outputinfo a, const outputinfo b);// to alphabetically sort a vector<outputinfo>

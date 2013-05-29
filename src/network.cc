@@ -133,6 +133,7 @@ void network::addinput (devlink dev, name iid)
 void network::addoutput (devlink dev, name oid)
 {
   outplink o = new outputrec;
+  o->dev = dev;
   o->id = oid;
   o->sig = low;
   o->next = dev->olist;
@@ -222,22 +223,26 @@ void network::disconnectoutput(outplink o)
  * Checks that all inputs are connected to an output.   
  *
  */
-void network::checknetwork (bool& ok)
+void network::checknetwork (bool& ok, bool silent)
 {
   devlink d;
   inplink i;
   ok = true;
   for (d = devs; d != NULL; d = d->next) 
     for (i = d->ilist; i != NULL; i = i->next)
-      if (i->connect == NULL) {
-	cout << "Unconnected Input : ";
-	nmz->writename (d->id);
-	if (i->id != blankname) {
-	  cout << ".";
-	  nmz->writename (i->id);
-	}
-	cout << endl;
-	ok = false;
+      if (i->connect == NULL)
+      {
+        if (!silent)
+        {
+          cout << "Unconnected Input : ";
+          nmz->writename (d->id);
+          if (i->id != blankname) {
+            cout << ".";
+            nmz->writename (i->id);
+          }
+          cout << endl;
+        }
+        ok = false;
       }
 }
 

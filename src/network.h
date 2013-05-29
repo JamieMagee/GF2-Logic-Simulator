@@ -12,10 +12,12 @@ typedef enum {falling, low, rising, high} asignal;
 typedef enum {aswitch, aclock, andgate, nandgate, orgate,
 	      norgate, xorgate, dtype, baddevice} devicekind;
 
+struct devicerec;
 struct outputrec {
   name       id;
   asignal    sig;
   outputrec* next;
+  devicerec* dev;
 };
 typedef outputrec* outplink;
 struct inputrec {
@@ -74,7 +76,7 @@ class network {
     /* 'outp' output of device 'odev'. 'ok' is set true if operation       */
     /* succeeds.                                                           */
  
-  void checknetwork (bool& ok);
+  void checknetwork (bool& ok, bool silent=false);
     /* Checks that all inputs are connected to an output.                  */
  
   network (names* names_mod);

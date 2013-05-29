@@ -113,6 +113,18 @@ bool outputinfo_namestrcmp(const outputinfo a, const outputinfo b)
 	return (a.namestr<b.namestr);
 }
 
+bool CircuitElementInfo_namestrcmp(const CircuitElementInfo a, const CircuitElementInfo b)
+{
+	return (a.namestr<b.namestr);
+}
+
+bool CircuitElementInfo_iconnect_namestrcmp(const CircuitElementInfo a, const CircuitElementInfo b)
+{
+	if (a.i && b.i && (a.i->connect==NULL)!=(b.i->connect==NULL))
+		return (a.i->connect==NULL) < (b.i->connect==NULL);
+	return (a.namestr<b.namestr);
+}
+
 bool circuit::GetUnmonitoredOutputs(vector<outputinfo> * unmonitoredOutputsRet)
 {
 	vector<outputinfo> unmonitoredOutputs;

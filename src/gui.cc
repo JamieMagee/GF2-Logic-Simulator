@@ -383,6 +383,10 @@ void MyGLCanvas::Render()
 			mons[i].Draw(this, visibleRegion);
 			mons[i].DrawName(this, visibleRegion);
 		}
+		if (errorMessage != wxT(""))
+		{
+			DrawInfoTextCentre(errorMessage, true);
+		}
 	}
 	else if (errorMessage != wxT(""))
 	{
@@ -426,13 +430,13 @@ void MyGLCanvas::DrawInfoTextCentre(wxString txt, bool isError)
 	int canvasWidth = GetClientSize().GetWidth();
 	int textWidth = GetGlutTextWidth(txt);
 	wxRect background(canvasWidth/2-textWidth/2-15, canvasHeight/2-15, textWidth+30, 30);
-	if (isError) glColor4f(1.0, 0.7, 0.7, 0.3);
-	else glColor4f(0.7, 0.7, 1.0, 0.3);
+	if (isError) glColor4f(1.0, 0.85, 0.85, 0.95);
+	else glColor4f(0.85, 0.85, 1.0, 0.95);
 	glBegin(GL_QUADS);
 	wxRect_GlVertex(background);
 	glEnd();
-	if (isError) glColor4f(0.7, 0.0, 0.0, 0.3);
-	else glColor4f(0.0, 0.0, 0.7, 0.3);
+	if (isError) glColor4f(0.7, 0.0, 0.0, 0.95);
+	else glColor4f(0.0, 0.0, 0.7, 0.95);
 	glBegin(GL_LINE_LOOP);
 	wxRect_GlVertex(background);
 	glEnd();
@@ -687,8 +691,14 @@ void MyFrame::UpdateControlStates()
 	}
 	else
 	{
-		// The circuit contains some devices, so enable the simulation controls
-		simctrls_container->Enable();
+		// The circuit contains some devices, so enable the simulation controls if all inputs are connected
+		// It is assumed that unconnected inputs are listed by whichever bit of code has allowed them to exist in the circuit, this function just updates control stated
+		bool ok;
+		c->netz()->checknetwork(ok, true);
+		if (ok)
+			simctrls_container->Enable();
+		else
+			simctrls_container->Disable();
 		// Only enable the add monitors button if some unmonitored outputs exist
 		if (c->GetUnmonitoredOutputs())
 			monitors_add_btn->Enable();
@@ -749,6 +759,11 @@ void MyFrame::OnButtonEditDevs(wxCommandEvent& event)// "Edit devices" button cl
 	DevicesDialog *dlg = new DevicesDialog(c, this, wxID_ANY, _("Edit devices"));
 	dlg->ShowModal();
 	dlg->Destroy();
+	bool ok;
+	c->netz()->checknetwork(ok);
+	if (!ok) canvas->SetErrorMessage(_("Circuit contains unconnected inputs"));
+	else canvas->ClearErrorMessage();
+	UpdateControlStates();
 }
 
 

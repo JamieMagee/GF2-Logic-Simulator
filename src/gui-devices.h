@@ -17,6 +17,7 @@ using namespace std;
 enum
 {
 	DEVICES_APPLY_BUTTON_ID = wxID_HIGHEST + 1,
+	DEVICES_CREATE_BUTTON_ID,
 	DEVICES_DELETE_BUTTON_ID,
 	DEVICES_ADDCONN_BUTTON_ID,
 	DEVICES_DELCONN_BUTTON_ID,
@@ -64,6 +65,7 @@ public:
 	void OnCircuitChanged();
 	void OnDeviceSelectionChanged();
 	void ReleasePointers();
+	devlink GetSelectionAfterDelete();
 private:
 	SelectedDevice* selectedDev;
 	circuit* c;
@@ -74,9 +76,26 @@ private:
 };
 
 // List of all inputs on a device and which output each is connected to, with buttons to add/remove connections
+// select multiple
 class DeviceInputsPanel: public wxPanel
 {
-	//circuit* circ, devlink
+public:
+	DeviceInputsPanel(circuit* circ, SelectedDevice* selectedDev_in, wxWindow* parent, wxWindowID id = wxID_ANY);
+	~DeviceInputsPanel();
+	void ReleasePointers();
+	void OnDeviceSelectionChanged();
+private:
+	SelectedDevice* selectedDev;
+	circuit* c;
+	vector<inplink> inps;
+	wxListBox* lbox;
+	wxButton *btnAddConn, *btnDelConn;
+	void UpdateInps();
+	void OnConnectButton(wxCommandEvent& event);
+	void OnDisconnectButton(wxCommandEvent& event);
+	void OnLBoxSelectionChanged(wxCommandEvent& event);
+	void UpdateControlStates();
+	DECLARE_EVENT_TABLE()
 };
 
 // Lists the inputs of other devices that a particular device output is connected to, with buttons to add/remove connections
@@ -102,7 +121,6 @@ private:
 	wxButton* updateBtn;
 	void UpdateApplyButtonState();
 	void OnInputChanged(wxCommandEvent& event);
-	void OnDeleteButton(wxCommandEvent& event);
 	void OnApply(wxCommandEvent& event);
 	void ShowErrorMsg(wxString txt);
 	DECLARE_EVENT_TABLE()
@@ -126,24 +144,41 @@ class DeviceDetailsPanel_Clock: public DeviceDetailsPanel
 	;
 };
 
-// For a given input, allow an output to be chosen to connect to it
-class ConnectToInputDialog: public wxDialog
+
+class ChooseOutputDialog: public wxDialog
 {
-	;
+public:
+	ChooseOutputDialog(circuit* circ, wxWindow* parent, wxWindowID id, const wxString& title, const wxString& description);
+	CircuitElementInfo result;
+private:
+	circuit* c;
+	wxListBox* lbox;
+	vector<CircuitElementInfo> outputs;
+	void OnOK(wxCommandEvent& event);
+	DECLARE_EVENT_TABLE()
 };
 
 // For a given output, allow input(s) to be chosen to connect to it
+// Makes the connection(s) when the OK button is clicked
 class ConnectToOutputDialog: public wxDialog
 {
-	;
+public:
+	ConnectToOutputDialog(circuit* circ, outplink outp, wxWindow* parent, wxWindowID id, const wxString& title);
+private:
+	circuit* c;
+	outplink o;
+	wxListBox* lbox;
+	void OnOK(wxCommandEvent& event);
+	DECLARE_EVENT_TABLE()
 };
 
 class DevicesDialog: public wxDialog
 {
 public:
 	DevicesDialog(circuit* circ, wxWindow* parent, wxWindowID id, const wxString& title, devlink d=NULL);
-	void OnDeviceSelectionChanged();
 	~DevicesDialog();
+	void OnDeviceSelectionChanged();
+	void OnDeleteButton(wxCommandEvent& event);
 private:
 	circuit* c;
 	SelectedDevice* selectedDev;
@@ -152,7 +187,7 @@ private:
 	DeviceInputsPanel* inputsPanel;
 	vector<DeviceOutputPanel*> outputPanels;
 	wxBoxSizer* mainSizer;
-
+	wxBoxSizer* outputsSizer;
 	void DestroyDeviceWidgets();
 	DECLARE_EVENT_TABLE()
 };
