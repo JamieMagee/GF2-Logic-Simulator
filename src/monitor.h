@@ -49,12 +49,6 @@ class monitor {
   void getmonname (int n, name& dev, name& outp);
     /* Returns name of n'th monitor.                                       */
 
-  // Returns the name of the monitored signal as a string
-  string getsignalstring(int m);
-
-  // Returns the number of samples recorded by the n'th monitor
-  int getsamplecount(int m);
-
   void resetmonitor (void);
     /* Initialises monitor memory in preparation for a new output sequence */
  
@@ -67,6 +61,16 @@ class monitor {
  
   monitor (names* names_mod, network* network_mod);
     /* Called to initialise the monitor module.                            */
+
+  // Returns the name of the monitored signal as a string
+  string getsignalstring(int m);
+
+  // Returns the number of samples recorded by the n'th monitor
+  int getsamplecount(int m);
+
+  // Returns true if the given output is being monitored
+  bool IsMonitored(outplink o);
+
 };
 
 #endif /* monitor_h */

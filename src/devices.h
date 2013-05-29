@@ -61,6 +61,9 @@ public:
   // Gets the name for an input of a gate (n=1 -> 'I1', n=2 -> 'I2', etc)
   name GetGateInputName(int n);
 
+  // Checks whether all inputs are connected
+  bool CheckDeviceInputs(devlink d);
+
   devices (names* names_mod, network* net_mod);
     /* Called to initialise module.                                        */
 };

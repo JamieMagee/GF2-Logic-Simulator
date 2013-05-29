@@ -491,3 +491,14 @@ void devices::SetGateInputCount(devlink d, int newCount)
 		}
 	}
 }
+
+bool devices::CheckDeviceInputs(devlink d)
+{
+	inplink i = d->ilist;
+	while (i != NULL)
+	{
+		if (i->connect == NULL) return false;
+		i = i->next;
+	}
+	return true;
+}

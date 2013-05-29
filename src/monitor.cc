@@ -200,5 +200,12 @@ string monitor::getsignalstring(int m)
 	return netz->getsignalstring(mtab[m].d->id, mtab[m].op->id);
 }
 
-
+bool monitor::IsMonitored(outplink o)
+{
+	for (int n = 0; n < moncount (); n++)
+	{
+		if (mtab[n].op == o) return true;
+	}
+	return false;
+}
 

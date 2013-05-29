@@ -20,16 +20,7 @@
 using namespace std;
 
 enum { 
-  MY_SPINCNTRL_ID = wxID_HIGHEST + 1,
-  MY_TEXTCTRL_ID,
-  MY_BUTTON_ID,
-  OUTPUT_TEXTCTRL_ID,
-  SIMCTRL_BUTTON_RUN_ID,
-  SIMCTRL_BUTTON_CONT_ID,
-  MONITORS_ADD_BUTTON_ID,
-  MONITORS_DEL_BUTTON_ID,
-  SWITCHES_CTRL_ID,
-  DEVICES_EDIT_BUTTON_ID
+ 
 }; // widget identifiers
 
 int GetGlutTextWidth(wxString txt, void *font=NULL);

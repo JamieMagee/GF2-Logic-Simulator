@@ -2,6 +2,75 @@
 #include <algorithm>
 using namespace std;
 
+void CircuitElementInfoVector::push_back_all_devs(devlink d)
+{
+	while (d!=NULL)
+	{
+		push_back(CircuitElementInfo(d));
+		d = d->next;
+	}
+}
+
+void CircuitElementInfoVector::push_back_all_outputs(devlink d)
+{
+	while (d!=NULL)
+	{
+		push_back_dev_outputs(d);
+		d = d->next;
+	}
+}
+
+void CircuitElementInfoVector::push_back_all_inputs(devlink d)
+{
+	while (d!=NULL)
+	{
+		push_back_dev_inputs(d);
+		d = d->next;
+	}
+}
+
+void CircuitElementInfoVector::push_back_dev_outputs(devlink d)
+{
+	push_back_iolist(d, d->olist);
+}
+
+void CircuitElementInfoVector::push_back_dev_inputs(devlink d)
+{
+	push_back_iolist(d, d->ilist);
+}
+
+template <class T>
+void CircuitElementInfoVector::push_back_iolist(devlink d, T item)
+{
+	while (item != NULL)
+	{
+		push_back(CircuitElementInfo(d, item));
+		item = item->next;
+	}
+}
+
+void CircuitElementInfoVector::UpdateSignalNames(circuit* c)
+{
+	for (CircuitElementInfoVector::iterator it=begin(); it<end(); it++)
+	{
+		if (!it->d)
+		{
+			it->namestr = "";
+		}
+		else
+		{
+			if (it->i)
+				it->namestr = c->netz()->getsignalstring(it->d,it->i);
+			else if (it->o)
+				it->namestr = c->netz()->getsignalstring(it->d,it->o);
+			else
+				it->namestr = c->nmz()->getnamestring(it->d->id);
+		}
+	}
+}
+
+
+
 circuit::circuit()
 {
 	AllocModules();

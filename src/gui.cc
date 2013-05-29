@@ -8,6 +8,7 @@
 #include "scanner.h"
 #include "parser.h"
 #include "gui-devices.h"
+#include "gui-id.h"
 
 using namespace std;
 
