@@ -69,19 +69,18 @@ void DevicesDialog::OnDeviceSelectionChanged()
 	detailsPanel = new DeviceDetailsPanel(c, selectedDev, this);
 	mainSizer->Insert(0, detailsPanel, 0, wxEXPAND | wxALL, 10);
 
-	CircuitElementInfoVector outputs;
-	outplink o = d->olist;
-	while (o != NULL)
+	if (selectedDev->Get())
 	{
-		outputs.push_back(CircuitElementInfo(o, c->nmz()->getnamestring(o->id)));
-		o = o->next;
-	}
-	sort(outputs.begin(), outputs.end(), CircuitElementInfo_namestrcmp);
-	for (CircuitElementInfoVector::iterator it=outputs.begin(); it<outputs.end(); ++it)
-	{
-		DeviceOutputPanel* opanel = new DeviceOutputPanel(c, it->o, this);
-		outputPanels.push_back(opanel);
-		outputsSizer->Add(opanel, 1, wxEXPAND | wxALL, 5);
+		CircuitElementInfoVector outputs;
+		outputs.push_back_dev_outputs(selectedDev->Get());
+		outputs.UpdateSignalNames(c);
+		sort(outputs.begin(), outputs.end(), CircuitElementInfo_namestrcmp);
+		for (CircuitElementInfoVector::iterator it=outputs.begin(); it<outputs.end(); ++it)
+		{
+			DeviceOutputPanel* opanel = new DeviceOutputPanel(c, it->o, this);
+			outputPanels.push_back(opanel);
+			outputsSizer->Add(opanel, 1, wxEXPAND | wxALL, 5);
+		}
 	}
 
 	Layout();

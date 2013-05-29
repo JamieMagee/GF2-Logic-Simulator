@@ -501,6 +501,7 @@ void MyGLCanvas::OnMouse(wxMouseEvent& event)
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_MENU(wxID_EXIT, MyFrame::OnExit)
   EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
+  EVT_MENU(MENU_CLEAR_CIRCUIT, MyFrame::OnMenuClearCircuit)
   EVT_MENU(wxID_OPEN, MyFrame::OnOpenFile)
   EVT_BUTTON(SIMCTRL_BUTTON_RUN_ID, MyFrame::OnButtonRun)
   EVT_BUTTON(SIMCTRL_BUTTON_CONT_ID, MyFrame::OnButtonContinue)
@@ -526,6 +527,7 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	// Menu items
 	wxMenu *fileMenu = new wxMenu;
 	fileMenu->Append(wxID_OPEN);
+	fileMenu->Append(MENU_CLEAR_CIRCUIT, _("Clear circuit"));
 	fileMenu->AppendSeparator();
 	fileMenu->Append(wxID_ABOUT, _("&About"));
 	fileMenu->Append(wxID_EXIT, _("&Quit"));
@@ -626,6 +628,11 @@ void MyFrame::OnAbout(wxCommandEvent &event)
 {
   wxMessageDialog about(this, _("Logic simulator\nIIA GF2 Team 8\n2013"), _("About Logsim"), wxICON_INFORMATION | wxOK);
   about.ShowModal();
+}
+
+void MyFrame::OnMenuClearCircuit(wxCommandEvent &event)
+{
+	c->Clear();
 }
 
 void MyFrame::OnOpenFile(wxCommandEvent &event)

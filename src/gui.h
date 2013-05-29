@@ -102,6 +102,7 @@ class MyFrame: public wxFrame
 	void OnButtonDelMon(wxCommandEvent& event);
 	void OnButtonEditDevs(wxCommandEvent& event);
 	void UpdateControlStates();
+	void OnMenuClearCircuit(wxCommandEvent &event);
  
   DECLARE_EVENT_TABLE()
 };
