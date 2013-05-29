@@ -20,15 +20,7 @@
 using namespace std;
 
 enum { 
-  MY_SPINCNTRL_ID = wxID_HIGHEST + 1,
-  MY_TEXTCTRL_ID,
-  MY_BUTTON_ID,
-  OUTPUT_TEXTCTRL_ID,
-  SIMCTRL_BUTTON_RUN_ID,
-  SIMCTRL_BUTTON_CONT_ID,
-  MONITORS_ADD_BUTTON_ID,
-  MONITORS_DEL_BUTTON_ID,
-  SWITCHES_CTRL_ID
+ 
 }; // widget identifiers
 
 int GetGlutTextWidth(wxString txt, void *font=NULL);
@@ -108,7 +100,9 @@ class MyFrame: public wxFrame
   void OnButtonContinue(wxCommandEvent& event);
 	void OnButtonAddMon(wxCommandEvent& event);
 	void OnButtonDelMon(wxCommandEvent& event);
+	void OnButtonEditDevs(wxCommandEvent& event);
 	void UpdateControlStates();
+	void OnMenuClearCircuit(wxCommandEvent &event);
  
   DECLARE_EVENT_TABLE()
 };

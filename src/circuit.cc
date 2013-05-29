@@ -2,6 +2,75 @@
 #include <algorithm>
 using namespace std;
 
+void CircuitElementInfoVector::push_back_all_devs(devlink d)
+{
+	while (d!=NULL)
+	{
+		push_back(CircuitElementInfo(d));
+		d = d->next;
+	}
+}
+
+void CircuitElementInfoVector::push_back_all_outputs(devlink d)
+{
+	while (d!=NULL)
+	{
+		push_back_dev_outputs(d);
+		d = d->next;
+	}
+}
+
+void CircuitElementInfoVector::push_back_all_inputs(devlink d)
+{
+	while (d!=NULL)
+	{
+		push_back_dev_inputs(d);
+		d = d->next;
+	}
+}
+
+void CircuitElementInfoVector::push_back_dev_outputs(devlink d)
+{
+	push_back_iolist(d, d->olist);
+}
+
+void CircuitElementInfoVector::push_back_dev_inputs(devlink d)
+{
+	push_back_iolist(d, d->ilist);
+}
+
+template <class T>
+void CircuitElementInfoVector::push_back_iolist(devlink d, T item)
+{
+	while (item != NULL)
+	{
+		push_back(CircuitElementInfo(d, item));
+		item = item->next;
+	}
+}
+
+void CircuitElementInfoVector::UpdateSignalNames(circuit* c)
+{
+	for (CircuitElementInfoVector::iterator it=begin(); it<end(); it++)
+	{
+		if (!it->d)
+		{
+			it->namestr = "";
+		}
+		else
+		{
+			if (it->i)
+				it->namestr = c->netz()->getsignalstring(it->d,it->i);
+			else if (it->o)
+				it->namestr = c->netz()->getsignalstring(it->d,it->o);
+			else
+				it->namestr = c->nmz()->getnamestring(it->d->id);
+		}
+	}
+}
+
+
+
 circuit::circuit()
 {
 	AllocModules();
@@ -113,6 +182,18 @@ bool outputinfo_namestrcmp(const outputinfo a, const outputinfo b)
 	return (a.namestr<b.namestr);
 }
 
+bool CircuitElementInfo_namestrcmp(const CircuitElementInfo a, const CircuitElementInfo b)
+{
+	return (a.namestr<b.namestr);
+}
+
+bool CircuitElementInfo_iconnect_namestrcmp(const CircuitElementInfo a, const CircuitElementInfo b)
+{
+	if (a.i && b.i && (a.i->connect!=NULL)!=(b.i->connect!=NULL))
+		return (a.i->connect!=NULL) < (b.i->connect!=NULL);
+	return (a.namestr<b.namestr);
+}
+
 bool circuit::GetUnmonitoredOutputs(vector<outputinfo> * unmonitoredOutputsRet)
 {
 	vector<outputinfo> unmonitoredOutputs;
@@ -159,3 +240,36 @@ bool circuit::GetUnmonitoredOutputs(vector<outputinfo> * unmonitoredOutputsRet)
 	return (unmonitoredOutputs.size()>0);
 }
 
+bool circuit::IsDeviceNameValid(string devname)
+{
+	// Checks syntax of a device name string (but not whether a device already exists with that name or if it's a reserved word)
+	if (!devname.length())
+		return false;
+	if (!isalpha(devname[0]))
+		return false;
+	for (string::iterator it=devname.begin(); it<devname.end(); ++it)
+	{
+		if (!isalpha(*it) && !isdigit(*it)) return false;
+	}
+	return true;
+}
+
+void circuit::RemoveDevice(devlink d)
+{
+	if (!d) return;
+
+	// Remove monitors first
+	outplink o = d->olist;
+	bool ok;
+	while (o != NULL)
+	{
+		mmz()->remmonitor(d->id, o->id, ok);
+		o = o->next;
+	}
+
+	// Disconnect, release memory, and remove from linked list of devices
+	netz()->deletedevice(d);
+
+	circuitChanged.Trigger();
+	monitorsChanged.Trigger();
+}

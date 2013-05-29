@@ -12,10 +12,12 @@ typedef enum {falling, low, rising, high} asignal;
 typedef enum {aswitch, aclock, andgate, nandgate, orgate,
 	      norgate, xorgate, dtype, baddevice} devicekind;
 
+struct devicerec;
 struct outputrec {
   name       id;
   asignal    sig;
   outputrec* next;
+  devicerec* dev;
 };
 typedef outputrec* outplink;
 struct inputrec {
@@ -37,6 +39,18 @@ struct devicerec {
   asignal memory;       // used when kind == dtype
 };
 typedef devicerec* devlink;
+
+template <class T>
+int GetLinkedListLength(T item)
+{
+	int count = 0;
+	while (item != NULL)
+	{
+		count++;
+		item = item->next;
+	}
+	return count;
+}
 
 class network {
   names* nmz;  // the instatiation of the names class that we are going to use.
@@ -74,7 +88,7 @@ class network {
     /* 'outp' output of device 'odev'. 'ok' is set true if operation       */
     /* succeeds.                                                           */
  
-  void checknetwork (bool& ok);
+  void checknetwork (bool& ok, bool silent=false);
     /* Checks that all inputs are connected to an output.                  */
  
   network (names* names_mod);
@@ -84,6 +98,12 @@ class network {
   string getsignalstring(devlink dev, outplink o);
   string getsignalstring(devlink dev, inplink i);
   /* Returns the string corresponding to the given device and pin          */
+
+  // Disconnects all inputs connected to the given output
+  void disconnectoutput(outplink o);
+  
+  // Deletes a device (after disconnecting the outputs)
+  void deletedevice(devlink dTarget);
 
  private:
   devlink devs;          // the list of devices
