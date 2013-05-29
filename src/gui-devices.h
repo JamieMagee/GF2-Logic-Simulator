@@ -101,7 +101,23 @@ private:
 // Lists the inputs of other devices that a particular device output is connected to, with buttons to add/remove connections
 class DeviceOutputPanel: public wxPanel
 {
-	//circuit* circ, devlink, outplink
+public:
+	DeviceOutputPanel(circuit* circ, outplink targetOutp, wxWindow* parent, wxWindowID id = wxID_ANY);
+	~DeviceOutputPanel();
+	void ReleasePointers();
+	void OnDeviceSelectionChanged();
+private:
+	circuit* c;
+	outplink outp;
+	vector<CircuitElementInfo> inps;
+	wxListBox* lbox;
+	wxButton *btnAddConn, *btnDelConn;
+	void UpdateInps();
+	void OnConnectButton(wxCommandEvent& event);
+	void OnDisconnectButton(wxCommandEvent& event);
+	void OnLBoxSelectionChanged(wxCommandEvent& event);
+	void UpdateControlStates();
+	DECLARE_EVENT_TABLE()
 };
 
 // For devicekinds with nothing configurable: xorgate, dtype
@@ -167,6 +183,7 @@ public:
 private:
 	circuit* c;
 	outplink o;
+	vector<CircuitElementInfo> inputs;
 	wxListBox* lbox;
 	void OnOK(wxCommandEvent& event);
 	DECLARE_EVENT_TABLE()

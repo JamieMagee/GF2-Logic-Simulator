@@ -41,7 +41,7 @@ depend:
 # DO NOT DELETE
 
 devices.o: devices.h names.h network.h
-gui.o: gui.h names.h devices.h network.h monitor.h wx_icon.xpm circuit.h observer.h
+gui.o: gui.h names.h devices.h network.h monitor.h wx_icon.xpm circuit.h observer.h gui-devices.h
 guitest.o: guitest.h names.h devices.h network.h monitor.h gui.h
 logsim.o: logsim.h names.h devices.h network.h monitor.h parser.h scanner.h
 logsim.o: userint.h gui.h

@@ -11,6 +11,7 @@ DevicesDialog::DevicesDialog(circuit* circ, wxWindow* parent, wxWindowID id, con
 	wxDialog(parent, id, title, wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
 	c = circ;
+	outputsSizer = NULL;
 	outputPanels.resize(0);
 	inputsPanel = NULL;
 	detailsPanel = NULL;
@@ -29,14 +30,14 @@ DevicesDialog::DevicesDialog(circuit* circ, wxWindow* parent, wxWindowID id, con
 	inputsPanel = new DeviceInputsPanel(c, selectedDev, this);
 	ioSizer->Add(inputsPanel, 1, wxEXPAND | wxALL, 5);
 	outputsSizer = new wxBoxSizer(wxVERTICAL);
-	ioSizer->Add(outputsSizer, 1, wxEXPAND | wxALL, 5);
+	ioSizer->Add(outputsSizer, 1, wxEXPAND | wxALL, 0);
 	mainSizer->Add(ioSizer, 1, wxEXPAND | wxALL, 5);
 
 
 	topsizer->Add(deviceListSizer, 0, wxEXPAND, 0);
 	topsizer->Add(mainSizer, 3, wxEXPAND, 0);
 	
-	//topsizer->Add(CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxEXPAND, 10);
+	mainSizer->Add(CreateButtonSizer(wxOK), 0, wxALL | wxEXPAND, 10);
 	SetSizerAndFit(topsizer);
 	SetSizeHints(400,300);
 
@@ -48,6 +49,10 @@ DevicesDialog::~DevicesDialog()
 	selectedDev->changed.Detach(this);
 	devListBox->ReleasePointers();// detach from selectedDev->changed observer
 	inputsPanel->ReleasePointers();
+	for (vector<DeviceOutputPanel*>::iterator it=outputPanels.begin(); it<outputPanels.end(); ++it)
+	{
+		(*it)->ReleasePointers();
+	}
 	delete selectedDev;
 }
 
@@ -55,7 +60,7 @@ void DevicesDialog::OnDeviceSelectionChanged()
 {
 	DestroyDeviceWidgets();
 
-	if (!selectedDev || !c) return;
+	if (!selectedDev || !c || !outputsSizer) return;
 
 	devicekind dk = baddevice;
 	devlink d = selectedDev->Get();
@@ -71,7 +76,20 @@ void DevicesDialog::OnDeviceSelectionChanged()
 	}
 	mainSizer->Insert(0, detailsPanel, 0, wxEXPAND | wxALL, 10);
 
-	//outputsSizer
+	vector<CircuitElementInfo> outputs;
+	outplink o = d->olist;
+	while (o != NULL)
+	{
+		outputs.push_back(CircuitElementInfo(o, c->nmz()->getnamestring(o->id)));
+		o = o->next;
+	}
+	sort(outputs.begin(), outputs.end(), CircuitElementInfo_namestrcmp);
+	for (vector<CircuitElementInfo>::iterator it=outputs.begin(); it<outputs.end(); ++it)
+	{
+		DeviceOutputPanel* opanel = new DeviceOutputPanel(c, it->o, this);
+		outputPanels.push_back(opanel);
+		outputsSizer->Add(opanel, 1, wxEXPAND | wxALL, 5);
+	}
 
 	Layout();
 	Fit();
@@ -149,11 +167,6 @@ void DeviceInputsPanel::UpdateInps()
 {
 	wxArrayInt selections;
 	lbox->GetSelections(selections);
-	/*vector<inplink> oldSelected;
-	for (int i=0; i<selections.GetCount(); i++)
-	{
-		if (selections[i]<inps.size()) oldSelected.push_back(inps[selections[i]]);
-	}*/
 
 	inps.resize(0);
 	wxArrayString lboxData;
@@ -184,11 +197,6 @@ void DeviceInputsPanel::UpdateInps()
 	}
 	lbox->Set(lboxData);
 
-	/*for (int i=0; i<inps.size(); i++)
-	{
-		vector<inplink>::iterator it = find(oldSelected.begin(), oldSelected.end(), inps[i]);
-		if (it<oldSelected.end()) lbox->SetSelection(i);
-	}*/
 	UpdateControlStates();
 }
 
@@ -255,7 +263,7 @@ void DeviceInputsPanel::OnDisconnectButton(wxCommandEvent& event)
 	{
 		if (i<inps.size()) inps[selections[i]]->connect = NULL;
 	}
-	UpdateInps();
+	c->circuitChanged.Trigger();
 }
 
 BEGIN_EVENT_TABLE(DeviceInputsPanel, wxPanel)
@@ -263,6 +271,122 @@ BEGIN_EVENT_TABLE(DeviceInputsPanel, wxPanel)
 	EVT_BUTTON(DEVICES_ADDCONN_BUTTON_ID, DeviceInputsPanel::OnConnectButton)
 	EVT_BUTTON(DEVICES_DELCONN_BUTTON_ID, DeviceInputsPanel::OnDisconnectButton)
 END_EVENT_TABLE()
+
+
+
+DeviceOutputPanel::DeviceOutputPanel(circuit* circ, outplink targetOutp, wxWindow* parent, wxWindowID id) :
+	wxPanel(parent, id)
+{
+	outp = targetOutp;
+	c = circ;
+
+	wxString title = _("Output");
+	if (outp->id != blankname)
+		title = title + wxT(" ") + wxString(c->nmz()->getnamestring(outp->id).c_str(),wxConvUTF8);
+	wxStaticBoxSizer* mainSizer = new wxStaticBoxSizer(wxVERTICAL, this, title);
+	mainSizer->Add(new wxStaticText(this, wxID_ANY, _("Inputs connected to this output:")), 0, wxTOP | wxLEFT | wxRIGHT, 10);
+	lbox = new wxListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_NEEDED_SB | wxLB_EXTENDED);
+	lbox->SetMinSize(wxSize(150,100));
+	mainSizer->Add(lbox, 1, wxEXPAND | wxLEFT | wxRIGHT, 10);
+	wxBoxSizer* buttonsSizer = new wxBoxSizer(wxHORIZONTAL);
+	btnAddConn = new wxButton(this, DEVICES_ADDCONN_BUTTON_ID, _("Connect"));
+	btnDelConn = new wxButton(this, DEVICES_DELCONN_BUTTON_ID, _("Disconnect"));
+	buttonsSizer->Add(btnAddConn, 1, wxEXPAND, 10);
+	buttonsSizer->Add(btnDelConn, 1, wxEXPAND, 10);
+	mainSizer->Add(buttonsSizer, 0, wxEXPAND | (wxALL & ~wxTOP) , 10);
+	SetSizerAndFit(mainSizer);
+	FitInside();
+
+	c->circuitChanged.Attach(this, &DeviceOutputPanel::UpdateInps);
+	UpdateInps();
+	UpdateControlStates();
+}
+
+DeviceOutputPanel::~DeviceOutputPanel()
+{
+	ReleasePointers();
+}
+
+void DeviceOutputPanel::ReleasePointers()
+{
+	if (c) c->circuitChanged.Detach(this);
+	c = NULL;
+}
+
+void DeviceOutputPanel::UpdateInps()
+{
+	wxArrayInt selections;
+	lbox->GetSelections(selections);
+	inps.resize(0);
+	wxArrayString lboxData;
+	if (c)
+	{
+		devlink d = c->netz()->devicelist();
+		while (d != NULL)
+		{
+			inplink i = d->ilist;
+			while (i != NULL)
+			{
+				if (i->connect == outp) inps.push_back(CircuitElementInfo(d,i,c->netz()->getsignalstring(d,i)));
+				i = i->next;
+			}
+			d = d->next;
+		}
+		reverse(inps.begin(), inps.end());
+		lboxData.Alloc(inps.size());
+		for (vector<CircuitElementInfo>::iterator it=inps.begin(); it<inps.end(); ++it)
+		{
+			lboxData.Add(wxString(it->namestr.c_str(), wxConvUTF8));
+		}
+	}
+	lbox->Set(lboxData);
+	UpdateControlStates();
+}
+
+void DeviceOutputPanel::OnLBoxSelectionChanged(wxCommandEvent& event)
+{
+	UpdateControlStates();
+}
+
+void DeviceOutputPanel::UpdateControlStates()
+{
+	wxArrayInt selections;
+	lbox->GetSelections(selections);
+	if (selections.GetCount())
+	{
+		btnDelConn->Enable();
+	}
+	else
+	{
+		btnDelConn->Disable();
+	}
+}
+
+void DeviceOutputPanel::OnConnectButton(wxCommandEvent& event)
+{
+	ConnectToOutputDialog dlg(c, outp, this, wxID_ANY, _("Choose inputs"));
+	dlg.ShowModal();
+}
+
+void DeviceOutputPanel::OnDisconnectButton(wxCommandEvent& event)
+{
+	wxArrayInt selections;
+	lbox->GetSelections(selections);
+	for (int i=0; i<selections.GetCount(); i++)
+	{
+		if (i<inps.size()) inps[selections[i]].i->connect = NULL;
+	}
+	c->circuitChanged.Trigger();
+}
+
+BEGIN_EVENT_TABLE(DeviceOutputPanel, wxPanel)
+	EVT_LISTBOX(wxID_ANY, DeviceOutputPanel::OnLBoxSelectionChanged)
+	EVT_BUTTON(DEVICES_ADDCONN_BUTTON_ID, DeviceOutputPanel::OnConnectButton)
+	EVT_BUTTON(DEVICES_DELCONN_BUTTON_ID, DeviceOutputPanel::OnDisconnectButton)
+END_EVENT_TABLE()
+
+
+
 
 
 
@@ -434,6 +558,69 @@ void ChooseOutputDialog::OnOK(wxCommandEvent& event)
 
 BEGIN_EVENT_TABLE(ChooseOutputDialog, wxDialog)
 	EVT_BUTTON(wxID_OK, ChooseOutputDialog::OnOK)
+END_EVENT_TABLE()
+
+
+ConnectToOutputDialog::ConnectToOutputDialog(circuit* circ, outplink outp, wxWindow* parent, wxWindowID id, const wxString& title):
+	wxDialog(parent, id, title, wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
+{
+	SetIcon(wxIcon(wx_icon));
+
+	c = circ;
+	o = outp;
+
+	devlink d = c->netz()->devicelist();
+	while (d != NULL)
+	{
+		inplink i = d->ilist;
+		while (i != NULL)
+		{
+			inputs.push_back(CircuitElementInfo(d, i, c->netz()->getsignalstring(d,i)));
+			i = i->next;
+		}
+		d = d->next;
+	}
+	sort(inputs.begin(), inputs.end(), CircuitElementInfo_iconnect_namestrcmp);
+
+	wxArrayString lboxContents;
+	lboxContents.Alloc(inputs.size());
+	for (vector<CircuitElementInfo>::iterator it=inputs.begin(); it<inputs.end(); ++it)
+	{
+		wxString desc(it->namestr.c_str(), wxConvUTF8);
+		if (it->i->connect)
+		{
+			desc = desc + wxT(" (") + _("connected to ") + wxString(c->netz()->getsignalstring(it->i->connect->dev->id, it->i->connect->id).c_str(), wxConvUTF8) + wxT(")");
+		}
+		else
+		{
+			desc = desc + _(" (unconnected)");
+		}
+		lboxContents.Add(desc);
+	}
+
+	wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
+	topsizer->Add(new wxStaticText(this, wxID_ANY, wxString(_("Choose input(s) to connect to ")) + wxString(c->netz()->getsignalstring(o->dev, o).c_str(), wxConvUTF8)), 0, wxLEFT | wxRIGHT | wxTOP, 10);
+	lbox = new wxListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, lboxContents, wxLB_EXTENDED | wxLB_NEEDED_SB);
+	topsizer->Add(lbox, 1, wxALL | wxEXPAND, 10);
+	topsizer->Add(CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxEXPAND, 10);
+	SetSizerAndFit(topsizer);
+}
+
+void ConnectToOutputDialog::OnOK(wxCommandEvent& event)
+{
+	wxArrayInt selections;
+	lbox->GetSelections(selections);
+	for (int i=0; i<selections.GetCount(); i++)
+	{
+		if (selections[i]<inputs.size())
+			inputs[selections[i]].i->connect = o;
+	}
+	c->circuitChanged.Trigger();
+	EndModal(wxID_OK);
+}
+
+BEGIN_EVENT_TABLE(ConnectToOutputDialog, wxDialog)
+	EVT_BUTTON(wxID_OK, ConnectToOutputDialog::OnOK)
 END_EVENT_TABLE()
 
 

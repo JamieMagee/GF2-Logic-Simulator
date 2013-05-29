@@ -120,8 +120,8 @@ bool CircuitElementInfo_namestrcmp(const CircuitElementInfo a, const CircuitElem
 
 bool CircuitElementInfo_iconnect_namestrcmp(const CircuitElementInfo a, const CircuitElementInfo b)
 {
-	if (a.i && b.i && (a.i->connect==NULL)!=(b.i->connect==NULL))
-		return (a.i->connect==NULL) < (b.i->connect==NULL);
+	if (a.i && b.i && (a.i->connect!=NULL)!=(b.i->connect!=NULL))
+		return (a.i->connect!=NULL) < (b.i->connect!=NULL);
 	return (a.namestr<b.namestr);
 }
 
