@@ -7,13 +7,14 @@
 
 % Squash a bit more text onto a page
 \usepackage{geometry}
-\geometry{verbose,tmargin=20mm,bmargin=20mm,lmargin=25mm,rmargin=25mm}
+\geometry{verbose,tmargin=15mm,bmargin=15mm,lmargin=15mm,rmargin=15mm}
 
 \usepackage{graphicx}
 \usepackage{listings}
 \usepackage{amsmath}
 \usepackage{verbatim}
 \usepackage{color}
+\usepackage{wrapfig}
 
 % Indent verbatim environments
 \makeatletter \def\verbatim@processline{\hspace*{2em}\the\verbatim@line\par}\makeatother
@@ -76,24 +77,26 @@
 
 \subsection{Parser Class}
 \subsubsection{parser.cc}
-\lstinputlisting[caption=parser.cc, firstline=187, lastline=372]{../../src/parser.cc}
+\lstinputlisting[caption=parser.cc]{../../src/parser.cc}
+
+\texttt{parser.cc} was written with joint effort between myself and Tim Hillel, with Tim contributing approximately 75\% of the code.
 
 \section{Test Definition Files}
 
 \subsection{XOR Gate}
 \subsubsection{Definition File}
-\lstinputlisting[caption=xor.gf2]{../../examples/xor.txt}
+\lstinputlisting[caption=xor.gf2]{../../examples/xor.gf2}
 \subsubsection{Circuit Diagram}
 \begin{figure}[h]
  \centering
- \includegraphics[width=12cm]{../../examples/xor.png}
+ \includegraphics[width=8cm]{../../examples/xor.png}
  \caption{Circuit diagram of an XOR gate implemented using NAND gates}
  \label{fig:example-xor}
 \end{figure}
 
 \subsection{4-bit Adder}
 \subsubsection{Definition File}
-\lstinputlisting[caption=4bitadder.gf2]{../../examples/4bitadder.txt}
+\lstinputlisting[caption=4bitadder.gf2]{../../examples/4bitadder.gf2}
 \subsubsection{Circuit Diagram}
 \begin{figure}[h]
  \centering
@@ -104,7 +107,7 @@
 
 \subsection{Serial In Parallel Out Shift Register}
 \subsubsection{Definition File}
-\lstinputlisting[caption=sipo.gf2]{../../examples/sipo.txt}
+\lstinputlisting[caption=sipo.gf2]{../../examples/sipo.gf2}
 \subsubsection{Circuit Diagram}
 
 \begin{figure}[h]
@@ -114,19 +117,54 @@
  \label{fig:example-sipo}
 \end{figure}
 
+\textbf{NB} The software used to draw the circuit diagram does not support the same style of D flip-flop used in the definition file, and Fig. \ref{fig:example-sipo} was the closest achievable.
+
 \subsection{Gated D Latch}
 \subsubsection{Definition File}
-\lstinputlisting[caption=sipo.gf2]{../../examples/gateddlatch.txt}
+\lstinputlisting[caption=sipo.gf2]{../../examples/gateddlatch.gf2}
 \subsubsection{Circuit Diagram}
 \begin{figure}[h]
  \centering
  \includegraphics[width=12cm]{../../examples/gated-d-latch.png}
  \caption{Circuit diagram of a Gated D Latch}
- \label{fig:example-sipo}
+ \label{fig:example-dlatch}
 \end{figure}
+
+\textbf{NB} The software used to draw the circuit diagram does not support the NAND gates with one input. Therefore the NAND gate G1 was substituted for a NOT gate as can be seen in Fig. \ref{fig:example-dlatch}.
+
+\pagebreak
 
 \section{User Guide}
 
-test
+To start the logic simulator, open a terminal window and browse to the \texttt{src} folder. Start the application by typing \texttt{./logsim} followed by the return key. You will then be presented with the default view.
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=.4\textwidth]{default}
+ \caption{The default view upon opening the Logic Simulator}
+ \label{fig:default}
+\end{figure}
+
+To open a definition file, click the \texttt{File} menu followed by the \texttt{Open} option. You will be presented with a file selection dialogue. The file selection dialogue will only show definition files (Files with the \texttt{.gf2} file extension). Upon selecting a file, any errors in the definition file will be written to the message window, otherwise the Logic Simulator is ready to use. 
+
+In order to run a simulation you must first enter a number of cycles you wish the simulation to run for (default is \texttt{42}) then press the run button. The monitored signals will be displayed in the left display panel. You may choose to continue the simulation by pressing the continue button.
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=.4\textwidth]{simulation}
+ \caption{The  view upon running a simulation}
+ \label{fig:default}
+\end{figure}
+
+\begin{wrapfigure}{l}{0.5\textwidth}
+  \begin{center}
+    \includegraphics[width=0.2\textwidth]{monitors}
+  \end{center}
+  \caption{Add monitors dialogue}
+\end{wrapfigure}
+
+You can also edit the monitors from within the logic simulator. To add monitors, click the \texttt{Add monitors} button and select the monitor, or monitors, you wish to add followed by the \texttt{OK} button. To remove monitors, press the \texttt{Remove monitors} button and select the monitor, or monitors, you wish to remove followed by the \texttt{OK} button
+
+In addition, if your circuit contains any  switches, you can change the state of the switch by changing the state of the check box beside its name.
 
 \end{document}
