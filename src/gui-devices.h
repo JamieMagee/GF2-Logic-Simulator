@@ -21,7 +21,8 @@ enum
 	DEVICES_DELETE_BUTTON_ID,
 	DEVICES_ADDCONN_BUTTON_ID,
 	DEVICES_DELCONN_BUTTON_ID,
-	DEVICENAME_TEXTCTRL_ID
+	DEVICENAME_TEXTCTRL_ID,
+	DEVICEOUTPUT_MONITOR_CB_ID
 };
 
 extern wxString devicenamestrings[baddevice];
@@ -106,16 +107,19 @@ public:
 	~DeviceOutputPanel();
 	void ReleasePointers();
 	void OnDeviceSelectionChanged();
+	void OnMonitorsChanged();
 private:
 	circuit* c;
 	outplink outp;
 	vector<CircuitElementInfo> inps;
 	wxListBox* lbox;
 	wxButton *btnAddConn, *btnDelConn;
+	wxCheckBox* monitorCheckbox;
 	void UpdateInps();
 	void OnConnectButton(wxCommandEvent& event);
 	void OnDisconnectButton(wxCommandEvent& event);
 	void OnLBoxSelectionChanged(wxCommandEvent& event);
+	void OnMonitorCheckboxChanged(wxCommandEvent& event);
 	void UpdateControlStates();
 	DECLARE_EVENT_TABLE()
 };

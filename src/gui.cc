@@ -675,6 +675,7 @@ bool MyFrame::loadFile(const char * filename)
 
 	delete pmz;
 	delete smz;
+	delete erz;
 
 	return result;
 }
@@ -709,12 +710,18 @@ void MyFrame::UpdateControlStates()
 			monitors_rem_btn->Enable();
 		else
 			monitors_rem_btn->Disable();
-		// Disable the continue button if the run button has not been used first
-		// Note: it does not get enabled here. The add monitor button disables it
-		// after adding monitors, to force the use of the run button. Enabling it here
-		// could undo that. Instead the continue button is enabled by using the run button.
-		if (c->GetTotalCycles()==0)
+		// Disable the continue button if the run button has not been used first (so GetTotalCycles returns 0) or there are some new monitors (so some monitors do not contain any samples)
+		bool someEmpty = (c->GetTotalCycles()==0);
+		for (int i=0; i<c->mmz()->moncount(); i++)
+		{
+			if (c->mmz()->getsamplecount(i)==0)
+				someEmpty = true;
+		}
+		if (someEmpty)
 			simctrl_continue->Disable();
+		else
+			simctrl_continue->Enable();
+		
 	}
 }
 
@@ -737,10 +744,8 @@ void MyFrame::OnButtonAddMon(wxCommandEvent& event)// "Add monitors" button clic
 	AddMonitorsDialog *dlg = new AddMonitorsDialog(c, this, _("Add monitors"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
 	if (dlg->ShowModal()==wxID_OK && oldMonCount!=c->mmz()->moncount())
 	{
-		if (c->GetTotalCycles())// if there are samples stored in the monitors
+		if (c->GetTotalCycles())
 		{
-			// Disable the continue button, since if the simulation is continued the displayed sample times for the new monitors will be incorrect
-			simctrl_continue->Disable();
 			cout << wxString(wxPLURAL("Monitor added, run simulation again to see updated signals", "Monitors added, run simulation again to see updated signals", c->mmz()->moncount()-oldMonCount)).mb_str() << endl;
 		}
 	}

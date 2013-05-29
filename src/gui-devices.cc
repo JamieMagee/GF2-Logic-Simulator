@@ -284,7 +284,10 @@ DeviceOutputPanel::DeviceOutputPanel(circuit* circ, outplink targetOutp, wxWindo
 	if (outp->id != blankname)
 		title = title + wxT(" ") + wxString(c->nmz()->getnamestring(outp->id).c_str(),wxConvUTF8);
 	wxStaticBoxSizer* mainSizer = new wxStaticBoxSizer(wxVERTICAL, this, title);
-	mainSizer->Add(new wxStaticText(this, wxID_ANY, _("Inputs connected to this output:")), 0, wxTOP | wxLEFT | wxRIGHT, 10);
+	monitorCheckbox = new wxCheckBox(this, DEVICEOUTPUT_MONITOR_CB_ID, _("Monitored"));
+	//(wxWindow* parent, wxWindowID id, const wxString& label, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = 0, const wxValidator& val, const wxString& name = "checkBox")
+	mainSizer->Add(monitorCheckbox, 0, wxALL, 10);
+	mainSizer->Add(new wxStaticText(this, wxID_ANY, _("Inputs connected to this output:")), 0, wxLEFT | wxRIGHT, 10);
 	lbox = new wxListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_NEEDED_SB | wxLB_EXTENDED);
 	lbox->SetMinSize(wxSize(150,100));
 	mainSizer->Add(lbox, 1, wxEXPAND | wxLEFT | wxRIGHT, 10);
@@ -298,8 +301,10 @@ DeviceOutputPanel::DeviceOutputPanel(circuit* circ, outplink targetOutp, wxWindo
 	FitInside();
 
 	c->circuitChanged.Attach(this, &DeviceOutputPanel::UpdateInps);
+	c->monitorsChanged.Attach(this, &DeviceOutputPanel::OnMonitorsChanged);
 	UpdateInps();
 	UpdateControlStates();
+	OnMonitorsChanged();
 }
 
 DeviceOutputPanel::~DeviceOutputPanel()
@@ -309,8 +314,45 @@ DeviceOutputPanel::~DeviceOutputPanel()
 
 void DeviceOutputPanel::ReleasePointers()
 {
-	if (c) c->circuitChanged.Detach(this);
+	if (c)
+	{
+		c->circuitChanged.Detach(this);
+		c->monitorsChanged.Detach(this);
+	}
 	c = NULL;
+}
+
+void DeviceOutputPanel::OnMonitorsChanged()
+{
+	int monCount = c->mmz()->moncount();
+	name monDev, monOut;
+	bool isMonitored = false;
+	for (int i=0; i<monCount; i++)
+	{
+		c->mmz()->getmonname(i, monDev, monOut);
+		if (monDev==outp->dev->id && monOut==outp->id)
+		{
+			isMonitored = true;
+			break;
+		}
+	}
+	monitorCheckbox->SetValue(isMonitored);
+}
+
+void DeviceOutputPanel::OnMonitorCheckboxChanged(wxCommandEvent& event)
+{
+	bool ok = false;
+	if (monitorCheckbox->IsChecked())
+	{
+		c->mmz()->makemonitor(outp->dev->id, outp->id, ok);
+		if (c->GetTotalCycles()!=0)
+			cout << wxString(_("Monitor added, run simulation again to see updated signals")).mb_str() << endl;
+	}
+	else
+	{
+		c->mmz()->remmonitor(outp->dev->id, outp->id, ok);
+	}
+	if (ok) c->monitorsChanged.Trigger();
 }
 
 void DeviceOutputPanel::UpdateInps()
@@ -381,6 +423,7 @@ void DeviceOutputPanel::OnDisconnectButton(wxCommandEvent& event)
 
 BEGIN_EVENT_TABLE(DeviceOutputPanel, wxPanel)
 	EVT_LISTBOX(wxID_ANY, DeviceOutputPanel::OnLBoxSelectionChanged)
+	EVT_CHECKBOX(DEVICEOUTPUT_MONITOR_CB_ID, DeviceOutputPanel::OnMonitorCheckboxChanged)
 	EVT_BUTTON(DEVICES_ADDCONN_BUTTON_ID, DeviceOutputPanel::OnConnectButton)
 	EVT_BUTTON(DEVICES_DELCONN_BUTTON_ID, DeviceOutputPanel::OnDisconnectButton)
 END_EVENT_TABLE()
