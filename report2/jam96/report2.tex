@@ -15,6 +15,7 @@
 \usepackage{verbatim}
 \usepackage{color}
 \usepackage{wrapfig}
+\usepackage{subcaption}
 
 % Indent verbatim environments
 \makeatletter \def\verbatim@processline{\hspace*{2em}\the\verbatim@line\par}\makeatother
@@ -139,22 +140,25 @@
 To start the logic simulator, open a terminal window and browse to the \texttt{src} folder. Start the application by typing \texttt{./logsim} followed by the return key. You will then be presented with the default view.
 
 \begin{figure}[h]
- \centering
- \includegraphics[width=.4\textwidth]{default}
- \caption{The default view upon opening the Logic Simulator}
- \label{fig:default}
+		\centering
+        \begin{subfigure}[h]{0.4\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{default}
+                \caption{The default view upon opening logsim}
+                \label{fig:default}
+        \end{subfigure}
+        \begin{subfigure}[h]{0.4\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{simulation}
+                \caption{The view upon running a simulation}
+                \label{fig:simulation}
+        \end{subfigure}
+        \caption{The logsim GUI}\label{fig:gui}
 \end{figure}
 
 To open a definition file, click the \texttt{File} menu followed by the \texttt{Open} option. You will be presented with a file selection dialogue. The file selection dialogue will only show definition files (Files with the \texttt{.gf2} file extension). Upon selecting a file, any errors in the definition file will be written to the message window, otherwise the Logic Simulator is ready to use. 
 
 In order to run a simulation you must first enter a number of cycles you wish the simulation to run for (default is \texttt{42}) then press the run button. The monitored signals will be displayed in the left display panel. You may choose to continue the simulation by pressing the continue button.
-
-\begin{figure}[h]
- \centering
- \includegraphics[width=.4\textwidth]{simulation}
- \caption{The  view upon running a simulation}
- \label{fig:default}
-\end{figure}
 
 \begin{wrapfigure}{l}{0.5\textwidth}
   \begin{center}
@@ -166,5 +170,15 @@ In order to run a simulation you must first enter a number of cycles you wish th
 You can also edit the monitors from within the logic simulator. To add monitors, click the \texttt{Add monitors} button and select the monitor, or monitors, you wish to add followed by the \texttt{OK} button. To remove monitors, press the \texttt{Remove monitors} button and select the monitor, or monitors, you wish to remove followed by the \texttt{OK} button
 
 In addition, if your circuit contains any  switches, you can change the state of the switch by changing the state of the check box beside its name.
+
+
+\begin{wrapfigure}{R}{0.5\textwidth}
+  \begin{center}
+    \includegraphics[width=.4\textwidth]{devices}
+  \end{center}
+  \caption{Edit devices dialogue}
+\end{wrapfigure}
+
+If you wish to edit your devices you can also do so from within the GUI. To edit devices, click the \texttt{Edit devices} button. From the Edit devices dialogue you can change the device's name, type and number of inputs (if applicable). You can also change the inputs to, or ouputs from a device.
 
 \end{document}

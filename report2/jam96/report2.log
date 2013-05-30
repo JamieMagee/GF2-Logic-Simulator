@@ -1,21 +1,21 @@
-This is pdfTeX, Version 3.1415926-2.4-1.40.13 (MiKTeX 2.9 64-bit) (preloaded format=pdflatex 2013.5.17)  28 MAY 2013 22:07
+This is pdfTeX, Version 3.1415926-2.3-1.40.12 (TeX Live 2011) (format=pdflatex 2012.9.11)  30 MAY 2013 17:26
 entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
 **report2.tex
-(C:\Users\Jamie\Documents\GitHub\turnt-octo-archer\report2\jam96\report2.tex
+(./report2.tex
 LaTeX2e <2011/06/27>
-Babel <v3.8m> and hyphenation patterns for english, afrikaans, ancientgreek, ar
-abic, armenian, assamese, basque, bengali, bokmal, bulgarian, catalan, coptic, 
-croatian, czech, danish, dutch, esperanto, estonian, farsi, finnish, french, ga
-lician, german, german-x-2012-05-30, greek, gujarati, hindi, hungarian, iceland
-ic, indonesian, interlingua, irish, italian, kannada, kurmanji, latin, latvian,
- lithuanian, malayalam, marathi, mongolian, mongolianlmc, monogreek, ngerman, n
-german-x-2012-05-30, nynorsk, oriya, panjabi, pinyin, polish, portuguese, roman
-ian, russian, sanskrit, serbian, slovak, slovenian, spanish, swedish, swissgerm
-an, tamil, telugu, turkish, turkmen, ukenglish, ukrainian, uppersorbian, usengl
-ishmax, welsh, loaded.
-("C:\Program Files\MiKTeX 2.9\tex\latex\base\article.cls"
+Babel <v3.8m> and hyphenation patterns for english, dumylang, nohyphenation, po
+lish, russian, ukrainian, coptic, lao, ancientgreek, ibycus, slovak, spanish, i
+ndonesian, icelandic, italian, afrikaans, croatian, catalan, kurmanji, mongolia
+n, mongolianlmc, turkish, danish, bokmal, nynorsk, finnish, slovenian, armenian
+, serbian, serbianc, german-x-2011-07-01, ngerman-x-2011-07-01, romanian, frenc
+h, hungarian, monogreek, greek, dutch, pinyin, czech, irish, bulgarian, swedish
+, latin, basque, welsh, uppersorbian, esperanto, interlingua, portuguese, ukeng
+lish, usenglishmax, galician, german, ngerman, swissgerman, estonian, loaded.
+(/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
 Document Class: article 2007/10/19 v1.4h Standard LaTeX document class
-("C:\Program Files\MiKTeX 2.9\tex\latex\base\size10.clo"
+(/usr/share/texlive/texmf-dist/tex/latex/base/size10.clo
 File: size10.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
 )
 \c@part=\count79
@@ -30,19 +30,19 @@ File: size10.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
 \belowcaptionskip=\skip42
 \bibindent=\dimen102
 )
-("C:\Program Files\MiKTeX 2.9\tex\latex\base\inputenc.sty"
+(/usr/share/texlive/texmf-dist/tex/latex/base/inputenc.sty
 Package: inputenc 2008/03/30 v1.1d Input encoding file
 \inpenc@prehook=\toks14
 \inpenc@posthook=\toks15
 
-("C:\Program Files\MiKTeX 2.9\tex\latex\base\utf8.def"
+(/usr/share/texlive/texmf-dist/tex/latex/base/utf8.def
 File: utf8.def 2008/04/05 v1.1m UTF-8 support for inputenc
 Now handling font encoding OML ...
 ... no UTF-8 mapping file for font encoding OML
 Now handling font encoding T1 ...
 ... processing UTF-8 mapping file for font encoding T1
 
-("C:\Program Files\MiKTeX 2.9\tex\latex\base\t1enc.dfu"
+(/usr/share/texlive/texmf-dist/tex/latex/base/t1enc.dfu
 File: t1enc.dfu 2008/04/05 v1.1m UTF-8 support for inputenc
    defining Unicode char U+00A1 (decimal 161)
    defining Unicode char U+00A3 (decimal 163)
@@ -192,7 +192,7 @@ File: t1enc.dfu 2008/04/05 v1.1m UTF-8 support for inputenc
 Now handling font encoding OT1 ...
 ... processing UTF-8 mapping file for font encoding OT1
 
-("C:\Program Files\MiKTeX 2.9\tex\latex\base\ot1enc.dfu"
+(/usr/share/texlive/texmf-dist/tex/latex/base/ot1enc.dfu
 File: ot1enc.dfu 2008/04/05 v1.1m UTF-8 support for inputenc
    defining Unicode char U+00A1 (decimal 161)
    defining Unicode char U+00A3 (decimal 163)
@@ -223,7 +223,7 @@ File: ot1enc.dfu 2008/04/05 v1.1m UTF-8 support for inputenc
 Now handling font encoding OMS ...
 ... processing UTF-8 mapping file for font encoding OMS
 
-("C:\Program Files\MiKTeX 2.9\tex\latex\base\omsenc.dfu"
+(/usr/share/texlive/texmf-dist/tex/latex/base/omsenc.dfu
 File: omsenc.dfu 2008/04/05 v1.1m UTF-8 support for inputenc
    defining Unicode char U+00A7 (decimal 167)
    defining Unicode char U+00B6 (decimal 182)
@@ -247,25 +247,25 @@ Now handling font encoding U ...
    defining Unicode char U+2122 (decimal 8482)
    defining Unicode char U+2423 (decimal 9251)
 ))
-("C:\Program Files\MiKTeX 2.9\tex\latex\ltxmisc\parskip.sty"
+(/usr/share/texlive/texmf-dist/tex/latex/parskip/parskip.sty
 Package: parskip 2001/04/09 non-zero parskip adjustments
 )
-("C:\Program Files\MiKTeX 2.9\tex\latex\geometry\geometry.sty"
+(/usr/share/texlive/texmf-dist/tex/latex/geometry/geometry.sty
 Package: geometry 2010/09/12 v5.6 Page Geometry
 
-("C:\Program Files\MiKTeX 2.9\tex\latex\graphics\keyval.sty"
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/keyval.sty
 Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
 \KV@toks@=\toks16
 )
-("C:\Program Files\MiKTeX 2.9\tex\generic\oberdiek\ifpdf.sty"
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/ifpdf.sty
 Package: ifpdf 2011/01/30 v2.3 Provides the ifpdf switch (HO)
 Package ifpdf Info: pdfTeX in PDF mode is detected.
 )
-("C:\Program Files\MiKTeX 2.9\tex\generic\oberdiek\ifvtex.sty"
-Package: ifvtex 2010/03/01 v1.5 Detect VTeX and its facilities (HO)
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/ifvtex.sty
+Package: ifvtex 2010/03/01 v1.5 Switches for detecting VTeX and its modes (HO)
 Package ifvtex Info: VTeX not detected.
 )
-("C:\Program Files\MiKTeX 2.9\tex\generic\ifxetex\ifxetex.sty"
+(/usr/share/texlive/texmf-dist/tex/generic/ifxetex/ifxetex.sty
 Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
 )
 \Gm@cnth=\count87
@@ -280,37 +280,36 @@ Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
 \Gm@layouthoffset=\dimen109
 \Gm@layoutvoffset=\dimen110
 \Gm@dimlist=\toks17
-
-("C:\Program Files\MiKTeX 2.9\tex\latex\geometry\geometry.cfg"))
-("C:\Program Files\MiKTeX 2.9\tex\latex\graphics\graphicx.sty"
+)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphicx.sty
 Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
 
-("C:\Program Files\MiKTeX 2.9\tex\latex\graphics\graphics.sty"
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphics.sty
 Package: graphics 2009/02/05 v1.0o Standard LaTeX Graphics (DPC,SPQR)
 
-("C:\Program Files\MiKTeX 2.9\tex\latex\graphics\trig.sty"
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/trig.sty
 Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
 )
-("C:\Program Files\MiKTeX 2.9\tex\latex\00miktex\graphics.cfg"
-File: graphics.cfg 2007/01/18 v1.5 graphics configuration of teTeX/TeXLive
+(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/graphics.cfg
+File: graphics.cfg 2010/04/23 v1.9 graphics configuration of TeX Live
 )
 Package graphics Info: Driver file: pdftex.def on input line 91.
 
-("C:\Program Files\MiKTeX 2.9\tex\latex\pdftex-def\pdftex.def"
+(/usr/share/texlive/texmf-dist/tex/latex/pdftex-def/pdftex.def
 File: pdftex.def 2011/05/27 v0.06d Graphics/color for pdfTeX
 
-("C:\Program Files\MiKTeX 2.9\tex\generic\oberdiek\infwarerr.sty"
-Package: infwarerr 2010/04/08 v1.3 Providing info/warning/error messages (HO)
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/infwarerr.sty
+Package: infwarerr 2010/04/08 v1.3 Providing info/warning/message (HO)
 )
-("C:\Program Files\MiKTeX 2.9\tex\generic\oberdiek\ltxcmds.sty"
-Package: ltxcmds 2011/11/09 v1.22 LaTeX kernel commands for general use (HO)
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/ltxcmds.sty
+Package: ltxcmds 2011/04/18 v1.20 LaTeX kernel commands for general use (HO)
 )
 \Gread@gobject=\count90
 ))
 \Gin@req@height=\dimen111
 \Gin@req@width=\dimen112
 )
-(C:\Users\Jamie\AppData\Roaming\MiKTeX\2.9\tex\latex\listings\listings.sty
+(/usr/share/texlive/texmf-dist/tex/latex/listings/listings.sty
 \lst@mode=\count91
 \lst@gtempboxa=\box26
 \lst@token=\toks18
@@ -324,52 +323,52 @@ Package: ltxcmds 2011/11/09 v1.22 LaTeX kernel commands for general use (HO)
 \lst@lineno=\count96
 \lst@maxwidth=\dimen116
 
-(C:\Users\Jamie\AppData\Roaming\MiKTeX\2.9\tex\latex\listings\lstmisc.sty
+(/usr/share/texlive/texmf-dist/tex/latex/listings/lstmisc.sty
 File: lstmisc.sty 2007/02/22 1.4 (Carsten Heinz)
 \c@lstnumber=\count97
 \lst@skipnumbers=\count98
 \lst@framebox=\box27
 )
-(C:\Users\Jamie\AppData\Roaming\MiKTeX\2.9\tex\latex\listings\listings.cfg
+(/usr/share/texlive/texmf-dist/tex/latex/listings/listings.cfg
 File: listings.cfg 2007/02/22 1.4 listings configuration
 ))
 Package: listings 2007/02/22 1.4 (Carsten Heinz)
 
-("C:\Program Files\MiKTeX 2.9\tex\latex\amsmath\amsmath.sty"
-Package: amsmath 2013/01/14 v2.14 AMS math features
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsmath.sty
+Package: amsmath 2000/07/18 v2.13 AMS math features
 \@mathmargin=\skip43
 
 For additional information on amsmath, use the `?' option.
-("C:\Program Files\MiKTeX 2.9\tex\latex\amsmath\amstext.sty"
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amstext.sty
 Package: amstext 2000/06/29 v2.01
 
-("C:\Program Files\MiKTeX 2.9\tex\latex\amsmath\amsgen.sty"
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsgen.sty
 File: amsgen.sty 1999/11/30 v2.0
 \@emptytoks=\toks19
 \ex@=\dimen117
 ))
-("C:\Program Files\MiKTeX 2.9\tex\latex\amsmath\amsbsy.sty"
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsbsy.sty
 Package: amsbsy 1999/11/29 v1.2d
 \pmbraise@=\dimen118
 )
-("C:\Program Files\MiKTeX 2.9\tex\latex\amsmath\amsopn.sty"
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsopn.sty
 Package: amsopn 1999/12/14 v2.01 operator names
 )
 \inf@bad=\count99
-LaTeX Info: Redefining \frac on input line 210.
+LaTeX Info: Redefining \frac on input line 211.
 \uproot@=\count100
 \leftroot@=\count101
-LaTeX Info: Redefining \overline on input line 306.
+LaTeX Info: Redefining \overline on input line 307.
 \classnum@=\count102
 \DOTSCASE@=\count103
-LaTeX Info: Redefining \ldots on input line 378.
-LaTeX Info: Redefining \dots on input line 381.
-LaTeX Info: Redefining \cdots on input line 466.
+LaTeX Info: Redefining \ldots on input line 379.
+LaTeX Info: Redefining \dots on input line 382.
+LaTeX Info: Redefining \cdots on input line 467.
 \Mathstrutbox@=\box28
 \strutbox@=\box29
 \big@size=\dimen119
-LaTeX Font Info:    Redeclaring font encoding OML on input line 566.
-LaTeX Font Info:    Redeclaring font encoding OMS on input line 567.
+LaTeX Font Info:    Redeclaring font encoding OML on input line 567.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 568.
 \macc@depth=\count104
 \c@MaxMatrixCols=\count105
 \dotsspace@=\muskip10
@@ -390,24 +389,24 @@ LaTeX Font Info:    Redeclaring font encoding OMS on input line 567.
 \multlinegap=\skip44
 \multlinetaggap=\skip45
 \mathdisplay@stack=\toks23
-LaTeX Info: Redefining \[ on input line 2665.
-LaTeX Info: Redefining \] on input line 2666.
+LaTeX Info: Redefining \[ on input line 2666.
+LaTeX Info: Redefining \] on input line 2667.
 )
-("C:\Program Files\MiKTeX 2.9\tex\latex\tools\verbatim.sty"
+(/usr/share/texlive/texmf-dist/tex/latex/tools/verbatim.sty
 Package: verbatim 2003/08/22 v1.5q LaTeX2e package for verbatim enhancements
 \every@verbatim=\toks24
 \verbatim@line=\toks25
 \verbatim@in@stream=\read1
 )
-("C:\Program Files\MiKTeX 2.9\tex\latex\graphics\color.sty"
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/color.sty
 Package: color 2005/11/14 v1.0j Standard LaTeX Color (DPC)
 
-("C:\Program Files\MiKTeX 2.9\tex\latex\00miktex\color.cfg"
+(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/color.cfg
 File: color.cfg 2007/01/18 v1.5 color configuration of teTeX/TeXLive
 )
 Package color Info: Driver file: pdftex.def on input line 130.
 )
-(C:\Users\Jamie\AppData\Roaming\MiKTeX\2.9\tex\latex\wrapfig\wrapfig.sty
+(/usr/share/texlive/texmf-dist/tex/latex/wrapfig/wrapfig.sty
 \wrapoverhang=\dimen126
 \WF@size=\dimen127
 \c@WF@wrappedlines=\count111
@@ -415,32 +414,51 @@ Package color Info: Driver file: pdftex.def on input line 130.
 \WF@everypar=\toks26
 Package: wrapfig 2003/01/31  v 3.6
 )
-(C:\Users\Jamie\AppData\Roaming\MiKTeX\2.9\tex\latex\listings\lstlang1.sty
+(/usr/share/texlive/texmf-dist/tex/latex/caption/subcaption.sty
+Package: subcaption 2011/10/30 v1.1c Sub-captions (AR)
+
+(/usr/share/texlive/texmf-dist/tex/latex/caption/caption.sty
+Package: caption 2011/11/10 v3.2e Customizing captions (AR)
+
+(/usr/share/texlive/texmf-dist/tex/latex/caption/caption3.sty
+Package: caption3 2011/11/01 v1.4a caption3 kernel (AR)
+\captionmargin=\dimen128
+\captionmargin@=\dimen129
+\captionwidth=\dimen130
+\caption@indent=\dimen131
+\caption@parindent=\dimen132
+\caption@hangindent=\dimen133
+)
+\c@ContinuedFloat=\count112
+Package caption Info: listings package is loaded.
+Package caption Info: wrapfig package is loaded.
+)
+\c@subfigure=\count113
+\c@subtable=\count114
+)
+(/usr/share/texlive/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2004/09/05 1.3 listings language file
 )
-(C:\Users\Jamie\AppData\Roaming\MiKTeX\2.9\tex\latex\listings\lstlang1.sty
+(/usr/share/texlive/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2004/09/05 1.3 listings language file
 )
-(C:\Users\Jamie\AppData\Roaming\MiKTeX\2.9\tex\latex\listings\lstmisc.sty
+(/usr/share/texlive/texmf-dist/tex/latex/listings/lstmisc.sty
 File: lstmisc.sty 2007/02/22 1.4 (Carsten Heinz)
-)
-(C:\Users\Jamie\Documents\GitHub\turnt-octo-archer\report2\jam96\report2.aux
+) (./report2.aux)
+\openout1 = `report2.aux'.
 
-LaTeX Warning: Label `fig:default' multiply defined.
-
-)
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 57.
-LaTeX Font Info:    ... okay on input line 57.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 57.
-LaTeX Font Info:    ... okay on input line 57.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 57.
-LaTeX Font Info:    ... okay on input line 57.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 57.
-LaTeX Font Info:    ... okay on input line 57.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 57.
-LaTeX Font Info:    ... okay on input line 57.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 57.
-LaTeX Font Info:    ... okay on input line 57.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 58.
+LaTeX Font Info:    ... okay on input line 58.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 58.
+LaTeX Font Info:    ... okay on input line 58.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 58.
+LaTeX Font Info:    ... okay on input line 58.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 58.
+LaTeX Font Info:    ... okay on input line 58.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 58.
+LaTeX Font Info:    ... okay on input line 58.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 58.
+LaTeX Font Info:    ... okay on input line 58.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -480,130 +498,166 @@ Package geometry Warning: The marginal notes overrun the paper.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-(C:\Users\Jamie\AppData\Roaming\MiKTeX\2.9\tex\context\base\supp-pdf.mkii
+(/usr/share/texlive/texmf-dist/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count112
-\scratchdimen=\dimen128
+\scratchcounter=\count115
+\scratchdimen=\dimen134
 \scratchbox=\box31
-\nofMPsegments=\count113
-\nofMParguments=\count114
+\nofMPsegments=\count116
+\nofMParguments=\count117
 \everyMPshowfont=\toks27
-\MPscratchCnt=\count115
-\MPscratchDim=\dimen129
-\MPnumerator=\count116
-\makeMPintoPDFobject=\count117
+\MPscratchCnt=\count118
+\MPscratchDim=\dimen135
+\MPnumerator=\count119
+\makeMPintoPDFobject=\count120
 \everyMPtoPDFconversion=\toks28
-)
-\c@lstlisting=\count118
- (C:\Users\Jamie\Documents\GitHub\turnt-octo-archer\src\names.h
-LaTeX Font Info:    Try loading font information for OML+cmr on input line 4.
+) (/usr/share/texlive/texmf-dist/tex/generic/oberdiek/pdftexcmds.sty
+Package: pdftexcmds 2011/04/22 v0.16 Utilities of pdfTeX for LuaTeX (HO)
 
-("C:\Program Files\MiKTeX 2.9\tex\latex\base\omlcmr.fd"
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/ifluatex.sty
+Package: ifluatex 2010/03/01 v1.3 Provides the ifluatex switch (HO)
+Package ifluatex Info: LuaTeX not detected.
+)
+Package pdftexcmds Info: LuaTeX not detected.
+Package pdftexcmds Info: \pdf@primitive is available.
+Package pdftexcmds Info: \pdf@ifprimitive is available.
+Package pdftexcmds Info: \pdfdraftmode found.
+)
+(/usr/share/texlive/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
+Package: epstopdf-base 2010/02/09 v2.5 Base part for package epstopdf
+
+(/usr/share/texlive/texmf-dist/tex/latex/oberdiek/grfext.sty
+Package: grfext 2010/08/19 v1.1 Managing graphics extensions (HO)
+
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/kvdefinekeys.sty
+Package: kvdefinekeys 2011/04/07 v1.3 Defining keys (HO)
+))
+(/usr/share/texlive/texmf-dist/tex/latex/oberdiek/kvoptions.sty
+Package: kvoptions 2010/12/23 v3.10 Keyval support for LaTeX options (HO)
+
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/kvsetkeys.sty
+Package: kvsetkeys 2011/04/07 v1.13 Key value parser (HO)
+
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/etexcmds.sty
+Package: etexcmds 2011/02/16 v1.5 Prefix for e-TeX command names (HO)
+Package etexcmds Info: Could not find \expanded.
+(etexcmds)             That can mean that you are not using pdfTeX 1.50 or
+(etexcmds)             that some package has redefined \expanded.
+(etexcmds)             In the latter case, load this package earlier.
+)))
+Package grfext Info: Graphics extension search list:
+(grfext)             [.png,.pdf,.jpg,.mps,.jpeg,.jbig2,.jb2,.PNG,.PDF,.JPG,.JPE
+G,.JBIG2,.JB2,.eps]
+(grfext)             \AppendGraphicsExtensions on input line 452.
+
+(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
+File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
+e
+))
+\c@lstlisting=\count121
+Package caption Info: Begin \AtBeginDocument code.
+Package caption Info: End \AtBeginDocument code.
+
+(../../src/names.h
+LaTeX Font Info:    Try loading font information for OML+cmr on input line 4.
+ (/usr/share/texlive/texmf-dist/tex/latex/base/omlcmr.fd
 File: omlcmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OML/cmr/m/n' in size <8> not available
 (Font)              Font shape `OML/cmm/m/it' tried instead on input line 4.
 LaTeX Font Info:    Try loading font information for OMS+cmr on input line 9.
 
-("C:\Program Files\MiKTeX 2.9\tex\latex\base\omscmr.fd"
+(/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <8> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 9.
-)
-(C:\Users\Jamie\Documents\GitHub\turnt-octo-archer\src\names.cc [1
+) (../../src/names.cc
+[1
 
-{C:/Users/Jamie/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}]) [2]
-(C:\Users\Jamie\Documents\GitHub\turnt-octo-archer\src\scanner.h)
-(C:\Users\Jamie\Documents\GitHub\turnt-octo-archer\src\scanner.cc [3] [4]
-[5]) (C:\Users\Jamie\Documents\GitHub\turnt-octo-archer\src\parser.cc [6]
-[7] [8] [9] [10] [11])
-(C:\Users\Jamie\Documents\GitHub\turnt-octo-archer\examples\xor.gf2)
-<../../examples/xor.png, id=44, 649.16211pt x 235.19447pt>
+{/usr/share/texlive/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2])
+(../../src/scanner.h) (../../src/scanner.cc [3] [4] [5]) (../../src/parser.cc
+[6] [7] [8] [9] [10] [11] [12]) (../../examples/xor.gf2)
+<../../examples/xor.png, id=48, 649.16211pt x 235.19447pt>
 File: ../../examples/xor.png Graphic file (type png)
 
 <use ../../examples/xor.png>
-Package pdftex.def Info: ../../examples/xor.png used on input line 92.
+Package pdftex.def Info: ../../examples/xor.png used on input line 93.
 (pdftex.def)             Requested size: 227.62204pt x 82.46643pt.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-(C:\Users\Jamie\Documents\GitHub\turnt-octo-archer\examples\4bitadder.gf2
-[12] [13 <C:/Users/Jamie/Documents/GitHub/turnt-octo-archer/examples/xor.png>])
-<../../examples/4-bit-adder.png, id=53, 649.16211pt x 242.80185pt>
+[13] (../../examples/4bitadder.gf2 [14 <../../examples/xor.png>])
+<../../examples/4-bit-adder.png, id=57, 649.16211pt x 242.80185pt>
 File: ../../examples/4-bit-adder.png Graphic file (type png)
 
 <use ../../examples/4-bit-adder.png>
-Package pdftex.def Info: ../../examples/4-bit-adder.png used on input line 103.
+Package pdftex.def Info: ../../examples/4-bit-adder.png used on input line 104.
 
 (pdftex.def)             Requested size: 455.24408pt x 170.27133pt.
-
-(C:\Users\Jamie\Documents\GitHub\turnt-octo-archer\examples\sipo.gf2 [14 <C:/Us
-ers/Jamie/Documents/GitHub/turnt-octo-archer/examples/4-bit-adder.png>])
-<../../examples/sipo.png, id=57, 649.16211pt x 129.95921pt>
+ (../../examples/sipo.gf2 [15 <../../examples/4-bit-adder.png>])
+<../../examples/sipo.png, id=61, 649.16211pt x 129.95921pt>
 File: ../../examples/sipo.png Graphic file (type png)
 
 <use ../../examples/sipo.png>
-Package pdftex.def Info: ../../examples/sipo.png used on input line 115.
+Package pdftex.def Info: ../../examples/sipo.png used on input line 116.
 (pdftex.def)             Requested size: 341.43306pt x 68.35254pt.
-
-(C:\Users\Jamie\Documents\GitHub\turnt-octo-archer\examples\gateddlatch.gf2)
-<../../examples/gated-d-latch.png, id=58, 649.16211pt x 293.51764pt>
+ (../../examples/gateddlatch.gf2 [16 <../../examples/sipo.png>])
+<../../examples/gated-d-latch.png, id=65, 649.16211pt x 293.51764pt>
 File: ../../examples/gated-d-latch.png Graphic file (type png)
 
 <use ../../examples/gated-d-latch.png>
 Package pdftex.def Info: ../../examples/gated-d-latch.png used on input line 12
-8.
+9.
 (pdftex.def)             Requested size: 341.43306pt x 154.37674pt.
- [15 <C:/Users/Jamie/Documents/GitHub/turnt-octo-archer/examples/sipo.png>] [16
- <C:/Users/Jamie/Documents/GitHub/turnt-octo-archer/examples/gated-d-latch.png>
-]
-<default.png, id=65, 720.6925pt x 562.1pt>
+ [17 <../../examples/gated-d-latch.png>]
+<default.png, id=69, 807.015pt x 630.355pt>
 File: default.png Graphic file (type png)
  <use default.png>
-Package pdftex.def Info: default.png used on input line 143.
-(pdftex.def)             Requested size: 204.85672pt x 159.77132pt.
+Package pdftex.def Info: default.png used on input line 146.
+(pdftex.def)             Requested size: 204.85672pt x 160.0122pt.
 
-<simulation.png, id=66, 719.68875pt x 565.11125pt>
+<simulation.png, id=70, 807.015pt x 630.355pt>
 File: simulation.png Graphic file (type png)
  <use simulation.png>
-Package pdftex.def Info: simulation.png used on input line 154.
-(pdftex.def)             Requested size: 204.85672pt x 160.86005pt.
+Package pdftex.def Info: simulation.png used on input line 152.
+(pdftex.def)             Requested size: 204.85672pt x 160.0122pt.
 
-<monitors.png, id=67, 196.735pt x 301.125pt>
+<monitors.png, id=71, 215.80624pt x 311.1625pt>
 File: monitors.png Graphic file (type png)
  <use monitors.png>
-Package pdftex.def Info: monitors.png used on input line 161.
-(pdftex.def)             Requested size: 102.42836pt x 156.77428pt.
- [17 <C:/Users/Jamie/Documents/GitHub/turnt-octo-archer/report2/jam96/default.p
-ng> <C:/Users/Jamie/Documents/GitHub/turnt-octo-archer/report2/jam96/simulation
-.png> <C:/Users/Jamie/Documents/GitHub/turnt-octo-archer/report2/jam96/monitors
-.png>]
-(C:\Users\Jamie\Documents\GitHub\turnt-octo-archer\report2\jam96\report2.aux)
+Package pdftex.def Info: monitors.png used on input line 165.
+(pdftex.def)             Requested size: 102.42836pt x 147.68503pt.
 
-LaTeX Warning: There were multiply-defined labels.
-
- ) 
+<devices.png, id=72, 686.565pt x 432.61626pt>
+File: devices.png Graphic file (type png)
+ <use devices.png>
+Package pdftex.def Info: devices.png used on input line 177.
+(pdftex.def)             Requested size: 204.85672pt x 129.07954pt.
+ [18 <./default.png> <./simulation.png> <./monitors.png> <./devices.png>] (./re
+port2.aux) ) 
 Here is how much of TeX's memory you used:
- 4870 strings out of 493921
- 64281 string characters out of 3147282
- 489078 words of memory out of 3000000
- 8079 multiletter control sequences out of 15000+200000
- 8731 words of font info for 32 fonts, out of 3000000 for 9000
- 841 hyphenation exceptions out of 8191
- 33i,6n,58p,427b,1637s stack positions out of 5000i,500n,10000p,200000b,50000s
-<C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Pr
-ogram Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Program Fi
-les/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Program Files/MiKTe
-X 2.9/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Program Files/MiKTeX 2.9/fon
-ts/type1/public/amsfonts/cm/cmr5.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/p
-ublic/amsfonts/cm/cmr8.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsf
-onts/cm/cmr9.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cm
-sy8.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on report2.pdf (17 pages, 394763 bytes).
+ 6255 strings out of 493723
+ 87947 string characters out of 3149524
+ 461842 words of memory out of 3000000
+ 9415 multiletter control sequences out of 15000+200000
+ 8958 words of font info for 33 fonts, out of 3000000 for 9000
+ 831 hyphenation exceptions out of 8191
+ 42i,8n,58p,427b,1635s stack positions out of 5000i,500n,10000p,200000b,50000s
+</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx1
+0.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
+</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/s
+hare/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/te
+xlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb></usr/share/texlive/te
+xmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist
+/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/t
+ype1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/pu
+blic/amsfonts/cm/cmtt10.pfb>
+Output written on report2.pdf (18 pages, 380304 bytes).
 PDF statistics:
- 100 PDF objects out of 1000 (max. 8388607)
+ 106 PDF objects out of 1000 (max. 8388607)
+ 68 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 36 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 41 words of extra memory for PDF output out of 10000 (max. 10000000)
 
