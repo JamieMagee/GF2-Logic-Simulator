@@ -146,7 +146,7 @@ void parser::newDevice(int deviceType)
 	smz->getsymbol(cursym, curname, curint);
 	if (cursym == namesym)
 	{
-		nameCheck = nmz->finddevice(curname);
+		devlink nameCheck = netz->finddevice(curname);
 		if(nameCheck==NULL)
 		{
 			name devName = curname;
