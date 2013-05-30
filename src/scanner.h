@@ -17,9 +17,9 @@ class scanner
 		symbol s;
 		names* nmz;//Pointer to instance of names class
 
-		scanner (names* names_mod,		//Pointer to names class
-				 const char* defname,	//Name of file being read
-				 bool& ok);				//True of file has been opened correctly
+		scanner(names* names_mod,		//Pointer to names class
+				const char* defname,	//Name of file being read
+				bool& ok);				//True of file has been opened correctly
 		~scanner();						//Destructor
 		void getsymbol(symbol& s,		//Symbol type read
 					   name& id,			//Return symbol name (if it has one)

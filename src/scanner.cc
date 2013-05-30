@@ -14,7 +14,7 @@ scanner::scanner(names* names_mod, const char* defname, bool& ok)
 		ok = 0;
 	}
 	eofile = (inf.get(curch) == 0);	//Get first character
-	linenum=1;
+	linenum = 1;
 }
 
 scanner::~scanner()
@@ -105,12 +105,12 @@ void scanner::getch()
 {
 	prevch = curch;
 	eofile = (inf.get(curch) == 0);	//get next character
-	if (prevch == '\n')
+	if (prevch == '\n') //If eoline, clear the currently stored line
 	{
 		linenum++;
 		line.clear();
 	}
-	else if (prevch != '\r')
+	else if (prevch != '\r') //If we're not at the end of a line, add the char to the line string
 	{
 		line.push_back(prevch);
 	}
@@ -156,7 +156,11 @@ void scanner::skipcomments()
 	while (!(prevch == '*' && curch == '/'))
 	{
 		getch();
-		if (eofile) break;
+		if (eofile)
+		{
+			cout << "Reached end of file before comment was terminated" << endl;
+			break;
+		}
 	}
 	getch(); //Get to next useful char
 }
