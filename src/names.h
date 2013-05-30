@@ -20,7 +20,7 @@ class names
 {
 
 	private:
-		vector<namestring> namelist;
+		vector<namestring> namelist; //Stores a list of reserved and declared names
 
 	public:
 		name lookup(namestring str);

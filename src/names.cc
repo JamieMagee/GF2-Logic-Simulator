@@ -46,33 +46,37 @@ names::names(void)  /* the constructor */
 	namelist.push_back("QBAR"); //33
 }
 
-name names::lookup (namestring str)
+name names::lookup(namestring str)
 {
-	if (cvtname(str) == blankname) {
+	if (cvtname(str) == blankname)
+	{
 		namelist.push_back(str);	//Insert new string
-		return namelist.size()-1;	//Return new strings internal name
-	} else {
+		return namelist.size() - 1;	//Return new strings internal name
+	}
+	else
+	{
 		return cvtname(str);
 	}
 }
 
-name names::cvtname (namestring str)
+name names::cvtname(namestring str)
 {
 	if (str == "") return blankname;
-	for (name id=0; id<namelist.size(); id++) {
+	for (name id = 0; id < namelist.size(); id++)
+	{
 		if (namelist[id] == str) return id;		//Linear search of namelist vector
 	}
 	return blankname;
 }
 
-void names::writename (name id)
+void names::writename(name id)
 {
 	if (id == blankname) cout << "blankname";
 	else if (id > blankname && id < namelist.size()) cout << namelist[id];
 	else cout << "Incorrect id";
 }
 
-int names::namelength (name id)
+int names::namelength(name id)
 {
 	if (id > blankname && id < namelist.size()) return namelist[id].length();
 	else return blankname;
