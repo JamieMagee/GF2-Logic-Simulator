@@ -2,9 +2,9 @@ OPENGL_LIBS = -lglut -lGL -lGLU
 
 CXX = $(shell wx-config --cxx)
 
-SRC = logsim.cc names.cc scanner.cc network.cc parser.cc monitor.cc devices.cc userint.cc gui.cc guitest.cc
+SRC = $(wildcard *.cc)
 
-L_OBJECTS = logsim.o names.o scanner.o network.o parser.o monitor.o devices.o userint.o gui.o circuit.o error.o gui-devices.o gui-misc.o gui-devices-infopanels.o
+L_OBJECTS = logsim.o names.o scanner.o network.o parser.o monitor.o devices.o userint.o gui.o circuit.o error.o gui-devices.o gui-misc.o gui-devices-infopanels.o gui-canvas.o
 
 G_OBJECTS = guitest.o names.o network.o monitor.o devices.o gui.o scanner.o parser.o
 
@@ -40,17 +40,33 @@ depend:
 
 # DO NOT DELETE
 
-logsim.o: logsim.h names.h devices.h network.h monitor.h parser.h scanner.h
-logsim.o: error.h userint.h gui.h circuit.h observer.h
-names.o: names.h
-scanner.o: scanner.h names.h
-network.o: network.h names.h
-parser.o: parser.h names.h scanner.h network.h devices.h monitor.h error.h
-monitor.o: monitor.h names.h network.h devices.h
+circuit.o: circuit.h names.h network.h devices.h monitor.h observer.h
 devices.o: devices.h names.h network.h
+error.o: error.h scanner.h names.h
+gui-canvas.o: gui-canvas.h circuit.h names.h network.h devices.h monitor.h
+gui-canvas.o: observer.h gui-misc.h
+gui.o: gui.h gui-canvas.h circuit.h names.h network.h devices.h monitor.h
+gui.o: observer.h gui-misc.h wx_icon.xpm scanner.h parser.h error.h
+gui.o: gui-devices.h gui-devices-infopanels.h gui-id.h
+gui-devices.o: gui-devices.h gui-devices-infopanels.h circuit.h names.h
+gui-devices.o: network.h devices.h monitor.h observer.h gui-misc.h gui-id.h
+gui-devices.o: wx_icon.xpm
+gui-devices-infopanels.o: gui-devices-infopanels.h circuit.h names.h
+gui-devices-infopanels.o: network.h devices.h monitor.h observer.h gui-misc.h
+gui-devices-infopanels.o: gui-devices.h gui-id.h
+gui-misc.o: gui-misc.h circuit.h names.h network.h devices.h monitor.h
+gui-misc.o: observer.h
+guitest.o: guitest.h names.h devices.h network.h monitor.h gui.h gui-canvas.h
+guitest.o: circuit.h observer.h gui-misc.h
+logsim.o: logsim.h names.h devices.h network.h monitor.h parser.h scanner.h
+logsim.o: error.h userint.h gui.h gui-canvas.h circuit.h observer.h
+logsim.o: gui-misc.h
+monitor.o: monitor.h names.h network.h devices.h
+names.o: names.h
+network.o: network.h names.h
+observer-test.o: observer.h
+parser.o: parser.h names.h scanner.h network.h devices.h monitor.h error.h
+runtests.o: tests.h scanner.h names.h
+scanner.o: scanner.h names.h
+tests.o: tests.h scanner.h names.h
 userint.o: userint.h names.h network.h devices.h monitor.h
-gui.o: gui.h names.h devices.h network.h monitor.h circuit.h observer.h
-gui.o: wx_icon.xpm scanner.h parser.h error.h gui-devices.h
-gui.o: gui-devices-infopanels.h gui-misc.h gui-id.h
-guitest.o: guitest.h names.h devices.h network.h monitor.h gui.h circuit.h
-guitest.o: observer.h

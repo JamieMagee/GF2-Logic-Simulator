@@ -4,10 +4,25 @@
 #include <wx/combobox.h>
 #include <wx/textctrl.h>
 #include <wx/listbox.h>
+#include <wx/checklst.h>
 #include "circuit.h"
 
-// This file contains a few classes derived from wxWidgets classes, that have some extra functions to make them more convenient to use for logic simulator related tasks
+// This file contains misc widgets
 // Also some functions for things done in lots of places in the GUI, like CircuitElementInfoVector_to_wxArrayString
+
+// CheckListBox to control switch states
+class SwitchesCheckListBox: public wxCheckListBox
+{
+public:
+	SwitchesCheckListBox(circuit* circ, wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = 0);
+	~SwitchesCheckListBox();
+	void OnCircuitChanged();
+private:
+	circuit* c;
+	CircuitElementInfoVector switches;
+	void OnSwitchChanged(wxCommandEvent& event);
+	DECLARE_EVENT_TABLE()
+};
 
 extern wxString devicekindstrings[baddevice];
 
