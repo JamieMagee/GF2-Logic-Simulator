@@ -108,7 +108,7 @@ void scanner::getch()
 		linenum++;
 		line.clear();
 	}
-	else
+	else if (prevch != '\r')
 	{
 		line.push_back(prevch);
 	}
@@ -167,7 +167,10 @@ string scanner::getline()
 		{
 			getch();
 		}
-		line.push_back(curch);
+		if (curch != '\n' && curch != '\r')
+		{
+			line.push_back(curch);
+		}
 	}
 	return line;
 }
