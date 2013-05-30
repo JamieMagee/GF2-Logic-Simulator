@@ -146,95 +146,104 @@ void parser::newDevice(int deviceType)
 	smz->getsymbol(cursym, curname, curint);
 	if (cursym == namesym)
 	{
-		name devName = curname;
-		if (deviceType == 10)
+		nameCheck = nmz->finddevice(curname);
+		if(nameCheck==NULL)
 		{
-			dmz->makedevice(dtype, devName, 0, correctOperation);	//create DTYPE with name devName
-			return;
-		}
-		if (deviceType == 11)
-		{
-			dmz->makedevice(xorgate, devName, 2, correctOperation); //create XOR with name devName
-			return;
-		}
-		smz->getsymbol(cursym, curname, curint);
-		if (cursym == colon)
-		{
-			smz->getsymbol(cursym, curname, curint);
-			if (cursym == numsym)
+			name devName = curname;
+			if (deviceType == 10)
 			{
-				switch (deviceType)
-				{
-					case 4:
-						if (curint > 0)
-						{
-							dmz->makedevice(aclock, devName, curint, correctOperation); //create clock with curint and devName
-						}
-						else
-						{
-							erz->newError(6);//clock must have number greater than 0
-						}
-						break;
-					case 5:
-						if (curint == 1 || curint == 0)
-						{
-							dmz->makedevice(aswitch, devName, curint, correctOperation);//create switch with curint and devName
-						}
-						else
-						{
-							erz->newError(7);//switch must have either 0 or 1
-						}
-						break;
-					case 6:
-					case 7:
-					case 8:
-					case 9:
-						if (curint > 0 && curint < 17)
-						{
-							switch (deviceType)
-							{
-								case 6:
-									dmz->makedevice(andgate, devName, curint, correctOperation);//create and gate with curint and devName
-									break;
-								case 7:
-									dmz->makedevice(nandgate, devName, curint, correctOperation);//create nand gate with curint and devName
-									break;
-								case 8:
-									dmz->makedevice(orgate, devName, curint, correctOperation);//create or gate with curint and devName
-									break;
-								case 9:
-									dmz->makedevice(norgate, devName, curint, correctOperation);//create nor gate with curint and devName
-									break;
-								default:
-									cout << "How on earth have you managed to get here?" << endl;
-							}
-						}
-						else
-						{
-							erz->newError(8);//must have between 1 and 16 inputs to a GATE
-						}
-						break;
-					default:
-						cout << "Please do not deduct marks if this message is displayed" << endl;
-				}
+				dmz->makedevice(dtype, devName, 0, correctOperation);	//create DTYPE with name devName
 				return;
+			}
+			if (deviceType == 11)
+			{
+				dmz->makedevice(xorgate, devName, 2, correctOperation); //create XOR with name devName
+				return;
+			}
+			smz->getsymbol(cursym, curname, curint);
+			if (cursym == colon)
+			{
+				smz->getsymbol(cursym, curname, curint);
+				if (cursym == numsym)
+				{
+					switch (deviceType)
+					{
+						case 4:
+							if (curint > 0)
+							{
+								dmz->makedevice(aclock, devName, curint, correctOperation); //create clock with curint and devName
+							}
+							else
+							{
+								erz->newError(6);//clock must have number greater than 0
+							}
+							break;
+						case 5:
+							if (curint == 1 || curint == 0)
+							{
+								dmz->makedevice(aswitch, devName, curint, correctOperation);//create switch with curint and devName
+							}
+							else
+							{
+								erz->newError(7);//switch must have either 0 or 1
+							}
+							break;
+						case 6:
+						case 7:
+						case 8:
+						case 9:
+							if (curint > 0 && curint < 17)
+							{
+								switch (deviceType)
+								{
+									case 6:
+										dmz->makedevice(andgate, devName, curint, correctOperation);//create and gate with curint and devName
+										break;
+									case 7:
+										dmz->makedevice(nandgate, devName, curint, correctOperation);//create nand gate with curint and devName
+										break;
+									case 8:
+										dmz->makedevice(orgate, devName, curint, correctOperation);//create or gate with curint and devName
+										break;
+									case 9:
+										dmz->makedevice(norgate, devName, curint, correctOperation);//create nor gate with curint and devName
+										break;
+									default:
+										cout << "How on earth have you managed to get here?" << endl;
+								}
+							}
+							else
+							{
+								erz->newError(8);//must have between 1 and 16 inputs to a GATE
+							}
+							break;
+						default:
+							cout << "Please do not deduct marks if this message is displayed" << endl;
+					}
+					return;
+				}
+				else
+				{
+					erz->newError(9);//clock needs clock cycle number
+				}
 			}
 			else
 			{
-				erz->newError(9);//clock needs clock cycle number
+				erz->newError(10);//need colon after name for CLOCK/SWITCH/GATE type
 			}
 		}
 		else
 		{
-			erz->newError(10);//need colon after name for CLOCK/SWITCH/GATE type
+			erz->newError(34);//attempting to give two devices the same name, choose an alternative name
 		}
 	}
 	else if (cursym!=badsym)
 	{
-		erz->newError(
+		erz->newError(33);//using reserved word as device name
+	}
 	else
 	{
-		erz->newError(11);//name must begin with name starting with letter and only containing letter number and _
+		erz->newError(11);//name must begin with letter and only containing letter number and _
 	}
 }
 
