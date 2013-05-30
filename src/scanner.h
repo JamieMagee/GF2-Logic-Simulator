@@ -15,10 +15,11 @@ class scanner
 {
 	public:
 		symbol s;
-		names* defnames;//Pointer to instance of names class
+		names* nmz;//Pointer to instance of names class
 
 		scanner (names* names_mod,		//Pointer to names class
-				 const char* defname);	//Name of file being read
+				 const char* defname,	//Name of file being read
+				 bool& ok);				//True of file has been opened correctly
 		~scanner();						//Destructor
 		void getsymbol(symbol& s,		//Symbol type read
 					   name& id,			//Return symbol name (if it has one)
@@ -30,7 +31,7 @@ class scanner
 		char curch;		//Current input character
 		char prevch;	//Previous input character. Used for finding line end
 		bool eofile; 	//True for end of file
-		bool eoline;	//True for line end
+		bool ok;		//True if the file has been opened correctly
 		int linenum;	//Number of lines in definition file
 		int cursymlen;	//Length of current symbol. Used for error printing
 		string line;	//Current line contents. Used for error printing

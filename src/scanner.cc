@@ -3,13 +3,15 @@
 
 using namespace std;
 
-scanner::scanner(names* names_mod, const char* defname)
+scanner::scanner(names* names_mod, const char* defname, bool& ok)
 {
-	defnames = names_mod;
+	nmz = names_mod;
+	ok = 1;
 	inf.open(defname);	//Open file
 	if (!inf)
 	{
 		cout << "Error: cannot open file for reading" << endl;
+		ok = 0;
 	}
 	eofile = (inf.get(curch) == 0);	//Get first character
 	linenum=1;
@@ -137,7 +139,7 @@ void scanner::getname(name& id)
 		cursymlen++;
 		getch();
 	}
-	id = defnames->lookup(str);
+	id = nmz->lookup(str);
 }
 
 void scanner::skipspaces()

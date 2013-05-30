@@ -24,10 +24,10 @@ class parser
 		monitor* mmz;
 		scanner* smz;
 		error* erz;
-		int curint;
+		int curint;  //integer, symbol and name returned by scanner
 		symbol cursym;
 		name curname;
-		bool correctOperation;
+		bool correctOperation; //bools to check for errors
 		bool anyErrors;
 		int badname;
 		name monitorName;
