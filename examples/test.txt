@@ -1,0 +1,49 @@
+processing 4bitadder.gf2...
+Logic Simulator: interactive command interface
+# Running for 50 cycles
+XOR2               :--------------------------------------------------
+XOR4               :--------------------------------------------------
+XOR6               :__________________________________________________
+XOR8               :__________________________________________________
+OR4                :__________________________________________________
+# Logic Simulator: terminating.
+
+
+processing gateddlatch.gf2...
+Logic Simulator: interactive command interface
+# Running for 50 cycles
+CLK1               :_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+CLK2               :__--__--__--__--__--__--__--__--__--__--__--__--__
+G4                 :___---_---_---_---_---_---_---_---_---_---_---_---
+G5                 :---___-___-___-___-___-___-___-___-___-___-___-___
+# Logic Simulator: terminating.
+
+
+processing oscillating.gf2...
+Logic Simulator: interactive command interface
+# Running for 50 cycles
+CLK1               :_____-----_____-----_____-----_____-----_____-----
+G12                :_____-----_____-----_____-----_____-----_____-----
+# Logic Simulator: terminating.
+
+
+processing sipo.gf2...
+Logic Simulator: interactive command interface
+# Running for 50 cycles
+CLK2               :_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+D1.Q               :___--__--__--__--__--__--__--__--__--__--__--__--_
+D2.Q               :_____--__--__--__--__--__--__--__--__--__--__--__-
+D3.Q               :_______--__--__--__--__--__--__--__--__--__--__--_
+D4.Q               :_________--__--__--__--__--__--__--__--__--__--__-
+# Logic Simulator: terminating.
+
+
+processing xor.gf2...
+Logic Simulator: interactive command interface
+# Running for 50 cycles
+S1                 :__________________________________________________
+S2                 :--------------------------------------------------
+G4                 :--------------------------------------------------
+# Logic Simulator: terminating.
+
+
