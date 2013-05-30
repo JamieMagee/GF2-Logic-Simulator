@@ -249,7 +249,7 @@ bool circuit::IsDeviceNameValid(string devname)
 		return false;
 	for (string::iterator it=devname.begin(); it<devname.end(); ++it)
 	{
-		if (!isalpha(*it) && !isdigit(*it)) return false;
+		if (!isalpha(*it) && !isdigit(*it) && (*it)!='_') return false;
 	}
 	return true;
 }
