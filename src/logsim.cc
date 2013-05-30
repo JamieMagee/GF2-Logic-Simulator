@@ -3,7 +3,7 @@
 #include "gui.h"
 #include <GL/glut.h>
 
-#define USE_GUI
+//#define USE_GUI
 
 IMPLEMENT_APP(MyApp)
   
@@ -22,7 +22,7 @@ bool MyApp::OnInit()
   netz = new network(nmz);
   dmz = new devices(nmz, netz);
   mmz = new monitor(nmz, netz);
-  smz = new scanner(nmz, wxString(argv[1]).mb_str());
+  smz = new scanner(nmz, wxString(argv[1]).mb_str(), ok);
   erz = new error(smz);
   pmz = new parser(netz, dmz, mmz, smz, erz);
   

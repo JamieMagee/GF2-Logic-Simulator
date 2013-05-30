@@ -297,7 +297,7 @@ void parser::connectionList()
 void parser::newConnection()
 {
 	//EBNF: con = devicename'.'input '=' devicename['.'output]
-	if (smz->defnames->namelength(curname) != 0)
+	if (smz->nmz->namelength(curname) != 0)
 	{
 		connectionInName = curname;
 		smz->getsymbol(cursym, curname, curint);
@@ -311,7 +311,7 @@ void parser::newConnection()
 				if (cursym == equals) //SEARCH - you have got to here
 				{
 					smz->getsymbol(cursym, curname, curint);
-					if (smz->defnames->namelength(curname) != 0)
+					if (smz->nmz->namelength(curname) != 0)
 					{
 						connectionOutName = curname;
 						devlink devtype = netz->finddevice(curname);
@@ -425,7 +425,7 @@ void parser::monitorList()
 void parser::newMonitor()
 {
 	//EBNF: mon = devicename['.'output]
-	if (smz->defnames->namelength(curname) != 0)
+	if (smz->nmz->namelength(curname) != 0)
 	{
 		monitorName = curname;
 		devlink devtype = netz->finddevice(curname);
