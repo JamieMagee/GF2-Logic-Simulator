@@ -146,7 +146,7 @@ void parser::newDevice(int deviceType)
 	smz->getsymbol(cursym, curname, curint);
 	if (cursym == namesym)
 	{
-		nameCheck = nmz->finddevice(curname);
+		devlink nameCheck = netz->finddevice(curname);
 		if(nameCheck==NULL)
 		{
 			name devName = curname;
@@ -255,7 +255,10 @@ void parser::connectionList()
 		smz->getsymbol(cursym, curname, curint);
 		if (cursym == endsym)
 		{
-			erz->newWarning(0);//No Connections
+			if (!connectionPresent)
+			{
+				erz->newWarning(0);//No Connections
+			}
 			return;
 		}
 		else if (cursym == namesym)
@@ -383,7 +386,10 @@ void parser::monitorList()
 		smz->getsymbol(cursym, curname, curint);
 		if (cursym == endsym)
 		{
-			erz->newWarning(1);//No Monitors
+			if (!monitorPresent)
+			{
+				erz->newWarning(1);//No Monitors
+			}
 			return;
 		}
 		else if (cursym == namesym)
