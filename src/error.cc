@@ -28,7 +28,7 @@ error::error(scanner* scanner_mod)  /* the constructor */
 	errorlist.push_back("Error 0x000F: Input device called in connection list does not exist"); //15
 	errorlist.push_back("Error 0x0010: Must specify output to connect to input with equals sign "); //16
 	errorlist.push_back("Error 0x0011: Must specify valid input gate after dot"); //17
-	errorlist.push_back("Error 0x0012: Need to specify valid iput gate seperated from device name by a '.'"); //18
+	errorlist.push_back("Error 0x0012: Need to specify valid input gate separated from device name by a '.'"); //18
 	errorlist.push_back("Error 0x0013: Output device called in connection list does not exist"); //19
 	errorlist.push_back("Error 0x0014: Monitor must start with the name of a valid device"); //20
 	errorlist.push_back("Error 0x0015: Expecting device name or END after semicolon (device name must start with letter)"); //21 monitor list
@@ -37,11 +37,11 @@ error::error(scanner* scanner_mod)  /* the constructor */
 	errorlist.push_back("Error 0x0018: Need semicolon at end of previous line"); //24
 	errorlist.push_back("Error 0x0019: Must only be one devices list"); //25
 	errorlist.push_back("Error 0x001A: There must be one 'DEVICES' block, it may not have been initialised properly");//26
-	errorlist.push_back("Error 0x001B: Devices already exists with this name, please choose an alternative name"); //27
+	errorlist.push_back("Error 0x001B: Device already exists with this name, please choose an alternative name"); //27
 	errorlist.push_back("Error 0x001C: Must only be one connections list"); //28
 	errorlist.push_back("Error 0x001D: Must only be one monitors list"); //29
 	errorlist.push_back("Error 0x001E: There must be one 'CONNECTIONS' block, it may not have been initialised properly");//30
-	errorlist.push_back("Error 0x001F: There must be one 'MONITOR' block, it may not have been initialised properly");//31
+	errorlist.push_back("Error 0x001F: There must be one 'MONITORS' block, it may not have been initialised properly");//31
 	errorlist.push_back("Error 0x0020: Block must be terminated with 'END'");//32
 	errorlist.push_back("Error 0x0021: Cannot name a device as a reserved word, for a list of reserved words check reservedWords.txt in docs");//33
 	errorlist.push_back("Error 0x0022: Not a valid output for a dtype");//34
@@ -51,8 +51,8 @@ error::error(scanner* scanner_mod)  /* the constructor */
 	warningCount = 0;
 	symbolCount = 0;
 	firstTime=true;
-	warninglist.push_back("Warning 0x0000: You have not specfied any conenctions. Please check this is what is required");//0
-	warninglist.push_back("Warning 0x0001: You have not specfied any monitors. Please check this is what is required");//1
+	warninglist.push_back("Warning 0x0000: You have not specified any connections. Please check this is what is required");//0
+	warninglist.push_back("Warning 0x0001: You have not specified any monitors. Please check this is what is required");//1
 	smz = scanner_mod;
 }
 
