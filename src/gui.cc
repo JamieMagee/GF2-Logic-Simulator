@@ -163,17 +163,17 @@ void MyFrame::OnOpenFile(wxCommandEvent &event)
 bool MyFrame::loadFile(const char * filename)
 // load a file (can be called by menu File->Open or for the command line argument)
 {
-	bool ok; //True of file is opened correctly
+	bool result; //True if file is opened correctly
 	// Clear log window
 	outputTextCtrl->ChangeValue(wxT(""));
 	cout << "Loading file " << filename << endl;
 
 	c->Clear();
 
-	scanner *smz = new scanner(c->nmz(), filename, ok);
+	scanner *smz = new scanner(c->nmz(), filename, result);
 	error *erz = new error(smz);
 	parser *pmz = new parser(c->netz(), c->dmz(), c->mmz(), smz, erz);
-	bool result = pmz->readin();
+	if (result) result = pmz->readin();
 
 	if (result)
 	{

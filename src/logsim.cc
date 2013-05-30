@@ -3,7 +3,7 @@
 #include "gui.h"
 #include <GL/glut.h>
 
-#define USE_GUI
+//#define USE_GUI
 
 IMPLEMENT_APP(MyApp)
   
@@ -22,9 +22,6 @@ bool MyApp::OnInit()
   netz = new network(nmz);
   dmz = new devices(nmz, netz);
   mmz = new monitor(nmz, netz);
-  smz = new scanner(nmz, wxString(argv[1]).mb_str(), ok);
-  erz = new error(smz);
-  pmz = new parser(netz, dmz, mmz, smz, erz);
 
 #ifdef USE_GUI
   // glutInit cannot cope with Unicode command line arguments, so we pass
@@ -39,6 +36,13 @@ bool MyApp::OnInit()
   }
   return(true); // enter the GUI event loop
 #else
+  smz = new scanner(nmz, wxString(argv[1]).mb_str(), ok);
+  if (!ok)
+  {
+	return(false);	
+  }
+  erz = new error(smz);
+  pmz = new parser(netz, dmz, mmz, smz, erz);
   if (pmz->readin ()) { // check the logic file parsed correctly
     // Construct the text-based interface
     userint umz(nmz, dmz, mmz);
