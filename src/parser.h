@@ -16,9 +16,9 @@ class parser
 		void deviceList();
 		void connectionList();
 		void monitorList();
-		void newDevice(int deviceType);
-		void newConnection();
-		void newMonitor();
+		bool newDevice(int deviceType);
+		bool newConnection();
+		bool newMonitor();
 		network* netz; // instantiations of various classes for parser to use.
 		devices* dmz;
 		monitor* mmz;

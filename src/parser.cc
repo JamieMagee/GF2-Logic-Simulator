@@ -81,12 +81,13 @@ bool parser::readin(void)
 void parser::deviceList()
 {
 	//EBNF: devices = 'DEVICES' dev {';' dev} ';' 'END'
+	bool deviceError;
 	if (!devicePresent)
 	{
 		smz->getsymbol(cursym, curname, curint);
 		if (cursym == classsym)
 		{
-			newDevice(curname);
+			deviceError = newDevice(curname);
 			devicePresent = true;
 		}
 		else if (cursym == endsym)
@@ -98,14 +99,17 @@ void parser::deviceList()
 		{
 			erz->newError(4); //need a device type
 		}
-		smz->getsymbol(cursym, curname, curint);
+		if (!deviceError)
+		{
+			smz->getsymbol(cursym, curname, curint);
+		}
 	}
 	while (cursym == semicol)
 	{
 		smz->getsymbol(cursym, curname, curint);
 		if (cursym == classsym)
 		{
-			newDevice(curname);
+			deviceError = newDevice(curname);
 		}
 		else if (cursym == endsym)
 		{
@@ -120,7 +124,10 @@ void parser::deviceList()
 		{
 			erz->newError(5);//Expecting device name or END after semicolon (device name must start with letter)
 		}
-		smz->getsymbol(cursym, curname, curint);
+		if (!deviceError)
+		{
+			smz->getsymbol(cursym, curname, curint);
+		}
 	}
 	erz->newError(24);//must end line in semicolon
 	while (cursym != semicol && cursym != endsym && cursym != eofsym)
@@ -138,9 +145,10 @@ void parser::deviceList()
 }
 
 
-void parser::newDevice(int deviceType)
+bool parser::newDevice(int deviceType)
 {
 	//EBNF: dev = clock|switch|gate|dtype|xor
+	bool errorOccurance = false;
 	smz->getsymbol(cursym, curname, curint);
 	if (cursym == namesym)
 	{
@@ -151,12 +159,12 @@ void parser::newDevice(int deviceType)
 			if (deviceType == 10)
 			{
 				dmz->makedevice(dtype, devName, 0, correctOperation);	//create DTYPE with name devName
-				return;
+				return errorOccurance;
 			}
 			if (deviceType == 11)
 			{
 				dmz->makedevice(xorgate, devName, 2, correctOperation); //create XOR with name devName
-				return;
+				return errorOccurance;
 			}
 			smz->getsymbol(cursym, curname, curint);
 			if (cursym == colon)
@@ -174,6 +182,7 @@ void parser::newDevice(int deviceType)
 							else
 							{
 								erz->newError(6);//clock must have number greater than 0
+								errorOccurance=true;
 							}
 							break;
 						case 5:
@@ -184,6 +193,7 @@ void parser::newDevice(int deviceType)
 							else
 							{
 								erz->newError(7);//switch must have either 0 or 1
+								errorOccurance=true;
 							}
 							break;
 						case 6:
@@ -213,41 +223,49 @@ void parser::newDevice(int deviceType)
 							else
 							{
 								erz->newError(8);//must have between 1 and 16 inputs to a GATE
+								errorOccurance=true;
 							}
 							break;
 						default:
 							cout << "Please do not deduct marks if this message is displayed" << endl;
 					}
-					return;
+					return errorOccurance;
 				}
 				else
 				{
 					erz->newError(9);//clock needs clock cycle number
+					errorOccurance=true;
 				}
 			}
 			else
 			{
 				erz->newError(10);//need colon after name for CLOCK/SWITCH/GATE type
+				errorOccurance=true;
 			}
 		}
 		else
 		{
 			erz->newError(34);//attempting to give two devices the same name, choose an alternative name
+			errorOccurance=true;
 		}
 	}
 	else if (cursym!=badsym)
 	{
 		erz->newError(33);//using reserved word as device name
+		errorOccurance=true;
 	}
 	else
 	{
 		erz->newError(11);//name must begin with letter and only containing letter number and _
+		errorOccurance=true;
 	}
+	return errorOccurance;
 }
 
 void parser::connectionList()
 {
 	//EBNF: connections = 'CONNECTIONS' {con ';'} 'END'
+	bool connectionError;
 	if (!connectionPresent)
 	{
 		smz->getsymbol(cursym, curname, curint);
@@ -261,21 +279,24 @@ void parser::connectionList()
 		}
 		else if (cursym == namesym)
 		{
-			newConnection();
+			connectionError = newConnection();
 			connectionPresent = true;
 		}
 		else
 		{
 			erz->newError(12);//connection must start with the name of a device
 		}
-		smz->getsymbol(cursym, curname, curint);
+		if (!connectionError)
+		{
+			smz->getsymbol(cursym, curname, curint);
+		}
 	}
 	while (cursym == semicol)
 	{
 		smz->getsymbol(cursym, curname, curint);
 		if (cursym == namesym)
 		{
-			newConnection();
+			connectionError = newConnection();
 		}
 		else if (cursym == endsym)
 		{
@@ -290,7 +311,10 @@ void parser::connectionList()
 		{
 			erz->newError(13);//connection must start with the name of a device or end of device list must be terminated with END (not semicolon)
 		}
-		smz->getsymbol(cursym, curname, curint);
+		if (!connectionError)
+		{
+			smz->getsymbol(cursym, curname, curint);
+		}
 	}
 	erz->newError(24);//must end line in semicolon
 	while (cursym != semicol && cursym != endsym && cursym != eofsym)
@@ -307,9 +331,10 @@ void parser::connectionList()
 	}
 }
 
-void parser::newConnection()
+bool parser::newConnection()
 {
 	//EBNF: con = devicename'.'input '=' devicename['.'output]
+	bool errorOccurance = false;
 	if (smz->nmz->namelength(curname) != 0)
 	{
 		connectionInName = curname;
@@ -338,47 +363,55 @@ void parser::newConnection()
 									if (cursym == iosym)
 									{
 										netz->makeconnection(connectionInName, inputPin, connectionOutName, curname, correctOperation);
-										return;
+										return errorOccurance;
 									}
 								}
 								else
 								{
 									erz->newError(14);	//Expect a dot after dtype
+									errorOccurance=true;
 								}
 							default:
 								netz->makeconnection(connectionInName, inputPin, connectionOutName, blankname, correctOperation);
-								return;
+								return errorOccurance;
 						}
 					}
 					else
 					{
 						erz->newError(15); //Device does not exist
+						errorOccurance=true;
 					}
 				}
 				else
 				{
 					erz->newError(16);//Must specify output to connect to input with equals sign
+					errorOccurance=true;
 				}
 			}
 			else
 			{
 				erz->newError(17);//specify valid input gate after dot
+				errorOccurance=true;
 			}
 		}
 		else
 		{
 			erz->newError(18);//need to seperate connection input with a '.' (or need to specify input)
+			errorOccurance=true;
 		}
 	}
 	else
 	{
 		erz->newError(19); //Device does not exist
+		errorOccurance=true;
 	}
+	return errorOccurance;
 }
 
 void parser::monitorList()
 {
 	//EBNF: monitors = 'MONITORS' {mon ';'} 'END'
+	bool monitorError;
 	if (!monitorPresent)
 	{
 		smz->getsymbol(cursym, curname, curint);
@@ -392,21 +425,24 @@ void parser::monitorList()
 		}
 		else if (cursym == namesym)
 		{
-			newMonitor();
+			monitorError = newMonitor();
 			monitorPresent = true;
 		}
 		else
 		{
 			erz->newError(20);//monitor must start with the name of a device
 		}
-		smz->getsymbol(cursym, curname, curint);
+		if (!monitorError)
+		{
+			smz->getsymbol(cursym, curname, curint);
+		}
 	}
 	while (cursym == semicol)
 	{
 		smz->getsymbol(cursym, curname, curint);
 		if (cursym == namesym)
 		{
-			newMonitor();
+			monitorError = newMonitor();
 		}
 		else if (cursym == endsym)
 		{
@@ -421,7 +457,10 @@ void parser::monitorList()
 		{
 			erz->newError(21);//monitor must start with the name of a device or end of device list must be terminated with END (not semicolon)
 		}
-		smz->getsymbol(cursym, curname, curint);
+		if (!monitorError)
+		{
+			smz->getsymbol(cursym, curname, curint);
+		}
 	}
 	erz->newError(24);//must end line in semicolon
 	while (cursym != semicol && cursym != endsym && cursym != eofsym)
@@ -438,9 +477,10 @@ void parser::monitorList()
 	}
 }
 
-void parser::newMonitor()
+bool parser::newMonitor()
 {
 	//EBNF: mon = devicename['.'output]
+	bool errorOccurance = false;
 	if (smz->nmz->namelength(curname) != 0)
 	{
 		monitorName = curname;
@@ -455,22 +495,25 @@ void parser::newMonitor()
 					if (cursym == iosym)
 					{
 						mmz->makemonitor(monitorName, curname, correctOperation);
-						return;
+						return errorOccurance;
 					}
 				}
 				else
 				{
 					erz->newError(22);	//Expect a dot after dtype
+					errorOccurance=true;
 				}
 			default:
 				mmz->makemonitor(monitorName, blankname, correctOperation);
-				return;
+				return errorOccurance;
 		}
 	}
 	else
 	{
 		erz->newError(23);
+		errorOccurance=true;
 	}
+	return errorOccurance;
 }
 
 parser::parser(network* network_mod, devices* devices_mod, monitor* monitor_mod, scanner* scanner_mod, error* error_mod)
