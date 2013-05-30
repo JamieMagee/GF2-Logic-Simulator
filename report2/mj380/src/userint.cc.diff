@@ -1,0 +1,11 @@
+@@ -109,10 +109,8 @@ void userint::rdstring (namestring &n)
+ 	cmdok = isalpha(curch);
+ 	if (cmdok) {
+ 		do {
+-			if (i < maxlength) {
+ 				n += curch;
+ 				i++;
+-			}
+ 			getch ();
+ 		} while (isdigit(curch) || isalpha(curch));
+ 	} else

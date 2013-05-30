@@ -1,0 +1,124 @@
+@@ -133,6 +133,7 @@ void network::addinput (devlink dev, name iid)
+ void network::addoutput (devlink dev, name oid)
+ {
+ 	outplink o = new outputrec;
++	o->dev = dev;
+ 	o->id = oid;
+ 	o->sig = low;
+ 	o->next = dev->olist;
+@@ -170,14 +171,17 @@ void network::makeconnection (name idev, name inp, name odev, name outp, bool& o
+  * Checks that all inputs are connected to an output.
+  *
+  */
+-void network::checknetwork (bool& ok)
++void network::checknetwork (bool& ok, bool silent)
+ {
+ 	devlink d;
+ 	inplink i;
+ 	ok = true;
+ 	for (d = devs; d != NULL; d = d->next)
+ 		for (i = d->ilist; i != NULL; i = i->next)
+-			if (i->connect == NULL) {
++			if (i->connect == NULL)
++			{
++				if (!silent)
++				{
+ 				cout << "Unconnected Input : ";
+ 				nmz->writename (d->id);
+ 				if (i->id != blankname) {
+@@ -185,6 +189,7 @@ void network::checknetwork (bool& ok)
+ 					nmz->writename (i->id);
+ 				}
+ 				cout << endl;
++				}
+ 				ok = false;
+ 			}
+ }
+@@ -205,3 +210,87 @@ void network::checknetwork (bool& ok)
+ 	lastdev = NULL;
+ }
+ 
++// Delete a device, after disconnecting it. Monitors should be deleted too, but this function only handles deleting the devicerec and inputs+outputs (use circuit::RemoveDevice instead).
++void network::deletedevice(devlink dTarget)
++{
++	if (!dTarget) return;
++	devlink d = devicelist();
++	devlink dPrev = NULL;
++	while (d!=NULL)
++	{
++		if (d == dTarget)
++		{
++			outplink o = d->olist, oNext;
++			while (o != NULL)
++			{
++				disconnectoutput(o);
++				oNext = o->next;
++				delete o;
++				o = oNext;
++			}
++			inplink i = d->ilist, iNext;
++			while (i != NULL)
++			{
++				iNext = i->next;
++				delete i;
++				i = iNext;
++			}
++			if (devs == d)
++				devs = d->next;
++			else
++				dPrev->next = d->next;
++			if (lastdev == d)
++				lastdev = dPrev;
++			break;
++		}
++		dPrev = d;
++		d = d->next;
++	}
++}
++
++// Disconnects all inputs connected to the given output
++void network::disconnectoutput(outplink o)
++{
++	devlink d = devicelist();
++	while (d!=NULL)
++	{
++		inplink i = d->ilist;
++		while (i!=NULL)
++		{
++			if (i->connect == o)
++				i->connect = NULL;
++			i = i->next;
++		}
++		d = d->next;
++	}
++}
++
++string network::getsignalstring(name dev, name p)
++{
++	if (dev==blankname)
++		return "";
++	string str = nmz->getnamestring(dev);
++	if (p != blankname)
++		str += "." + nmz->getnamestring(p);
++	return str;
++}
++
++string network::getsignalstring(devlink d, outplink o)
++{
++	if (d==NULL)
++		return "";
++	name opn = blankname;
++	if (o==NULL)
++		return getsignalstring(d->id);
++	return getsignalstring(d->id, o->id);
++}
++
++string network::getsignalstring(devlink d, inplink i)
++{
++	if (d==NULL)
++		return "";
++	name opn = blankname;
++	if (i==NULL)
++		return getsignalstring(d->id);
++	return getsignalstring(d->id, i->id);
++}

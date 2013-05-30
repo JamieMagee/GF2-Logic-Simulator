@@ -1,0 +1,154 @@
+\documentclass[landscape,twocolumn,a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+ 
+% Blank line between paragraphs instead of indenting the first line
+\usepackage{parskip}
+\setlength{\parskip}{\baselineskip}
+
+% Squash a bit more text onto a page
+\usepackage{geometry}
+\geometry{verbose,tmargin=15mm,bmargin=20mm,lmargin=20mm,rmargin=20mm}
+
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{verbatim}
+\usepackage{xcolor}
+\setlength{\columnsep}{30pt}
+
+\definecolor{darkgreen}{rgb}{0,0.7,0}
+\definecolor{darkred}{rgb}{0.7,0,0}
+
+\lstdefinelanguage{diff}
+{
+  morecomment=[f][\color{blue}]{@@},     % group identifier
+  morecomment=[f][\color{darkred}]{-},         % deleted lines 
+  morecomment=[f][\color{darkgreen}]{+},       % added lines
+  morecomment=[f][\color{magenta}]{---}, % Diff header lines (must appear after +,-)
+  morecomment=[f][\color{magenta}]{+++},
+  basicstyle=\small\ttfamily,
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  frame=single,
+  numbers=none
+}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\lstset { 
+  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\ttfamily\fontsize{10}{10}\selectfont,      % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{mygreen},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  frame=single,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  columns=flexible,
+  keywordstyle=\color{blue},       % keyword style
+  language=C++,                    % the language of the code
+  morekeywords={*,DEVICES,
+  				CONNECTIONS,
+  				MONITORS,
+  				END}, 	           % if you want to add more keywords to the set
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve},     % string literal style
+  tabsize=2,                       % sets default tabsize to 2 spaces
+  title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+
+\begin{document}
+\renewcommand{\contentsname}{Appendix A: Source Code - table of contents}
+\tableofcontents{}\pagebreak
+
+\appendix
+
+\section{Source code}
+
+\subsection{Changes to supplied source code}
+
+Where appropriate, changes to the supplied source code are shown as diffs, and summaries of the changes are given. For files where many parts have changed and a diff would be hard to read, the entire new file is shown. 
+
+I wrote all the changes to the supplied source code listed here, except for the changes to \texttt{logsim.cc} and \texttt{logsim.h}, which were performed partly by other team members.
+
+\subsubsection{devices}
+
+\textbf{Summary:} Three functions added, mainly for use by the device editing part of the GUI. Small modification to \texttt{updateclocks()} so that changing \texttt{frequency} after running the simulation can no longer cause a clock to stop changing state. \texttt{maxmachinecycles} is now dynamically set depending on the number of devices, to make it less likely that simulation will fail unnecessarily. It will still fail if an inverter is connected to itself, but will no longer fail for 20 inverters connected in series. 
+
+\lstinputlisting[language=diff,caption=devices.h]{src/devices.h.diff}
+\lstinputlisting[language=diff,caption=devices.cc]{src/devices.cc.diff}
+
+\subsubsection{network}
+
+\textbf{Summary:} Functions added for getting linked list length, deleting or disconnecting a device, and obtaining device and input/output name strings. \texttt{outputrec} now has a pointer to the parent device, to make it easier for the device editing part of the GUI to find which device an output is connected to. 
+
+\lstinputlisting[language=diff,caption=network.h]{src/network.h.diff}
+\lstinputlisting[language=diff,caption=network.cc]{src/network.cc.diff}
+
+\subsubsection{logsim}
+
+\textbf{Summary:} Command line argument is now optional for the GUI, and a \texttt{MyFrame} member function is used to load the file if using the GUI. Additional class \texttt{error} added to count and display errors which occur during parsing.
+
+\lstinputlisting[language=diff,caption=logsim.h]{src/logsim.h.diff}
+\lstinputlisting[language=C++,caption=logsim.cc]{src/logsim.cc}
+
+\subsubsection{monitors}
+
+\textbf{Summary:} Converted to use STL vectors, and to use pointers to the device and output objects instead of the \texttt{name} for each. New functions \texttt{getsamplecount}, \texttt{getsignalstring}, \texttt{IsMonitored} added.
+
+\lstinputlisting[language=C++,caption=monitor.h]{src/monitor.h}
+\lstinputlisting[language=C++,caption=monitor.cc]{src/monitor.cc}
+
+
+\subsection{GUI}
+
+I was responsible for the whole of the GUI, except for some contributions by other team members to the \texttt{MyFrame::loadFile()} function.
+
+\subsubsection{Helper class: circuit}
+\lstinputlisting[language=C++,caption=circuit.h]{src/circuit.h}
+\lstinputlisting[language=C++,caption=circuit.cc]{src/circuit.cc}
+\subsubsection{Helper class: observers}
+\lstinputlisting[language=C++,caption=observer.h]{src/observer.h}
+\subsubsection{Main GUI: dialogs and frame}
+\lstinputlisting[language=C++,caption=gui.h]{src/gui.h}
+\lstinputlisting[language=C++,caption=gui.cc]{src/gui.cc}
+\subsubsection{Main GUI: monitor traces canvas}
+\lstinputlisting[language=C++,caption=gui-canvas.h]{src/gui-canvas.h}
+\lstinputlisting[language=C++,caption=gui-canvas.cc]{src/gui-canvas.cc}
+\subsubsection{GUI: miscellaneous widgets and functions}
+\lstinputlisting[language=C++,caption=gui-misc.h]{src/gui-misc.h}
+\lstinputlisting[language=C++,caption=gui-misc.cc]{src/gui-misc.cc}
+\subsubsection{GUI: widget IDs}
+\lstinputlisting[language=C++,caption=gui-id.h]{src/gui-id.h}
+\subsubsection{Device editing GUI: dialogs}
+\lstinputlisting[language=C++,caption=gui-devices.h]{src/gui-devices.h}
+\lstinputlisting[language=C++,caption=gui-devices.cc]{src/gui-devices.cc}
+\subsubsection{Device editing GUI: information panels}
+\lstinputlisting[language=C++,caption=gui-devices-infopanels.h]{src/gui-devices-infopanels.h}
+\lstinputlisting[language=C++,caption=gui-devices-infopanels.cc]{src/gui-devices-infopanels.cc}
+
+% Not sure whether this needs including or not, plus appendix is quite long enough already
+% \subsection{Test programs}
+% I wrote automated tests for the \texttt{names} and \texttt{scanner} classes. 
+% 
+% \lstinputlisting[language=C++,caption=tests.h]{src/tests.h}
+% \lstinputlisting[language=C++,caption=tests.cc]{src/tests.cc}
+% \lstinputlisting[language=C++,caption=runtests.cc]{src/runtests.cc}
+% 
+% \lstinputlisting[language=C++,caption=observer-test.cc]{src/observer-test.cc}
+
+\end{document}
+
+

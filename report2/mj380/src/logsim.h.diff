@@ -1,0 +1,17 @@
+@@ -7,6 +7,7 @@
+ #include "monitor.h"
+ #include "network.h"
+ #include "parser.h"
++#include "scanner.h"
+ 
+ class MyApp: public wxApp
+ {
+@@ -19,6 +20,8 @@ class MyApp: public wxApp
+ 	monitor *mmz;  // pointer to the monitor class
+ 	scanner *smz;  // pointer to the scanner class
+ 	parser *pmz;   // pointer to the parser class
++	error *erz; // pointer to the error class
++	bool ok;
+ };
+ 
+ #endif /* logsim_h */
