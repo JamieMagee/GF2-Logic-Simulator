@@ -58,7 +58,9 @@ bool parser::readin(void)
 			while (cursym != devsym && cursym != consym && cursym != monsym && cursym != eofsym)
 			{
 				smz->getsymbol(cursym, curname, curint);
+				erz->countSymbols();
 			}
+			erz->symbolError(deviceDone, connectionDone, monitorDone);
 		}
 	}
 	if (!deviceDone)
