@@ -140,42 +140,6 @@ void network::addoutput (devlink dev, name oid)
   dev->olist = o;
 }
 
-void network::deletedevice(devlink dTarget)
-{
-	if (!dTarget) return;
-	devlink d = devicelist();
-	devlink dPrev = NULL;
-	while (d!=NULL)
-	{
-		if (d == dTarget)
-		{
-			outplink o = d->olist, oNext;
-			while (o != NULL)
-			{
-				disconnectoutput(o);
-				oNext = o->next;
-				delete o;
-				o = oNext;
-			}
-			inplink i = d->ilist, iNext;
-			while (i != NULL)
-			{
-				iNext = i->next;
-				delete i;
-				i = iNext;
-			}
-			if (devs == d)
-				devs = d->next;
-			else
-				dPrev->next = d->next;
-			if (lastdev == d)
-				lastdev = dPrev;
-			break;
-		}
-		dPrev = d;
-		d = d->next;
-	}
-}
 
 /***********************************************************************
  *
@@ -201,22 +165,6 @@ void network::makeconnection (name idev, name inp, name odev, name outp, bool& o
   }
 }
 
-// Disconnects all inputs connected to the given output
-void network::disconnectoutput(outplink o)
-{
-	devlink d = devicelist();
-	while (d!=NULL)
-	{
-		inplink i = d->ilist;
-		while (i!=NULL)
-		{
-			if (i->connect == o)
-				i->connect = NULL;
-			i = i->next;
-		}
-		d = d->next;
-	}
-}
 
 /***********************************************************************
  *
@@ -260,6 +208,61 @@ network::network (names* names_mod)
   nmz = names_mod;
   devs = NULL;
   lastdev = NULL;
+}
+
+// Delete a device, after disconnecting it. Monitors should be deleted too, but this function only handles deleting the devicerec and inputs+outputs (use circuit::RemoveDevice instead).
+void network::deletedevice(devlink dTarget)
+{
+	if (!dTarget) return;
+	devlink d = devicelist();
+	devlink dPrev = NULL;
+	while (d!=NULL)
+	{
+		if (d == dTarget)
+		{
+			outplink o = d->olist, oNext;
+			while (o != NULL)
+			{
+				disconnectoutput(o);
+				oNext = o->next;
+				delete o;
+				o = oNext;
+			}
+			inplink i = d->ilist, iNext;
+			while (i != NULL)
+			{
+				iNext = i->next;
+				delete i;
+				i = iNext;
+			}
+			if (devs == d)
+				devs = d->next;
+			else
+				dPrev->next = d->next;
+			if (lastdev == d)
+				lastdev = dPrev;
+			break;
+		}
+		dPrev = d;
+		d = d->next;
+	}
+}
+
+// Disconnects all inputs connected to the given output
+void network::disconnectoutput(outplink o)
+{
+	devlink d = devicelist();
+	while (d!=NULL)
+	{
+		inplink i = d->ilist;
+		while (i!=NULL)
+		{
+			if (i->connect == o)
+				i->connect = NULL;
+			i = i->next;
+		}
+		d = d->next;
+	}
 }
 
 string network::getsignalstring(name dev, name p)
