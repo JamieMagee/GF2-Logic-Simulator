@@ -13,6 +13,7 @@
 #include <wx/checkbox.h>
 #include <wx/button.h>
 
+// Panel for display and modification of device properties
 class DeviceDetailsPanel: public wxPanel
 {
 public:

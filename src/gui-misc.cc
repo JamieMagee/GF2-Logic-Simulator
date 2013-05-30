@@ -43,6 +43,7 @@ void SwitchesCheckListBox::OnSwitchChanged(wxCommandEvent& event)
 {
 	if (!c) return;
 
+	// Checkbox changed, update underlying switch state
 	int i = event.GetInt();
 	if (i>=switches.size()) 
 	{
@@ -68,6 +69,7 @@ DevicekindDropdown::DevicekindDropdown(wxWindow* parent, wxWindowID id, vector<d
 	wxComboBox(parent, id, wxT(""), wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY)
 {
 	filter = filterDevicekinds;
+	// Fill dropdown with available device kinds (optionally filtering to only include those listed in filterDevicekinds)
 	for (int i=0; i<baddevice; i++)
 	{
 		if (filter.size()==0 || find(filter.begin(), filter.end(), devicekind(i)) != filter.end())
