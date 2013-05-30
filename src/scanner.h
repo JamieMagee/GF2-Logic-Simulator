@@ -15,8 +15,7 @@ class scanner
 {
 	public:
 		symbol s;
-		names* nmz;//Pointer to instance of names class
-
+		
 		scanner(names* names_mod,		//Pointer to names class
 				const char* defname,	//Name of file being read
 				bool& ok);				//True of file has been opened correctly
@@ -28,6 +27,7 @@ class scanner
 
 	private:
 		ifstream inf;	//Input file
+		names* nmz;//Pointer to instance of names class
 		char curch;		//Current input character
 		char prevch;	//Previous input character. Used for finding line end
 		bool eofile; 	//True for end of file

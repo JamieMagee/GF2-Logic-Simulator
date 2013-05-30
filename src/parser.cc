@@ -129,7 +129,7 @@ void parser::deviceList()
 			smz->getsymbol(cursym, curname, curint);
 		}
 	}
-	erz->newError(24);//must end line in semicolon
+	if (!deviceError) erz->newError(24);//must end line in semicolon
 	while (cursym != semicol && cursym != endsym && cursym != eofsym)
 	{
 		smz->getsymbol(cursym, curname, curint);
@@ -316,7 +316,7 @@ void parser::connectionList()
 			smz->getsymbol(cursym, curname, curint);
 		}
 	}
-	erz->newError(24);//must end line in semicolon
+	if (!connectionError) erz->newError(24);//must end line in semicolon
 	while (cursym != semicol && cursym != endsym && cursym != eofsym)
 	{
 		smz->getsymbol(cursym, curname, curint);
@@ -335,24 +335,27 @@ bool parser::newConnection()
 {
 	//EBNF: con = devicename'.'input '=' devicename['.'output]
 	bool errorOccurance = false;
-	if (smz->nmz->namelength(curname) != 0)
+	devlink devtype = netz->finddevice(curname);
+	if (devtype != NULL)
 	{
 		connectionInName = curname;
 		smz->getsymbol(cursym, curname, curint);
 		if (cursym == dot)
 		{
 			smz->getsymbol(cursym, curname, curint);
-			if (cursym == iosym)
+			devtype = netz->finddevice(connectionInName);
+			inplink ilist = netz->findinput(devtype, curname);
+			if (cursym == iosym && ilist != NULL)
 			{
 				name inputPin = curname;
 				smz->getsymbol(cursym, curname, curint);
 				if (cursym == equals) //SEARCH - you have got to here
 				{
 					smz->getsymbol(cursym, curname, curint);
-					if (smz->nmz->namelength(curname) != 0)
+					devtype = netz->finddevice(curname);
+					if (devtype != NULL)
 					{
 						connectionOutName = curname;
-						devlink devtype = netz->finddevice(curname);
 						switch (devtype ? devtype->kind : baddevice)
 						{
 							case 7:
@@ -360,10 +363,15 @@ bool parser::newConnection()
 								if (cursym == dot)
 								{
 									smz->getsymbol(cursym, curname, curint);
-									if (cursym == iosym)
+									outplink olist = netz->findoutput(devtype, curname);
+									if (cursym == iosym && olist != NULL)
 									{
 										netz->makeconnection(connectionInName, inputPin, connectionOutName, curname, correctOperation);
 										return errorOccurance;
+									}
+									else
+									{
+										erz->newError(34); //Not valid output for dtype
 									}
 								}
 								else
@@ -462,7 +470,7 @@ void parser::monitorList()
 			smz->getsymbol(cursym, curname, curint);
 		}
 	}
-	erz->newError(24);//must end line in semicolon
+	if (!monitorError) erz->newError(24);//must end line in semicolon
 	while (cursym != semicol && cursym != endsym && cursym != eofsym)
 	{
 		smz->getsymbol(cursym, curname, curint);
@@ -481,10 +489,10 @@ bool parser::newMonitor()
 {
 	//EBNF: mon = devicename['.'output]
 	bool errorOccurance = false;
-	if (smz->nmz->namelength(curname) != 0)
+	devlink devtype = netz->finddevice(curname);
+	if (devtype != NULL)
 	{
 		monitorName = curname;
-		devlink devtype = netz->finddevice(curname);
 		switch (devtype ? devtype->kind : baddevice)
 		{
 			case 7:
@@ -492,10 +500,15 @@ bool parser::newMonitor()
 				if (cursym == dot)
 				{
 					smz->getsymbol(cursym, curname, curint);
-					if (cursym == iosym)
+					outplink olist = netz->findoutput(devtype, curname);
+					if (cursym == iosym && olist != NULL)
 					{
 						mmz->makemonitor(monitorName, curname, correctOperation);
 						return errorOccurance;
+					}
+					else
+					{
+						erz->newError(34); //Not valid output for dtype
 					}
 				}
 				else
