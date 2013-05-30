@@ -7,6 +7,8 @@
 #include <algorithm>
 #include "scanner.h"
 #include "parser.h"
+#include "gui-devices.h"
+#include "gui-id.h"
 
 using namespace std;
 
@@ -382,6 +384,10 @@ void MyGLCanvas::Render()
 			mons[i].Draw(this, visibleRegion);
 			mons[i].DrawName(this, visibleRegion);
 		}
+		if (errorMessage != wxT(""))
+		{
+			DrawInfoTextCentre(errorMessage, true);
+		}
 	}
 	else if (errorMessage != wxT(""))
 	{
@@ -425,13 +431,13 @@ void MyGLCanvas::DrawInfoTextCentre(wxString txt, bool isError)
 	int canvasWidth = GetClientSize().GetWidth();
 	int textWidth = GetGlutTextWidth(txt);
 	wxRect background(canvasWidth/2-textWidth/2-15, canvasHeight/2-15, textWidth+30, 30);
-	if (isError) glColor4f(1.0, 0.7, 0.7, 0.3);
-	else glColor4f(0.7, 0.7, 1.0, 0.3);
+	if (isError) glColor4f(1.0, 0.85, 0.85, 0.95);
+	else glColor4f(0.85, 0.85, 1.0, 0.95);
 	glBegin(GL_QUADS);
 	wxRect_GlVertex(background);
 	glEnd();
-	if (isError) glColor4f(0.7, 0.0, 0.0, 0.3);
-	else glColor4f(0.0, 0.0, 0.7, 0.3);
+	if (isError) glColor4f(0.7, 0.0, 0.0, 0.95);
+	else glColor4f(0.0, 0.0, 0.7, 0.95);
 	glBegin(GL_LINE_LOOP);
 	wxRect_GlVertex(background);
 	glEnd();
@@ -495,11 +501,13 @@ void MyGLCanvas::OnMouse(wxMouseEvent& event)
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_MENU(wxID_EXIT, MyFrame::OnExit)
   EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
+  EVT_MENU(MENU_CLEAR_CIRCUIT, MyFrame::OnMenuClearCircuit)
   EVT_MENU(wxID_OPEN, MyFrame::OnOpenFile)
   EVT_BUTTON(SIMCTRL_BUTTON_RUN_ID, MyFrame::OnButtonRun)
   EVT_BUTTON(SIMCTRL_BUTTON_CONT_ID, MyFrame::OnButtonContinue)
   EVT_BUTTON(MONITORS_ADD_BUTTON_ID, MyFrame::OnButtonAddMon)
   EVT_BUTTON(MONITORS_DEL_BUTTON_ID, MyFrame::OnButtonDelMon)
+  EVT_BUTTON(DEVICES_EDIT_BUTTON_ID, MyFrame::OnButtonEditDevs)
 END_EVENT_TABLE()
   
 MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, const wxSize& size,
@@ -519,6 +527,7 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	// Menu items
 	wxMenu *fileMenu = new wxMenu;
 	fileMenu->Append(wxID_OPEN);
+	fileMenu->Append(MENU_CLEAR_CIRCUIT, _("Clear circuit"));
 	fileMenu->AppendSeparator();
 	fileMenu->Append(wxID_ABOUT, _("&About"));
 	fileMenu->Append(wxID_EXIT, _("&Quit"));
@@ -577,7 +586,8 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	monitors_add_btn = new wxButton(mainPanel, MONITORS_ADD_BUTTON_ID, _("Add monitors"));
 	monitors_rem_btn = new wxButton(mainPanel, MONITORS_DEL_BUTTON_ID, _("Remove monitors"));
 	edit_sizer->Add(monitors_add_btn, 0, (wxALL & ~wxBOTTOM) | wxEXPAND, 10);
-	edit_sizer->Add(monitors_rem_btn, 0, (wxALL & ~wxTOP) | wxEXPAND, 10);
+	edit_sizer->Add(monitors_rem_btn, 0, wxLEFT | wxRIGHT | wxEXPAND, 10);
+	edit_sizer->Add(new wxButton(mainPanel, DEVICES_EDIT_BUTTON_ID, _("Edit devices")), 0, (wxALL & ~wxTOP) | wxEXPAND, 10);
 
 	// wxCheckListBox that allows switch states to be changed 
 	wxStaticBoxSizer *switches_sizer = new wxStaticBoxSizer(wxVERTICAL, mainPanel, _("Switches"));
@@ -618,6 +628,11 @@ void MyFrame::OnAbout(wxCommandEvent &event)
 {
   wxMessageDialog about(this, _("Logic simulator\nIIA GF2 Team 8\n2013"), _("About Logsim"), wxICON_INFORMATION | wxOK);
   about.ShowModal();
+}
+
+void MyFrame::OnMenuClearCircuit(wxCommandEvent &event)
+{
+	c->Clear();
 }
 
 void MyFrame::OnOpenFile(wxCommandEvent &event)
@@ -668,6 +683,7 @@ bool MyFrame::loadFile(const char * filename)
 
 	delete pmz;
 	delete smz;
+	delete erz;
 
 	return result;
 }
@@ -684,8 +700,14 @@ void MyFrame::UpdateControlStates()
 	}
 	else
 	{
-		// The circuit contains some devices, so enable the simulation controls
-		simctrls_container->Enable();
+		// The circuit contains some devices, so enable the simulation controls if all inputs are connected
+		// It is assumed that unconnected inputs are listed by whichever bit of code has allowed them to exist in the circuit, this function just updates control stated
+		bool ok;
+		c->netz()->checknetwork(ok, true);
+		if (ok)
+			simctrls_container->Enable();
+		else
+			simctrls_container->Disable();
 		// Only enable the add monitors button if some unmonitored outputs exist
 		if (c->GetUnmonitoredOutputs())
 			monitors_add_btn->Enable();
@@ -696,12 +718,18 @@ void MyFrame::UpdateControlStates()
 			monitors_rem_btn->Enable();
 		else
 			monitors_rem_btn->Disable();
-		// Disable the continue button if the run button has not been used first
-		// Note: it does not get enabled here. The add monitor button disables it
-		// after adding monitors, to force the use of the run button. Enabling it here
-		// could undo that. Instead the continue button is enabled by using the run button.
-		if (c->GetTotalCycles()==0)
+		// Disable the continue button if the run button has not been used first (so GetTotalCycles returns 0) or there are some new monitors (so some monitors do not contain any samples)
+		bool someEmpty = (c->GetTotalCycles()==0);
+		for (int i=0; i<c->mmz()->moncount(); i++)
+		{
+			if (c->mmz()->getsamplecount(i)==0)
+				someEmpty = true;
+		}
+		if (someEmpty)
 			simctrl_continue->Disable();
+		else
+			simctrl_continue->Enable();
+		
 	}
 }
 
@@ -724,10 +752,8 @@ void MyFrame::OnButtonAddMon(wxCommandEvent& event)// "Add monitors" button clic
 	AddMonitorsDialog *dlg = new AddMonitorsDialog(c, this, _("Add monitors"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
 	if (dlg->ShowModal()==wxID_OK && oldMonCount!=c->mmz()->moncount())
 	{
-		if (c->GetTotalCycles())// if there are samples stored in the monitors
+		if (c->GetTotalCycles())
 		{
-			// Disable the continue button, since if the simulation is continued the displayed sample times for the new monitors will be incorrect
-			simctrl_continue->Disable();
 			cout << wxString(wxPLURAL("Monitor added, run simulation again to see updated signals", "Monitors added, run simulation again to see updated signals", c->mmz()->moncount()-oldMonCount)).mb_str() << endl;
 		}
 	}
@@ -739,6 +765,18 @@ void MyFrame::OnButtonDelMon(wxCommandEvent& event)// "Remove monitors" button c
 	DelMonitorsDialog *dlg = new DelMonitorsDialog(c, this, _("Remove monitors"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
 	dlg->ShowModal();
 	dlg->Destroy();
+}
+
+void MyFrame::OnButtonEditDevs(wxCommandEvent& event)// "Edit devices" button clicked
+{
+	DevicesDialog *dlg = new DevicesDialog(c, this, wxID_ANY, _("Edit devices"));
+	dlg->ShowModal();
+	dlg->Destroy();
+	bool ok;
+	c->netz()->checknetwork(ok);
+	if (!ok) canvas->SetErrorMessage(_("Circuit contains unconnected inputs"));
+	else canvas->ClearErrorMessage();
+	UpdateControlStates();
 }
 
 

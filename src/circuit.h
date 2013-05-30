@@ -6,14 +6,78 @@
 #include "devices.h"
 #include "monitor.h"
 #include "observer.h"
+#include <vector>
+using namespace std;
+
+class circuit;
+
+
+// Many bits of the GUI involve manipulating (creating, searching, sorting) vectors where each element needs to contain one or more pointers to circuit elements, with an associated string. This class is a unified way of doing that for all circuit elements (inputs, outputs, and devices).
+class CircuitElementInfo
+{
+public:
+	devlink d;
+	outplink o;
+	inplink i;
+	string namestr;
+	CircuitElementInfo() : d(NULL), o(NULL), i(NULL), namestr("") {}
+	CircuitElementInfo(devlink dev, string str="") : d(dev), o(NULL), i(NULL), namestr(str) {}
+	CircuitElementInfo(devlink dev, outplink outp, string str="") : d(dev), o(outp), i(NULL), namestr(str) {}
+	CircuitElementInfo(outplink outp, string str="") : d(outp->dev), o(outp), i(NULL), namestr(str) {}
+	CircuitElementInfo(devlink dev, inplink inp, string str="") : d(dev), o(NULL), i(inp), namestr(str) {}
+};
+
+class CircuitElementInfoVector : public vector<CircuitElementInfo>
+{
+public:
+	// push_back() all devices in a linked list of devices, all outputs in a linked list of devices, or all inputs in a linked list of devices
+	void push_back_all_devs(devlink d);
+	void push_back_all_outputs(devlink d);
+	void push_back_all_inputs(devlink d);
+	// push_back() all outputs or inputs for a particular device
+	void push_back_dev_outputs(devlink d);
+	void push_back_dev_inputs(devlink d);
+	// Sets namestr for each element to the device or signal name (e.g. S1, or G1.I1, or DT1.CLK)
+	void UpdateSignalNames(circuit* c);
+private:
+	template <class T> void push_back_iolist(devlink d, T item);
+};
+
+bool CircuitElementInfo_namestrcmp(const CircuitElementInfo a, const CircuitElementInfo b);// to alphabetically sort a vector<outputinfo>
+bool CircuitElementInfo_iconnect_namestrcmp(const CircuitElementInfo a, const CircuitElementInfo b);// to sort a vector<outputinfo> by input connected state then alphabetically by namestr
+
+
+// Used in the device editing GUI to store a pointer to the currently selected device and notify widgets when it changes. This is here instead of in a gui file because it contains nothing specific to wxWidgets and may be useful elsewhere
+class SelectedDevice
+{
+private:
+	devlink selected;
+public:
+	ObserverSubject changed;
+	devlink Get()
+	{
+		return selected;
+	}
+	void Set(devlink d)
+	{
+		if (d!=selected)
+		{
+			selected = d;
+			changed.Trigger();
+		}
+	}
+};
 
 
 struct outputinfo
 {
 	name devname, outpname;
+	outplink o;
 	string namestr;
 };
 bool outputinfo_namestrcmp(const outputinfo a, const outputinfo b);// to alphabetically sort a vector<outputinfo>
+
+
 
 // This class is a more convenient way of passing around a set of names, monitors, devices, and network modules. 
 // It also handles observers for changes to the circuit.
@@ -59,8 +123,8 @@ public:
 	network* netz(){ return network_mod; }
 	int GetTotalCycles(){ return totalCycles; }
 	int GetContinuedCycles(){ return continuedCycles; }
-	
+	static bool IsDeviceNameValid(string devname);
+	void RemoveDevice(devlink d);
 };
-
 
 #endif

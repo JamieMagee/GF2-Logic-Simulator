@@ -125,14 +125,7 @@ void devices::makegate (devicekind dkind, name did, int ninputs, bool& ok)
     netz->adddevice (dkind, did, d);
     netz->addoutput (d, blankname);
     for (n = 1; n <= ninputs; n++) {
-      iname = "I";
-      if (n < 10) {
-	iname += ((char) n) + '0';
-      } else {
-	iname += ((char) (n / 10)) + '0';
-	iname += ((char) (n % 10)) + '0';
-      }
-      netz->addinput (d, nmz->lookup (iname));
+      netz->addinput(d, GetGateInputName(n));
     }
   }
 }
@@ -342,7 +335,7 @@ void devices::updateclocks (void)
   devlink d;
   for (d = netz->devicelist (); d != NULL; d = d->next) {
     if (d->kind == aclock) {
-      if (d->counter == d->frequency) {
+      if (d->counter >= d->frequency) {
 	d->counter = 0;
 	if (d->olist->sig == high)
 	  d->olist->sig = falling;
@@ -364,7 +357,8 @@ void devices::updateclocks (void)
  */
 void devices::executedevices (bool& ok)
 {
-  const int maxmachinecycles = 20;
+  int maxmachinecycles = 20;
+  int count = 0;
   devlink d;
   int machinecycle;
   if (debugging)
@@ -387,9 +381,11 @@ void devices::executedevices (bool& ok)
         case xorgate:  execxorgate (d);          break;
         case dtype:    execdtype (d);            break;     
       }
+      if (machinecycle==1) count++;
       if (debugging)
 	showdevice (d);
     }
+    if (machinecycle==1) maxmachinecycles = 20 + 2*count;
   } while ((! steadystate) && (machinecycle < maxmachinecycles));
   if (debugging)
     cout << "End of execution cycle" << endl;
@@ -464,4 +460,48 @@ devices::devices (names* names_mod, network* net_mod)
   qbarpin = nmz->lookup("QBAR");
 }
 
+name devices::GetGateInputName(int n)
+{
+	// moved from makegate() into new function
+	namestring iname = "I";
+	if (n < 10) {
+		iname += ((char) n) + '0';
+	} else {
+		iname += ((char) (n / 10)) + '0';
+		iname += ((char) (n % 10)) + '0';
+	}
+	return nmz->lookup(iname);
+}
 
+void devices::SetGateInputCount(devlink d, int newCount)
+{
+	if (!d) return;
+	int oldCount = GetLinkedListLength(d->ilist);
+	if (newCount<oldCount)
+	{
+		for (int i=0; i<oldCount-newCount; i++)
+		{
+			inplink nextI = d->ilist->next;
+			delete d->ilist;
+			d->ilist = nextI;
+		}
+	}
+	else
+	{
+		for (int i=oldCount+1; i<=newCount; i++)
+		{
+			netz->addinput(d, GetGateInputName(i));
+		}
+	}
+}
+
+bool devices::CheckDeviceInputs(devlink d)
+{
+	inplink i = d->ilist;
+	while (i != NULL)
+	{
+		if (i->connect == NULL) return false;
+		i = i->next;
+	}
+	return true;
+}

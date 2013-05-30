@@ -4,7 +4,7 @@ CXX = $(shell wx-config --cxx)
 
 SRC = logsim.cc names.cc scanner.cc network.cc parser.cc monitor.cc devices.cc userint.cc gui.cc guitest.cc
 
-L_OBJECTS = logsim.o names.o scanner.o network.o parser.o monitor.o devices.o userint.o gui.o circuit.o error.o
+L_OBJECTS = logsim.o names.o scanner.o network.o parser.o monitor.o devices.o userint.o gui.o circuit.o error.o gui-devices.o gui-misc.o gui-devices-infopanels.o
 
 G_OBJECTS = guitest.o names.o network.o monitor.o devices.o gui.o scanner.o parser.o
 
@@ -31,7 +31,7 @@ runtests: $(T_OBJECTS)
 observer-test: observer-test.cc observer.h
 
 clean: 
-	rm -f *.o logsim guitest runtests
+	rm -f *.o logsim guitest runtests observer-test
 
 depend:
 	# -Y stops it adding files in /usr/include, just to keep the Makefile a bit tidier since those files won't change very often.
@@ -40,15 +40,17 @@ depend:
 
 # DO NOT DELETE
 
-devices.o: devices.h names.h network.h
-gui.o: gui.h names.h devices.h network.h monitor.h wx_icon.xpm circuit.h observer.h
-guitest.o: guitest.h names.h devices.h network.h monitor.h gui.h
 logsim.o: logsim.h names.h devices.h network.h monitor.h parser.h scanner.h
-logsim.o: userint.h gui.h
-monitor.o: monitor.h names.h network.h devices.h
+logsim.o: error.h userint.h gui.h circuit.h observer.h
 names.o: names.h
-network.o: network.h names.h
-parser.o: parser.h names.h scanner.h network.h devices.h monitor.h
 scanner.o: scanner.h names.h
+network.o: network.h names.h
+parser.o: parser.h names.h scanner.h network.h devices.h monitor.h error.h
+monitor.o: monitor.h names.h network.h devices.h
+devices.o: devices.h names.h network.h
 userint.o: userint.h names.h network.h devices.h monitor.h
-circuit.o: circuit.cc circuit.h observer.h
+gui.o: gui.h names.h devices.h network.h monitor.h circuit.h observer.h
+gui.o: wx_icon.xpm scanner.h parser.h error.h gui-devices.h
+gui.o: gui-devices-infopanels.h gui-misc.h gui-id.h
+guitest.o: guitest.h names.h devices.h network.h monitor.h gui.h circuit.h
+guitest.o: observer.h
