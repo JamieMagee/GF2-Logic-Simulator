@@ -48,8 +48,6 @@ error::error(scanner* scanner_mod)  /* the constructor */
 	
 	errorCount = 0;
 	warningCount = 0;
-	symbolCount = 0;
-	firstTime=true;
 	warninglist.push_back("Warning 0x0000: You have not specfied any conenctions. Please check this is what is required");//0
 	warninglist.push_back("Warning 0x0001: You have not specfied any monitors. Please check this is what is required");//1
 	smz = scanner_mod;
@@ -73,24 +71,6 @@ void error::newWarning(int warningCode)
 {
 	cout << warninglist[warningCode] << endl; //don't display where warning occurs
 	warningCount ++;
-}
-
-void error::countSymbols()
-{
-	if(firstTime)
-	{
-		symbolCount=0;
-	}
-	symbolCount++;
-	firstTime=false;
-}
-
-void error::symbolError()
-{
-		smz->writelineerror();
-		cout << "Error 0x0023: There are" << symbolCount <<" unexpected symbols before this line" << endl;
-		firstTime=true;
-		errorCount ++;
 }
 
 bool error::anyErrors()
