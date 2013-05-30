@@ -23,7 +23,6 @@ bool parser::readin(void)
 			{
 				erz->newError(25);//Must only be one devices list
 			}
-			devicePresent = false;
 			deviceDone = true;
 			deviceList();
 		}
@@ -36,8 +35,8 @@ bool parser::readin(void)
 			if (connectionDone)
 			{
 				erz->newError(28);//Must only be one connections list
+				
 			}
-			connectionPresent = false;
 			connectionDone = true;
 			connectionList();
 		}
@@ -51,7 +50,6 @@ bool parser::readin(void)
 			{
 				erz->newError(29);//Must only be one Monitors list
 			}
-			monitorPresent = false;
 			monitorDone = true;
 			monitorList();
 		}
