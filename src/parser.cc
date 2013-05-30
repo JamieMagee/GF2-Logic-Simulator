@@ -60,7 +60,7 @@ bool parser::readin(void)
 				smz->getsymbol(cursym, curname, curint);
 				erz->countSymbols();
 			}
-			erz->symbolError();
+			erz->symbolError(deviceDone, connectionDone, monitorDone);
 		}
 	}
 	if (!deviceDone)

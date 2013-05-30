@@ -86,11 +86,22 @@ void error::countSymbols()
 	firstTime=false;
 }
 
-void error::symbolError()
+void error::symbolError(bool deviceDone, bool connectionDone, bool monitorDone)
 {
 		smz->writelineerror();
-		cout << "Error 0x0023: There are" << symbolCount <<" unexpected symbols before this line" << endl;
-		firstTime=true;
+		cout << "Error 0x0023: There are " << symbolCount <<" unexpected symbols before this line." << endl;
+		if (!deviceDone)
+		{
+			cout << "Expected DEVICES block" << endl;
+		}
+		else if (!connectionDone)
+		{
+			cout << "Expected CONNECTIONS block" << endl;
+		}
+		else if (!monitorDone)
+		{
+			cout << "Expected MONITORS block" << endl;
+		}
 		errorCount ++;
 }
 

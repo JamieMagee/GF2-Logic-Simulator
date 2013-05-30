@@ -18,7 +18,7 @@ class error
 	public:
 		error(scanner* scanner_mod);
 		void newError(int errorCode);
-		void symbolError();
+		void symbolError(bool deviceDone, bool connectionDone, bool monitorDone);
 		void newWarning(int warningCode);
 		void countSymbols();
 		
