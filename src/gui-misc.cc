@@ -3,8 +3,66 @@
 #include <algorithm>
 using namespace std;
 
-wxString devicekindstrings[baddevice] = {_("Switch"), _("Clock"), _("AND gate"), _("NAND gate"), _("OR gate"), _("NOR gate"), _("XOR gate"), _("D-type flip-flop")};
+SwitchesCheckListBox::SwitchesCheckListBox(circuit* circ, wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style)
+	: wxCheckListBox(parent, id, pos, size, 0, NULL, style & ~wxLB_SORT)
+{
+	c = circ;
+	if (c) c->circuitChanged.Attach(this, &SwitchesCheckListBox::OnCircuitChanged);
+	OnCircuitChanged();
+}
 
+SwitchesCheckListBox::~SwitchesCheckListBox()
+{
+	if (c) c->circuitChanged.Detach(this);
+}
+
+void SwitchesCheckListBox::OnCircuitChanged()
+{
+	if (!c) return;
+
+	// Update switch names
+	switches.resize(0);
+	devlink d = c->netz()->devicelist();
+	while (d!=NULL)
+	{
+		if (d->kind == aswitch) switches.push_back(CircuitElementInfo(d));
+		d = d->next;
+	}
+	switches.UpdateSignalNames(c);
+	wxArrayString switchNames;
+	CircuitElementInfoVector_to_wxArrayString(switches, switchNames);
+	Set(switchNames);
+	// Update switch states
+	for (int i=0; i<switches.size(); i++)
+	{
+		Check(i, switches[i].d->swstate==high);
+	}
+}
+
+void SwitchesCheckListBox::OnSwitchChanged(wxCommandEvent& event)
+{
+	if (!c) return;
+
+	int i = event.GetInt();
+	if (i>=switches.size()) 
+	{
+		ShowErrorMsgDialog(this,  _("Tried to change unknown switch"));
+		return;
+	}
+	if (IsChecked(i))
+		switches[i].d->swstate = high;
+	else
+		switches[i].d->swstate = low;
+
+	c->circuitChanged.Trigger();
+}
+
+BEGIN_EVENT_TABLE(SwitchesCheckListBox, wxCheckListBox)
+	EVT_CHECKLISTBOX(wxID_ANY, SwitchesCheckListBox::OnSwitchChanged)
+END_EVENT_TABLE()
+
+
+wxString devicekindstrings[baddevice] = {_("Switch"), _("Clock"), _("AND gate"), _("NAND gate"), _("OR gate"), _("NOR gate"), _("XOR gate"), _("D-type flip-flop")};
 
 DevicekindDropdown::DevicekindDropdown(wxWindow* parent, wxWindowID id, vector<devicekind> filterDevicekinds) :
 	wxComboBox(parent, id, wxT(""), wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY)
