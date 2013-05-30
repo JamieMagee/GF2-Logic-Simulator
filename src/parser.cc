@@ -94,6 +94,7 @@ void parser::deviceList()
 		else if (cursym == endsym)
 		{
 			erz->newError(3); //must have at least one device
+			return;
 		}
 		else
 		{
