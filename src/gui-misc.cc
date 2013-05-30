@@ -79,9 +79,6 @@ DevicekindDropdown::DevicekindDropdown(wxWindow* parent, wxWindowID id, vector<d
 
 devicekind DevicekindDropdown::GetDevicekind()
 {
-	if (GetSelection()==wxNOT_FOUND)
-		return baddevice;
-
 	for (int i=0; i<baddevice; i++)
 	{
 		if (devicekindstrings[i] == GetValue())
