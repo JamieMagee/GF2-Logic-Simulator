@@ -53,7 +53,7 @@ bool parser::readin(void)
 			monitorDone = true;
 			monitorList();
 		}
-		else
+		else if (cursym != eofsym)
 		{
 			while (cursym != devsym && cursym != consym && cursym != monsym && cursym != eofsym)
 			{
