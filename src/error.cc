@@ -43,6 +43,9 @@ error::error(scanner* scanner_mod)  /* the constructor */
 	errorlist.push_back("Error 0x001E: There must be one 'CONNECTIONS' block, it may not have been initialised properly");//30
 	errorlist.push_back("Error 0x001F: There must be one 'MONITOR' block, it may not have been initialised properly");//31
 	errorlist.push_back("Error 0x0020: Block must be terminated with 'END'");//32
+	errorlist.push_back("Error 0x0021: Cannot name a device as a reserved word, for a list of reserved words check reservedWords.txt in docs");//33
+	
+	
 	errorCount = 0;
 	warningCount = 0;
 	warninglist.push_back("Warning 0x0000: You have not specfied any conenctions. Please check this is what is required");//0

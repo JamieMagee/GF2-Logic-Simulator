@@ -9,7 +9,7 @@ using namespace std;
 bool parser::readin(void)
 {
 	//EBNF: specfile = devices connections monitors
-	bool deviceDone = 0, connectionDone = 0, monitorDone = 0;
+	bool deviceDone = false, connectionDone = false, monitorDone = false;
 	cursym = badsym;
 	while (cursym != eofsym)
 	{
@@ -23,8 +23,8 @@ bool parser::readin(void)
 			{
 				erz->newError(25);//Must only be one devices list
 			}
-			devicePresent = 0;
-			deviceDone = 1;
+			devicePresent = false;
+			deviceDone = true;
 			deviceList();
 		}
 		else if (cursym == consym)
@@ -37,8 +37,8 @@ bool parser::readin(void)
 			{
 				erz->newError(28);//Must only be one connections list
 			}
-			connectionPresent = 0;
-			connectionDone = 1;
+			connectionPresent = false;
+			connectionDone = true;
 			connectionList();
 		}
 		else if (cursym == monsym)
@@ -51,8 +51,8 @@ bool parser::readin(void)
 			{
 				erz->newError(29);//Must only be one Monitors list
 			}
-			monitorPresent = 0;
-			monitorDone = 1;
+			monitorPresent = false;
+			monitorDone = true;
 			monitorList();
 		}
 		else
@@ -89,7 +89,7 @@ void parser::deviceList()
 		if (cursym == classsym)
 		{
 			newDevice(curname);
-			devicePresent = 1;
+			devicePresent = true;
 		}
 		else if (cursym == endsym)
 		{
@@ -229,6 +229,9 @@ void parser::newDevice(int deviceType)
 			erz->newError(10);//need colon after name for CLOCK/SWITCH/GATE type
 		}
 	}
+	else if (cursym!=badsym)
+	{
+		erz->newError(
 	else
 	{
 		erz->newError(11);//name must begin with name starting with letter and only containing letter number and _
@@ -249,7 +252,7 @@ void parser::connectionList()
 		else if (cursym == namesym)
 		{
 			newConnection();
-			connectionPresent = 1;
+			connectionPresent = true;
 		}
 		else
 		{
@@ -377,7 +380,7 @@ void parser::monitorList()
 		else if (cursym == namesym)
 		{
 			newMonitor();
-			monitorPresent = 1;
+			monitorPresent = true;
 		}
 		else
 		{
