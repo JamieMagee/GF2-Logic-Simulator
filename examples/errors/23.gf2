@@ -29,8 +29,8 @@ D4.CLEAR = R;
 END
 
 MONITORS
-CLK3;
-D1.Q;
+CLK2;
+D1.Q1;
 D2.Q;
 D3.Q;
 D4.Q;
