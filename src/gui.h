@@ -40,6 +40,10 @@ class MyFrame: public wxFrame
 	wxButton *monitors_rem_btn;
 	circuit* c;
 	wxTimer runsimTimer;
+	wxMenu *fileMenu;
+	
+	wxString filedlgName, filedlgDir;
+	string lastFilePath;
 
   void OnExit(wxCommandEvent& event);     // callback for exit menu item
   void OnAbout(wxCommandEvent& event);    // callback for about menu item
@@ -53,6 +57,7 @@ class MyFrame: public wxFrame
 	void SetContinuousRun(bool state);
 	void UpdateControlStates();
 	void OnMenuClearCircuit(wxCommandEvent &event);
+	void OnFileReload(wxCommandEvent &event);
 	void OnRunSimTimer(wxTimerEvent& event);
  
   DECLARE_EVENT_TABLE()

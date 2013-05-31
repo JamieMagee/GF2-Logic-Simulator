@@ -18,6 +18,7 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_MENU(wxID_EXIT, MyFrame::OnExit)
   EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
   EVT_MENU(MENU_CLEAR_CIRCUIT, MyFrame::OnMenuClearCircuit)
+  EVT_MENU(MENU_RELOAD_FILE, MyFrame::OnFileReload)
   EVT_MENU(wxID_OPEN, MyFrame::OnOpenFile)
   EVT_BUTTON(SIMCTRL_BUTTON_RUN_ID, MyFrame::OnButtonRun)
   EVT_BUTTON(SIMCTRL_BUTTON_CONT_ID, MyFrame::OnButtonContinue)
@@ -41,12 +42,15 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
     exit(1);
   }
 	c = new circuit(names_mod, devices_mod, monitor_mod, net_mod);
-  
+	filedlgName = _("");
+	filedlgDir = _("../examples/");
 	runsimTimer.SetOwner(this, RUNSIM_TIMER_ID);
 
 	// Menu items
-	wxMenu *fileMenu = new wxMenu;
+	fileMenu = new wxMenu;
 	fileMenu->Append(wxID_OPEN);
+	fileMenu->Append(MENU_RELOAD_FILE, _("Reload\tCtrl+R"));
+	fileMenu->Enable(MENU_RELOAD_FILE, false);
 	fileMenu->Append(MENU_CLEAR_CIRCUIT, _("Clear circuit"));
 	fileMenu->AppendSeparator();
 	fileMenu->Append(wxID_ABOUT, _("&About"));
@@ -158,12 +162,19 @@ void MyFrame::OnMenuClearCircuit(wxCommandEvent &event)
 	c->Clear();
 }
 
+void MyFrame::OnFileReload(wxCommandEvent &event)
+{
+	loadFile(lastFilePath.c_str());
+}
+
 void MyFrame::OnOpenFile(wxCommandEvent &event)
   // Callback for the File -> Open menu item
 {
-	wxFileDialog openFileDialog(this, _("Open logic circuit"), wxT("../examples/"), wxT(""), _("Logic circuit files (*.gf2)|*.gf2|All files (*.*)|*.*"), wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_CHANGE_DIR);
+	wxFileDialog openFileDialog(this, _("Open logic circuit"), filedlgDir, filedlgName, _("Logic circuit files (*.gf2)|*.gf2|All files (*.*)|*.*"), wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_CHANGE_DIR);
 	if (openFileDialog.ShowModal() == wxID_CANCEL)
 		return; // cancelled, don't open a file
+	filedlgDir = openFileDialog.GetDirectory();
+	filedlgName = openFileDialog.GetFilename();
 	loadFile(openFileDialog.GetPath().mb_str());
 }
 
@@ -171,6 +182,10 @@ bool MyFrame::loadFile(const char * filename)
 // load a file (can be called by menu File->Open or for the command line argument)
 {
 	bool result; //True if file is opened correctly
+
+	fileMenu->Enable(MENU_RELOAD_FILE, true);
+	lastFilePath = filename;
+
 	// Clear log window
 	outputTextCtrl->ChangeValue(wxT(""));
 	cout << "Loading file " << filename << endl;
