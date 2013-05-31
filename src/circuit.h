@@ -43,8 +43,8 @@ private:
 	template <class T> void push_back_iolist(devlink d, T item);
 };
 
-bool CircuitElementInfo_namestrcmp(const CircuitElementInfo a, const CircuitElementInfo b);// to alphabetically sort a vector<outputinfo>
-bool CircuitElementInfo_iconnect_namestrcmp(const CircuitElementInfo a, const CircuitElementInfo b);// to sort a vector<outputinfo> by input connected state then alphabetically by namestr
+bool CircuitElementInfo_namestrcmp(const CircuitElementInfo a, const CircuitElementInfo b);// to alphabetically sort a CircuitElementInfoVector
+bool CircuitElementInfo_iconnect_namestrcmp(const CircuitElementInfo a, const CircuitElementInfo b);// to sort a CircuitElementInfoVector by input connected state then alphabetically by namestr
 
 
 // Used in the device editing GUI to store a pointer to the currently selected device and notify widgets when it changes. This is here instead of in a gui file because it contains nothing specific to wxWidgets and may be useful elsewhere
