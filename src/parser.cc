@@ -15,7 +15,7 @@ bool parser::readin(void)
 	{
 		if (cursym != devsym && cursym != consym && cursym != monsym)
 		{
-			smz->getsymbol(cursym, curname, curint);
+			smz->getsymbol(cursym, curname, curint, numstring);
 		}
 		if (cursym == devsym)
 		{
@@ -57,7 +57,7 @@ bool parser::readin(void)
 		{
 			while (cursym != devsym && cursym != consym && cursym != monsym && cursym != eofsym)
 			{
-				smz->getsymbol(cursym, curname, curint);
+				smz->getsymbol(cursym, curname, curint, numstring);
 				erz->countSymbols();
 			}
 			erz->symbolError(deviceDone, connectionDone, monitorDone);
@@ -86,7 +86,7 @@ void parser::deviceList()
 	bool deviceError;
 	if (!devicePresent)
 	{
-		smz->getsymbol(cursym, curname, curint);
+		smz->getsymbol(cursym, curname, curint, numstring);
 		if (cursym == classsym)
 		{
 			deviceError = newDevice(curname);
@@ -103,12 +103,12 @@ void parser::deviceList()
 		}
 		if (!deviceError)
 		{
-			smz->getsymbol(cursym, curname, curint);
+			smz->getsymbol(cursym, curname, curint, numstring);
 		}
 	}
 	while (cursym == semicol)
 	{
-		smz->getsymbol(cursym, curname, curint);
+		smz->getsymbol(cursym, curname, curint, numstring);
 		if (cursym == classsym)
 		{
 			deviceError = newDevice(curname);
@@ -128,13 +128,13 @@ void parser::deviceList()
 		}
 		if (!deviceError)
 		{
-			smz->getsymbol(cursym, curname, curint);
+			smz->getsymbol(cursym, curname, curint, numstring);
 		}
 	}
 	if (!deviceError) erz->newError(24);//must end line in semicolon
 	while (cursym != semicol && cursym != endsym && cursym != eofsym)
 	{
-		smz->getsymbol(cursym, curname, curint);
+		smz->getsymbol(cursym, curname, curint, numstring);
 	}
 	if (cursym == semicol)
 	{
@@ -151,7 +151,7 @@ bool parser::newDevice(int deviceType)
 {
 	//EBNF: dev = clock|switch|gate|dtype|xor|siggen
 	bool errorOccurance = false;
-	smz->getsymbol(cursym, curname, curint);
+	smz->getsymbol(cursym, curname, curint, numstring);
 	if (cursym == namesym)
 	{
 		devlink nameCheck = netz->finddevice(curname);
@@ -168,10 +168,10 @@ bool parser::newDevice(int deviceType)
 				dmz->makedevice(xorgate, devName, 2, correctOperation); //create XOR with name devName
 				return errorOccurance;
 			}
-			smz->getsymbol(cursym, curname, curint);
+			smz->getsymbol(cursym, curname, curint, numstring);
 			if (cursym == colon)
 			{
-				smz->getsymbol(cursym, curname, curint);
+				smz->getsymbol(cursym, curname, curint, numstring);
 				if (cursym == numsym)
 				{
 					switch (deviceType)
@@ -229,14 +229,21 @@ bool parser::newDevice(int deviceType)
 							}
 							break;
 						case 12:
-							if (isBinary(curint))
+							if (isBinary(numstring))
 							{
-								dmz->makedevice(siggen, devName, curint, correctOperation); //create SIGGEN with name devName
+								sequence waveform;
+								for (int i=0; i<numstring.length(); i++)
+								{
+									waveform.push_back(numstring[i]=='1');
+								}
+								dmz->makesiggen(devName, waveform); //create SIGGEN with name devName
 							}
 							else
 							{
 								erz->newError(36); //Must be a binary input
+								errorOccurance=true;
 							}
+							break;
 						default:
 							cout << "Please do not deduct marks if this message is displayed" << endl;
 					}
@@ -279,7 +286,7 @@ void parser::connectionList()
 	bool connectionError;
 	if (!connectionPresent)
 	{
-		smz->getsymbol(cursym, curname, curint);
+		smz->getsymbol(cursym, curname, curint, numstring);
 		if (cursym == endsym)
 		{
 			if (!connectionPresent)
@@ -299,12 +306,12 @@ void parser::connectionList()
 		}
 		if (!connectionError)
 		{
-			smz->getsymbol(cursym, curname, curint);
+			smz->getsymbol(cursym, curname, curint, numstring);
 		}
 	}
 	while (cursym == semicol)
 	{
-		smz->getsymbol(cursym, curname, curint);
+		smz->getsymbol(cursym, curname, curint, numstring);
 		if (cursym == namesym)
 		{
 			connectionError = newConnection();
@@ -324,13 +331,13 @@ void parser::connectionList()
 		}
 		if (!connectionError)
 		{
-			smz->getsymbol(cursym, curname, curint);
+			smz->getsymbol(cursym, curname, curint, numstring);
 		}
 	}
 	if (!connectionError) erz->newError(24);//must end line in semicolon
 	while (cursym != semicol && cursym != endsym && cursym != eofsym)
 	{
-		smz->getsymbol(cursym, curname, curint);
+		smz->getsymbol(cursym, curname, curint, numstring);
 	}
 	if (cursym == semicol)
 	{
@@ -350,19 +357,19 @@ bool parser::newConnection()
 	if (devtype != NULL)
 	{
 		connectionInName = curname;
-		smz->getsymbol(cursym, curname, curint);
+		smz->getsymbol(cursym, curname, curint, numstring);
 		if (cursym == dot)
 		{
-			smz->getsymbol(cursym, curname, curint);
+			smz->getsymbol(cursym, curname, curint, numstring);
 			devtype = netz->finddevice(connectionInName);
 			inplink ilist = netz->findinput(devtype, curname);
 			if (cursym == iosym && ilist != NULL)
 			{
 				name inputPin = curname;
-				smz->getsymbol(cursym, curname, curint);
+				smz->getsymbol(cursym, curname, curint, numstring);
 				if (cursym == equals) //SEARCH - you have got to here
 				{
-					smz->getsymbol(cursym, curname, curint);
+					smz->getsymbol(cursym, curname, curint, numstring);
 					devtype = netz->finddevice(curname);
 					if (devtype != NULL)
 					{
@@ -370,10 +377,10 @@ bool parser::newConnection()
 						switch (devtype ? devtype->kind : baddevice)
 						{
 							case 7:
-								smz->getsymbol(cursym, curname, curint);
+								smz->getsymbol(cursym, curname, curint, numstring);
 								if (cursym == dot)
 								{
-									smz->getsymbol(cursym, curname, curint);
+									smz->getsymbol(cursym, curname, curint, numstring);
 									outplink olist = netz->findoutput(devtype, curname);
 									if (cursym == iosym && olist != NULL)
 									{
@@ -405,7 +412,7 @@ bool parser::newConnection()
 								}
 								else
 								{
-									erz->newError(37);//bad connection
+									erz->newError(37);//attempting to input 2 ouputs into same input
 								}
 						}
 					}
@@ -447,7 +454,7 @@ void parser::monitorList()
 	bool monitorError;
 	if (!monitorPresent)
 	{
-		smz->getsymbol(cursym, curname, curint);
+		smz->getsymbol(cursym, curname, curint, numstring);
 		if (cursym == endsym)
 		{
 			if (!monitorPresent)
@@ -467,12 +474,12 @@ void parser::monitorList()
 		}
 		if (!monitorError)
 		{
-			smz->getsymbol(cursym, curname, curint);
+			smz->getsymbol(cursym, curname, curint, numstring);
 		}
 	}
 	while (cursym == semicol)
 	{
-		smz->getsymbol(cursym, curname, curint);
+		smz->getsymbol(cursym, curname, curint, numstring);
 		if (cursym == namesym)
 		{
 			monitorError = newMonitor();
@@ -492,13 +499,13 @@ void parser::monitorList()
 		}
 		if (!monitorError)
 		{
-			smz->getsymbol(cursym, curname, curint);
+			smz->getsymbol(cursym, curname, curint, numstring);
 		}
 	}
 	if (!monitorError) erz->newError(24);//must end line in semicolon
 	while (cursym != semicol && cursym != endsym && cursym != eofsym)
 	{
-		smz->getsymbol(cursym, curname, curint);
+		smz->getsymbol(cursym, curname, curint, numstring);
 	}
 	if (cursym == semicol)
 	{
@@ -521,10 +528,10 @@ bool parser::newMonitor()
 		switch (devtype ? devtype->kind : baddevice)
 		{
 			case 7:
-				smz->getsymbol(cursym, curname, curint);
+				smz->getsymbol(cursym, curname, curint, numstring);
 				if (cursym == dot)
 				{
-					smz->getsymbol(cursym, curname, curint);
+					smz->getsymbol(cursym, curname, curint, numstring);
 					outplink olist = netz->findoutput(devtype, curname);
 					bool alreadyMonitored = mmz->IsMonitored(olist);
 					if (!alreadyMonitored)
@@ -577,10 +584,22 @@ bool parser::newMonitor()
 	}
 	else
 	{
-		erz->newError(23);
+		erz->newError(23);//bad device monitor
 		errorOccurance=true;
 	}
 	return errorOccurance;
+}
+
+bool parser::isBinary(string numstring)
+{
+	for (int i=0; i<numstring.length(); i++)
+	{
+		if (numstring[i]!='0' && numstring[i]!='1')
+			{
+				return false;
+			}
+	}
+	return true;
 }
 
 parser::parser(network* network_mod, devices* devices_mod, monitor* monitor_mod, scanner* scanner_mod, error* error_mod)
@@ -593,14 +612,3 @@ parser::parser(network* network_mod, devices* devices_mod, monitor* monitor_mod,
 	/* any other initialisation you want to do? */
 }
 
-bool parser::isBinary(int signal)
-{
-	int i;
-	while(signal!=0)
-	{
-		i = signal % 10;
-		if(i>1) return false;
-		signal = signal / 10;
-	}
-	return true;
-}

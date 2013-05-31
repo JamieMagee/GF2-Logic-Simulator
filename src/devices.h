@@ -20,7 +20,6 @@ class devices{
   void makeclock (name id, int frequency);
   void makegate (devicekind dkind, name did, int ninputs, bool& ok);
   void makedtype (name id);
-  void makesiggen (name id, int signal);
   void signalupdate (asignal target, asignal& sig);
   asignal inv (asignal s);
   void execswitch (devlink d);
@@ -30,6 +29,7 @@ class devices{
   void execclock(devlink d);
   void execsiggen(devlink d);
   void updateclocks (void);
+  void updatesiggens (void);
   void outsig (asignal s);
 
 public:
@@ -37,6 +37,8 @@ public:
     /* Adds a device to the network of the specified kind and name.  The   */
     /* variant is used with such things as gates where it specifies the    */
     /* number of inputs. 'ok' returns true if operation succeeds.          */
+ 
+ void makesiggen (name id, sequence waveform); //called directly by gui and parser so waveform can be passed
  
   void setswitch (name sid, asignal level, bool& ok);
     /* Sets the state of the named switch. 'ok' returns false if switch    */
@@ -62,6 +64,7 @@ public:
 
   // Gets the name for an input of a gate (n=1 -> 'I1', n=2 -> 'I2', etc)
   name GetGateInputName(int n);
+ 
 
   // Checks whether all inputs are connected
   bool CheckDeviceInputs(devlink d);

@@ -117,7 +117,7 @@ void error::monitorWarning(namestring repeatedMonitor)
 
 void error::connectionWarning(namestring repeatedInput, namestring repeatedOutput)
 {
-	cout << "Warning 0x003: The connection of output " << repeatedOutput << " to input " << repeatedInput << " has been specified multiple times. This has been treated as one instance of the same connection." <<endl;
+	cout << "Warning 0x0003: The connection of output " << repeatedOutput << " to input " << repeatedInput << " has been specified multiple times. This has been treated as one instance of the same connection." <<endl;
 	warningCount ++;
 }
 

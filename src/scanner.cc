@@ -22,7 +22,7 @@ scanner::~scanner()
 	inf.close(); 	//Close file
 }
 
-void scanner::getsymbol(symbol& s, name& id, int& num)
+void scanner::getsymbol(symbol& s, name& id, int& num, string& numstring)
 {
 	s = badsym;
 	cursymlen = 0;
@@ -33,7 +33,7 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
 		if (isdigit(curch))
 		{
 			s = numsym;
-			getnumber(num);
+			getnumber(num, numstring);
 		}
 		else
 		{
@@ -74,7 +74,7 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
 						{
 							getch();
 							skipcomments();
-							getsymbol(s, id, num);
+							getsymbol(s, id, num, numstring);
 						}
 						break;
 					default:
@@ -116,12 +116,14 @@ void scanner::getch()
 	}
 }
 
-void scanner::getnumber(int& number)
+void scanner::getnumber(int& number, string& numstring)
 {
+	numstring = "";
 	number = 0;
 	cursymlen = 0;
 	while (isdigit(curch) && !eofile)
 	{
+		numstring.push_back(curch);
 		number *= 10;
 		number += (int(curch) - int('0'));
 		cursymlen++;
@@ -173,7 +175,7 @@ string scanner::getline()
 		{
 			getch();
 		}
-		if (curch != '\n' && curch != '\r')
+		if (curch != '\n' && curch != '\r' && !eofile)
 		{
 			line.push_back(curch);
 		}

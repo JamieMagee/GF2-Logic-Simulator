@@ -23,7 +23,8 @@ class scanner
 		~scanner();						//Destructor
 		void getsymbol(symbol& s,		//Symbol type read
 					   name& id,			//Return symbol name (if it has one)
-					   int& num);			//Return symbol value (if it's a number)
+					   int& num,
+					   string& numstring);			//Return symbol value (if it's a number)
 		void writelineerror();
 
 	private:
@@ -37,7 +38,7 @@ class scanner
 		string line;	//Current line contents. Used for error printing
 
 		void getch();	//Gets next input character
-		void getnumber(int& number);	//Reads number from file
+		void getnumber(int& number, string& numstring);	//Reads number from file
 		void getname(name& id); //Reads name from file
 		string getline();	//Reads the line
 		void skipspaces(); //Skips spaces

@@ -155,13 +155,16 @@ void devices::makedtype (name id)
 /***********************************************************************
  *
  * Used to make new clock devices.
- * Called by makedevice.
+ * Called directly by GUI and Parser
  *
  */
-void devices::makesiggen (name id, int signal)
+void devices::makesiggen (name id, sequence waveform)
 {
 	devlink d;
-	
+	netz->adddevice (siggen, id, d);
+	netz->addoutput (d, blankname);
+	d->waveform = waveform;
+	d->counter = 0;
 }
 
 /***********************************************************************
@@ -193,9 +196,8 @@ void devices::makedevice (devicekind dkind, name did, int variant, bool& ok)
     case dtype:
       makedtype(did);
       break;
-    case siggen:
-	  makesiggen(did, variant);
-	  break;
+    default:
+		ok = false;
   }
 }
 
@@ -344,9 +346,15 @@ void devices::execclock(devlink d)
  */
 void devices::execsiggen(devlink d)
 {
-	
-} 
-
+	if (d->waveform[d->counter])
+	{
+		signalupdate (high, d->olist->sig);
+	}
+	else
+	{
+		signalupdate (low, d->olist->sig);
+	}
+}
 
 
 /***********************************************************************
@@ -373,6 +381,27 @@ void devices::updateclocks (void)
   }
 }
 
+/***********************************************************************
+ *
+ * Increment the counters in the clock devices and initiate changes
+ * in their outputs when the end of their period is reached.
+ * Called by executedevices.
+ *
+ */
+void devices::updatesiggens (void)
+{
+	devlink d;
+	for (d = netz->devicelist (); d != NULL; d = d->next) {
+		if (d->kind == siggen)
+		{
+			(d->counter) ++;
+			if (d->counter >= d->waveform.size())
+			{
+				d->counter=0;
+			}
+		}
+	}
+}
 
 /***********************************************************************
  *
@@ -416,6 +445,7 @@ void devices::executedevices (bool& ok)
   } while ((! steadystate) && (machinecycle < maxmachinecycles));
   if (debugging)
     cout << "End of execution cycle" << endl;
+    updatesiggens();
   ok = steadystate;
 }
 

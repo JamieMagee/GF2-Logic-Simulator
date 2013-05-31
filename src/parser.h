@@ -19,7 +19,7 @@ class parser
 		bool newDevice(int deviceType);
 		bool newConnection();
 		bool newMonitor();
-		bool isBinary(int signal);
+		bool isBinary(string numstring);
 		network* netz; // instantiations of various classes for parser to use.
 		devices* dmz;
 		monitor* mmz;
@@ -28,6 +28,7 @@ class parser
 		int curint;  //integer, symbol and name returned by scanner
 		symbol cursym;
 		name curname;
+		string numstring;
 		bool correctOperation; //bools to check for errors
 		bool anyErrors;
 		int badname;

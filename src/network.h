@@ -3,6 +3,7 @@
 
 #include "names.h"
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -11,6 +12,8 @@ using namespace std;
 typedef enum {falling, low, rising, high} asignal;
 typedef enum {aswitch, aclock, andgate, nandgate, orgate,
 	      norgate, xorgate, dtype, siggen, baddevice} devicekind;
+
+typedef vector<bool> sequence;
 
 struct devicerec;
 struct outputrec {
@@ -36,8 +39,8 @@ struct devicerec {
   asignal swstate;      // used when kind == aswitch
   int frequency;        // used when kind == aclock
   int counter;          // used when kind == aclock
+  sequence waveform;		// used when kind == siggen
   asignal memory;       // used when kind == dtype
-  int signal;			// used when kind == siggen
 };
 typedef devicerec* devlink;
 
