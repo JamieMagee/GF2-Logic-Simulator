@@ -25,7 +25,7 @@ processing 11.gf2...
 Line 4:
 NAND 1:2;
      ^
-Error 0x000B: Name must start with letter and only contain letter number and '_'
+Error 0x0021: Cannot name a device as a reserved word, for a list of reserved words check reservedWords.txt in docs
 Unconnected Input : G3.I1
 Unconnected Input : G2.I2
 There is 1 error
@@ -245,6 +245,22 @@ Line 9:
 CONNECTIONS
 ^
 Error 0x0020: Block must be terminated with 'END'
+There is 1 error
+
+
+processing 33.gf2...
+Line 7:
+NAND I4:2;
+     ^
+Error 0x0021: Cannot name a device as a reserved word, for a list of reserved words check reservedWords.txt in docs
+There is 1 error
+
+
+processing 34.gf2...
+Line 7:
+NAND G3:2;
+     ^
+Error 0x0022: Devices already exists with this name, please choose an alternative name
 There is 1 error
 
 
