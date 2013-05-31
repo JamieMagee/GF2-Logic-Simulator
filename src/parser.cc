@@ -235,7 +235,7 @@ bool parser::newDevice(int deviceType)
 							}
 							else
 							{
-								erz->newError(35); //Must be a binary input
+								erz->newError(36); //Must be a binary input
 							}
 						default:
 							cout << "Please do not deduct marks if this message is displayed" << endl;
@@ -391,8 +391,22 @@ bool parser::newConnection()
 									errorOccurance=true;
 								}
 							default:
-								netz->makeconnection(connectionInName, inputPin, connectionOutName, blankname, correctOperation);
-								return errorOccurance;
+							//check the connection is unique
+								if (ilist->connect==NULL)
+								{
+									netz->makeconnection(connectionInName, inputPin, connectionOutName, blankname, correctOperation);
+									return errorOccurance;
+								}
+								else if (ilist->connect==findoutput(connectionOutName, blankname))
+								{
+									namestring repeatedInput = smz->nmz->getnamestring(connectionInName);
+									namestring repeatedOutput = smz->nmz->getnamestring(connectionOutName);
+									erz->connectionWarning(repeatedInput, repeatedOutput);
+								}
+								else
+								{
+									erz->newError(37);//bad connection
+								}
 						}
 					}
 					else

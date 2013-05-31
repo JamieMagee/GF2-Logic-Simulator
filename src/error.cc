@@ -45,7 +45,9 @@ error::error(scanner* scanner_mod)  /* the constructor */
 	errorlist.push_back("Error 0x0020: Block must be terminated with 'END'");//32
 	errorlist.push_back("Error 0x0021: Cannot name a device as a reserved word, for a list of reserved words check reservedWords.txt in docs");//33
 	errorlist.push_back("Error 0x0022: Not a valid output for a dtype");//34
-	errorlist.push_back("Error 0x0023: SIGGEN only accepts a binary input");//35 RESERVED FOR symbolError() function
+	errorlist.push_back("RESERVED");//35 RESERVED FOR symbolError() function
+	errorlist.push_back("Error 0x0024: SIGGEN only accepts a binary input");//36
+	errorlist.push_back("Error 0x0025: Specified connection of two different outputs to the same input");//37
 	
 	errorCount = 0;
 	warningCount = 0;
@@ -108,7 +110,13 @@ void error::symbolError(bool deviceDone, bool connectionDone, bool monitorDone)
 
 void error::monitorWarning(namestring repeatedMonitor)
 {
-	cout << "Warning 0x0002: The connection " << repeatedMonitor << " is already being monitored. Please check this is what is required" << endl;
+	cout << "Warning 0x0002: The output " << repeatedMonitor << " is already being monitored. Please check this is what is required" << endl;
+	warningCount ++;
+}
+
+void error::connectionWarning(namestring repeatedInput, namestring repeatedOutput)
+{
+	cout << "Warning 0x003: The connection of output " << repeatedOutput << " to input " << repeatedInput << " has been specified multiple times. This has been treated as one instance of the same connection."
 	warningCount ++;
 }
 
