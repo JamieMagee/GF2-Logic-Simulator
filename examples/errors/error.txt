@@ -4,7 +4,19 @@ Line 1:
 MONITORS
 ^
 Error 0x0002: Must have monitor list last (after devices list and connections) in definition file, initialised by 'MONITORS'
-There is 1 error
+Line 2:
+S1;
+^
+Error 0x0017: Bad device monitor
+Line 3:
+S2;
+^
+Error 0x0017: Bad device monitor
+Line 4:
+G4;
+^
+Error 0x0017: Bad device monitor
+There are 4 errors
 
 
 processing 10.gf2...
@@ -12,23 +24,51 @@ Line 4:
 NAND G12;
         ^
 Error 0x000A: Need colon after name for CLOCK/SWITCH/GATE type
-Line 5:
-NAND G2:2;
+Line 11:
+G1.I1 = S1;
 ^
-Error 0x0018: Need semicolon at end of previous line
-Unconnected Input : G4.I1
+Error 0x0013: Output device called in connection list does not exist
+Line 12:
+G1.I2 = S2;
+^
+Error 0x0013: Output device called in connection list does not exist
+Line 14:
+G2.I2 = G1;
+        ^
+Error 0x000F: Input device called in connection list does not exist
+Line 15:
+G3.I1 = G1;
+        ^
+Error 0x000F: Input device called in connection list does not exist
 Unconnected Input : G3.I1
-There are 2 errors
+Unconnected Input : G2.I2
+There are 5 errors
 
 
 processing 11.gf2...
 Line 4:
 NAND 1:2;
      ^
-Error 0x000B: Name must start with letter and only contain letter number and '_'
+Error 0x0021: Cannot name a device as a reserved word, for a list of reserved words check reservedWords.txt in docs
+Line 11:
+G1.I1 = S1;
+^
+Error 0x0013: Output device called in connection list does not exist
+Line 12:
+G1.I2 = S2;
+^
+Error 0x0013: Output device called in connection list does not exist
+Line 14:
+G2.I2 = G1;
+        ^
+Error 0x000F: Input device called in connection list does not exist
+Line 15:
+G3.I1 = G1;
+        ^
+Error 0x000F: Input device called in connection list does not exist
 Unconnected Input : G3.I1
 Unconnected Input : G2.I2
-There is 1 error
+There are 5 errors
 
 
 processing 12.gf2...
@@ -53,17 +93,17 @@ Line 14:
 D2.DATA = D1;
             ^
 Error 0x000E: Expect a dot after DTYPE
-Line 15:
-D3.DATA = D2.Q;
-^
-Error 0x0018: Need semicolon at end of previous line
-Unconnected Input : D3.DATA
 Unconnected Input : D2.DATA
-There are 2 errors
+There is 1 error
 
 
 processing 15.gf2...
+Line 18:
+G5.I2 = G3;
+^
+Error 0x0013: Output device called in connection list does not exist
 Unconnected Input : G4.I2
+There is 1 error
 
 
 processing 16.gf2...
@@ -76,20 +116,30 @@ There is 1 error
 
 
 processing 17.gf2...
+Line 18:
+G4.I3 = G3;
+   ^
+Error 0x0011: Must specify valid input gate after dot
 Unconnected Input : G4.I2
+There is 1 error
 
 
 processing 18.gf2...
 Line 18:
 G4I2 = G3;
-     ^
-Error 0x0012: Need to specify valid iput gate seperated from device name by a '.'
+^
+Error 0x0013: Output device called in connection list does not exist
 Unconnected Input : G4.I2
 There is 1 error
 
 
 processing 19.gf2...
+Line 18:
+G4.I2 = G5;
+        ^
+Error 0x000F: Input device called in connection list does not exist
 Unconnected Input : G4.I2
+There is 1 error
 
 
 processing 1.gf2...
@@ -97,10 +147,54 @@ Line 1:
 CONNECTIONS
 ^
 Error 0x0000: Must have device list first in definition file, initialised with 'DEVICES'
+Line 2:
+G1.I1 = S1;
+^
+Error 0x0013: Output device called in connection list does not exist
+Line 3:
+G1.I2 = S2;
+^
+Error 0x0013: Output device called in connection list does not exist
+Line 4:
+G2.I1 = S1;
+^
+Error 0x0013: Output device called in connection list does not exist
+Line 5:
+G2.I2 = G1;
+^
+Error 0x0013: Output device called in connection list does not exist
+Line 6:
+G3.I1 = G1;
+^
+Error 0x0013: Output device called in connection list does not exist
+Line 7:
+G3.I2 = S2;
+^
+Error 0x0013: Output device called in connection list does not exist
+Line 8:
+G4.I1 = G2;
+^
+Error 0x0013: Output device called in connection list does not exist
+Line 9:
+G4.I2 = G3;
+^
+Error 0x0013: Output device called in connection list does not exist
 Line 12:
 MONITORS
 ^
 Error 0x0002: Must have monitor list last (after devices list and connections) in definition file, initialised by 'MONITORS'
+Line 13:
+S1;
+^
+Error 0x0017: Bad device monitor
+Line 14:
+S2;
+^
+Error 0x0017: Bad device monitor
+Line 15:
+G4;
+^
+Error 0x0017: Bad device monitor
 Unconnected Input : G4.I2
 Unconnected Input : G4.I1
 Unconnected Input : G3.I2
@@ -109,15 +203,15 @@ Unconnected Input : G2.I2
 Unconnected Input : G2.I1
 Unconnected Input : G1.I2
 Unconnected Input : G1.I1
-There are 2 errors
+There are 13 errors
 
 
 processing 20.gf2...
-Logic Simulator: interactive command interface
-# Running for 50 cycles
-S2                 :--------------------------------------------------
-G4                 :--------------------------------------------------
-# Logic Simulator: terminating.
+Line 22:
+S3;
+^
+Error 0x0017: Bad device monitor
+There is 1 error
 
 
 processing 21.gf2...
@@ -137,21 +231,15 @@ Line 33:
 D1;
   ^
 Error 0x0016: Expect a dot after DTYPE as must specify output to monitor in monitor list
-Line 34:
-D2.Q;
-^
-Error 0x0018: Need semicolon at end of previous line
-There are 2 errors
+There is 1 error
 
 
 processing 23.gf2...
-Logic Simulator: interactive command interface
-# Running for 50 cycles
-D1.Q               :___--__--__--__--__--__--__--__--__--__--__--__--_
-D2.Q               :_____--__--__--__--__--__--__--__--__--__--__--__-
-D3.Q               :_______--__--__--__--__--__--__--__--__--__--__--_
-D4.Q               :_________--__--__--__--__--__--__--__--__--__--__-
-# Logic Simulator: terminating.
+Line 33:
+D1.Q1;
+   ^
+Error 0x0022: Not a valid output for a dtype
+There is 1 error
 
 
 processing 24.gf2...
@@ -167,23 +255,76 @@ Line 27:
 DEVICES
 ^
 Error 0x0019: Must only be one devices list
-There is 1 error
+Line 27:
+DEVICES
+^
+Error 0x0018: Need semicolon at end of previous line
+There are 2 errors
 
 
 processing 26.gf2...
 Line 9:
 CONNECTIONS
 ^
+Error 0x0023: There are 31 unexpected symbols before this line.
+Expected DEVICES block
+Line 9:
+CONNECTIONS
+^
 Error 0x0000: Must have device list first in definition file, initialised with 'DEVICES'
+Line 10:
+G1.I1 = S1;
+^
+Error 0x0013: Output device called in connection list does not exist
+Line 11:
+G1.I2 = S2;
+^
+Error 0x0013: Output device called in connection list does not exist
+Line 12:
+G2.I1 = S1;
+^
+Error 0x0013: Output device called in connection list does not exist
+Line 13:
+G2.I2 = G1;
+^
+Error 0x0013: Output device called in connection list does not exist
+Line 14:
+G3.I1 = G1;
+^
+Error 0x0013: Output device called in connection list does not exist
+Line 15:
+G3.I2 = S2;
+^
+Error 0x0013: Output device called in connection list does not exist
+Line 16:
+G4.I1 = G2;
+^
+Error 0x0013: Output device called in connection list does not exist
+Line 17:
+G4.I2 = G3;
+^
+Error 0x0013: Output device called in connection list does not exist
 Line 20:
 MONITORS
 ^
 Error 0x0002: Must have monitor list last (after devices list and connections) in definition file, initialised by 'MONITORS'
+Line 21:
+S1;
+^
+Error 0x0017: Bad device monitor
+Line 22:
+S2;
+^
+Error 0x0017: Bad device monitor
+Line 23:
+G4;
+^
+Error 0x0017: Bad device monitor
 Line 25:
 
 ^
 Error 0x001A: There must be one 'DEVICES' block, it may not have been initialised properly
-There are 3 errors
+There are 15 errors
 
 
 processing 28.gf2...
@@ -191,8 +332,11 @@ Line 27:
 CONNECTIONS
 ^
 Error 0x001C: Must only be one connections list
-Warning 0x0000: You have not specfied any conenctions. Please check this is what is required
-There is 1 error and 1 warning
+Line 27:
+CONNECTIONS
+^
+Error 0x0018: Need semicolon at end of previous line
+There are 2 errors
 
 
 processing 29.gf2...
@@ -200,8 +344,11 @@ Line 27:
 MONITORS
 ^
 Error 0x001D: Must only be one monitors list
-Warning 0x0001: You have not specfied any monitors. Please check this is what is required
-There is 1 error and 1 warning
+Line 27:
+MONITORS
+^
+Error 0x0018: Need semicolon at end of previous line
+There are 2 errors
 
 
 processing 2.gf2...
@@ -209,7 +356,19 @@ Line 1:
 MONITORS
 ^
 Error 0x0002: Must have monitor list last (after devices list and connections) in definition file, initialised by 'MONITORS'
-There is 1 error
+Line 2:
+S1;
+^
+Error 0x0017: Bad device monitor
+Line 3:
+S2;
+^
+Error 0x0017: Bad device monitor
+Line 4:
+G4;
+^
+Error 0x0017: Bad device monitor
+There are 4 errors
 
 
 processing 30.gf2...
@@ -236,7 +395,7 @@ processing 31.gf2...
 Line 20:
 
 ^
-Error 0x001F: There must be one 'MONITOR' block, it may not have been initialised properly
+Error 0x001F: There must be one 'MONITORS' block, it may not have been initialised properly
 There is 1 error
 
 
@@ -253,8 +412,8 @@ Line 2:
 END
 ^
 Error 0x0003: Must have at least one device in devices list
-Warning 0x0000: You have not specfied any conenctions. Please check this is what is required
-Warning 0x0001: You have not specfied any monitors. Please check this is what is required
+Warning 0x0000: You have not specified any connections. Please check this is what is required
+Warning 0x0001: You have not specified any monitors. Please check this is what is required
 There is 1 error and 2warnings
 
 
@@ -263,9 +422,21 @@ Line 2:
 S1:0;
 ^
 Error 0x0004: Need device type for device definition
+Line 11:
+G1.I1 = S1;
+        ^
+Error 0x000F: Input device called in connection list does not exist
+Line 13:
+G2.I1 = S1;
+        ^
+Error 0x000F: Input device called in connection list does not exist
+Line 22:
+S1;
+^
+Error 0x0017: Bad device monitor
 Unconnected Input : G2.I1
 Unconnected Input : G1.I1
-There is 1 error
+There are 4 errors
 
 
 processing 5.gf2...
@@ -281,9 +452,21 @@ Line 2:
 CLOCK CLK1:-1;
            ^
 Error 0x0006: Clock must have integer clock number greater than 0
+Line 12:
+G1.I1 = CLK1;
+        ^
+Error 0x000F: Input device called in connection list does not exist
+Line 16:
+G3.I2 = CLK1;
+        ^
+Error 0x000F: Input device called in connection list does not exist
+Line 24:
+CLK1;
+^
+Error 0x0017: Bad device monitor
 Unconnected Input : G3.I2
 Unconnected Input : G1.I1
-There is 1 error
+There are 4 errors
 
 
 processing 7.gf2...
@@ -291,9 +474,21 @@ Line 2:
 SWITCH S1:2;
           ^
 Error 0x0007: Switch must be set to either 0 or 1
+Line 11:
+G1.I1 = S1;
+        ^
+Error 0x000F: Input device called in connection list does not exist
+Line 13:
+G2.I1 = S1;
+        ^
+Error 0x000F: Input device called in connection list does not exist
+Line 22:
+S1;
+^
+Error 0x0017: Bad device monitor
 Unconnected Input : G2.I1
 Unconnected Input : G1.I1
-There is 1 error
+There are 4 errors
 
 
 processing 8.gf2...
@@ -301,9 +496,25 @@ Line 4:
 NAND G1:20;
         ^
 Error 0x0008: Must specify an integer number of inputs between 1 and 16 to a GATE
+Line 11:
+G1.I1 = S1;
+^
+Error 0x0013: Output device called in connection list does not exist
+Line 12:
+G1.I2 = S2;
+^
+Error 0x0013: Output device called in connection list does not exist
+Line 14:
+G2.I2 = G1;
+        ^
+Error 0x000F: Input device called in connection list does not exist
+Line 15:
+G3.I1 = G1;
+        ^
+Error 0x000F: Input device called in connection list does not exist
 Unconnected Input : G3.I1
 Unconnected Input : G2.I2
-There is 1 error
+There are 5 errors
 
 
 processing 9.gf2...
@@ -311,19 +522,25 @@ Line 2:
 CLOCK CLK1:;
            ^
 Error 0x0006: Clock must have integer clock number greater than 0
-Line 3:
-CLOCK CLK2:2;
+Line 12:
+G1.I1 = CLK1;
+        ^
+Error 0x000F: Input device called in connection list does not exist
+Line 16:
+G3.I2 = CLK1;
+        ^
+Error 0x000F: Input device called in connection list does not exist
+Line 24:
+CLK1;
 ^
-Error 0x0018: Need semicolon at end of previous line
+Error 0x0017: Bad device monitor
 Unconnected Input : G3.I2
-Unconnected Input : G3.I1
-Unconnected Input : G2.I2
 Unconnected Input : G1.I1
-There are 2 errors
+There are 4 errors
 
 
 processing warning0.gf2...
-Warning 0x0000: You have not specfied any conenctions. Please check this is what is required
+Warning 0x0000: You have not specified any connections. Please check this is what is required
 Unconnected Input : G4.I2
 Unconnected Input : G4.I1
 Unconnected Input : G3.I2
@@ -336,7 +553,7 @@ There are no errors and 1 warning
 
 
 processing warning1.gf2...
-Warning 0x0001: You have not specfied any monitors. Please check this is what is required
+Warning 0x0001: You have not specified any monitors. Please check this is what is required
 There are no errors and 1 warning
 Logic Simulator: interactive command interface
 # Running for 50 cycles
