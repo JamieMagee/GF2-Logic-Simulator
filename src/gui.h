@@ -61,7 +61,7 @@ public:
 private:
 	circuit* c;
 	int oldMonCount;
-	vector<outputinfo> availableOutputs;
+	CircuitElementInfoVector availableOutputs;
 	wxListBox *lbox;
 	void OnOK(wxCommandEvent& event);
 	DECLARE_EVENT_TABLE()

@@ -306,15 +306,11 @@ AddMonitorsDialog::AddMonitorsDialog(circuit* circ, wxWindow* parent, const wxSt
 	c = circ;
 	oldMonCount = c->mmz()->moncount();
 
+	// Make a list of unmonitored outputs
 	c->GetUnmonitoredOutputs(&availableOutputs);
-	sort(availableOutputs.begin(), availableOutputs.end(), outputinfo_namestrcmp);
-
+	sort(availableOutputs.begin(), availableOutputs.end(), CircuitElementInfo_namestrcmp);
 	wxArrayString displayedOutputs;
-	displayedOutputs.Alloc(availableOutputs.size());
-	for (vector<outputinfo>::iterator it=availableOutputs.begin(); it!=availableOutputs.end(); ++it)
-	{
-		displayedOutputs.Add(wxString(it->namestr.c_str(), wxConvUTF8));
-	}
+	CircuitElementInfoVector_to_wxArrayString(availableOutputs, displayedOutputs);
 
 	wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
 	topsizer->Add(new wxStaticText(this, wxID_ANY, _("Select output(s) to monitor:")), 0, wxLEFT | wxRIGHT | wxTOP, 10);
@@ -332,7 +328,7 @@ void AddMonitorsDialog::OnOK(wxCommandEvent& event)
 	bool ok;
 	for (int i=0; i<num; i++)
 	{
-		c->mmz()->makemonitor(availableOutputs[selections[i]].devname, availableOutputs[selections[i]].outpname, ok);
+		c->mmz()->makemonitor(availableOutputs[selections[i]].d->id, availableOutputs[selections[i]].o->id, ok);
 	}
 	if (c->mmz()->moncount() != oldMonCount)
 	{
