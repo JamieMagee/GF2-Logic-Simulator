@@ -15,6 +15,7 @@ scanner::scanner(names* names_mod, const char* defname, bool& ok)
 	}
 	eofile = (inf.get(curch) == 0);	//Get first character
 	linenum = 1;
+	s = badsym;//in case getline is called before getsymbol
 }
 
 scanner::~scanner()

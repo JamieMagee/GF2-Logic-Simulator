@@ -10,6 +10,7 @@ bool parser::readin(void)
 {
 	//EBNF: specfile = devices connections monitors
 	bool deviceDone = false, connectionDone = false, monitorDone = false;
+	devicePresent = connectionPresent = monitorPresent = false;
 	cursym = badsym;
 	while (cursym != eofsym)
 	{
