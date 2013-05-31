@@ -24,7 +24,7 @@ class monitor {
   names*   nmz;     // version of names class to use.
   network* netz;    // version of the network class to use.
 
-  vector<moninfo> mtab;                 // table of monitored signals
+  montable mtab;                 // table of monitored signals
   int cycles;                        // counts clock cycles
 
  public:
