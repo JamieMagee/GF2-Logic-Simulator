@@ -95,7 +95,7 @@
 
 \section{User guide}
 
-\textbf{Opening files.} There are two methods of opening a file. Either pass the filename as a command line argument when starting the logic simulator, or use the ``File $\rightarrow$ Open'' menu item and select the correct file. Logic circuit definition files are plain text files with extension \texttt{.gf2}. Examples are provided. Any errors which occur while loading the file will be shown in the textbox at the bottom of the window.
+\textbf{Opening files.} There are two methods of opening a file. Either pass the filename as a command line argument when starting the logic simulator, or use the ``File $\rightarrow$ Open'' menu item and select the correct file. Logic circuit definition files are plain text files with extension \texttt{.gf2}. Examples are provided in section~\ref{sec:examples}. Any errors which occur while loading the file will be shown in the textbox at the bottom of the window.
 
 \textbf{Running the simulation.} After opening a circuit, select the number of cycles to simulate using the textbox in the top right corner. Then click the ``Run'' button just below the textbox. Results will be displayed in the large space to the left (see figure~\ref{fig:gui-main}). The run button clears the displayed results and simulates the circuit for the specified number of cycles. To simulate for additional cycles without clearing the displayed results, use the ``Continue'' button instead. The only limit on the number of displayed signals and simulated cycles is the available memory on the computer.  If necessary, scrollbars will appear around the result display area.
 
@@ -103,7 +103,7 @@
 
 \textbf{Changing switch states.} Use the checkboxes located in the bottom right corner of the window. Changes take effect immediately. Run or continue the simulation to see the effect on the circuit. 
 
-\textbf{Editing devices.} Click the edit devices button on the right hand side. This will open a window allowing you to add, edit, or delete devices(see figure~\ref{fig:gui-devices}). Select a device to edit using the list on the left. The top panel allows device properties to be modified. The bottom panels show inputs and outputs for the selected device, and which devices are connected to it. They also allow connections to be added and deleted. All changes to devices and connections take effect immediately, except for changes to device properties, which must be confirmed using the ``Apply changes'' button. 
+\textbf{Editing devices.} Click the edit devices button on the right hand side. This will open a window allowing you to add, edit, or delete devices (see figure~\ref{fig:gui-devices}). Select a device to edit using the list on the left. The top panel allows device properties to be modified. The bottom panels show inputs and outputs for the selected device, and which devices are connected to it. They also allow connections to be added and deleted. All changes to devices and connections take effect immediately, except for changes to device properties, which must be confirmed using the ``Apply changes'' button. 
 
 \begin{figure}[h]
  \centering
@@ -118,9 +118,9 @@
  \label{fig:gui-devices}
 \end{figure}
 
-
 \clearpage
 \section{Example circuits}
+\label{sec:examples}
 Jamie Magee made all definition files and circuit diagrams shown here.
 
 \subsection{XOR Gate}
@@ -170,7 +170,7 @@ Jamie Magee made all definition files and circuit diagrams shown here.
  \label{fig:example-dlatch}
 \end{figure}
 
-\textbf{NB} The software used to draw the circuit diagram does not support the NAND gates with one input. Therefore the NAND gate G1 was substituted for a NOT gate as can be seen in Fig. \ref{fig:example-dlatch}.
+\textbf{NB} The software used to draw the circuit diagram does not support NAND gates with one input. Therefore the NAND gate G1 was substituted for a NOT gate as can be seen in Fig. \ref{fig:example-dlatch}.
 
 
 \end{document}
