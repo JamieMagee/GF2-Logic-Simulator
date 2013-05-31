@@ -250,7 +250,11 @@ void MyFrame::UpdateControlStates()
 				someEmpty = true;
 		}
 		if (someEmpty)
+		{
 			simctrl_continue->Disable();
+			if (c->GetTotalCycles() && runsimTimer.IsRunning())// some but not all empty, and continuously scrolling
+				SetContinuousRun(false);
+		}
 		else
 			simctrl_continue->Enable();
 		
@@ -314,6 +318,13 @@ void MyFrame::SetContinuousRun(bool state)
 
 	if (state)
 	{
+		bool someEmpty = (c->GetTotalCycles()==0);
+		for (int i=0; i<c->mmz()->moncount(); i++)
+		{
+			if (c->mmz()->getsamplecount(i)==0)
+				someEmpty = true;
+		}
+		if (someEmpty) c->ResetMonitors();
 		if (!runsimTimer.Start(10))
 		{
 			ShowErrorMsgDialog(this, _("Could not start timer"));
