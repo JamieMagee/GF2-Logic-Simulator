@@ -20,6 +20,7 @@ class devices{
   void makeclock (name id, int frequency);
   void makegate (devicekind dkind, name did, int ninputs, bool& ok);
   void makedtype (name id);
+  void makesiggen (name id, int signal);
   void signalupdate (asignal target, asignal& sig);
   asignal inv (asignal s);
   void execswitch (devlink d);
@@ -27,6 +28,7 @@ class devices{
   void execxorgate(devlink d);
   void execdtype (devlink d);
   void execclock(devlink d);
+  void execsiggen(devlink d);
   void updateclocks (void);
   void outsig (asignal s);
 
