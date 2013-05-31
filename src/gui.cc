@@ -21,9 +21,11 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_MENU(wxID_OPEN, MyFrame::OnOpenFile)
   EVT_BUTTON(SIMCTRL_BUTTON_RUN_ID, MyFrame::OnButtonRun)
   EVT_BUTTON(SIMCTRL_BUTTON_CONT_ID, MyFrame::OnButtonContinue)
+  EVT_BUTTON(SIMCTRL_BUTTON_RUNCONT_ID, MyFrame::OnButtonRunContinuously)
   EVT_BUTTON(MONITORS_ADD_BUTTON_ID, MyFrame::OnButtonAddMon)
   EVT_BUTTON(MONITORS_DEL_BUTTON_ID, MyFrame::OnButtonDelMon)
   EVT_BUTTON(DEVICES_EDIT_BUTTON_ID, MyFrame::OnButtonEditDevs)
+  EVT_TIMER(RUNSIM_TIMER_ID, MyFrame::OnRunSimTimer)
 END_EVENT_TABLE()
   
 MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, const wxSize& size,
@@ -40,6 +42,8 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
   }
 	c = new circuit(names_mod, devices_mod, monitor_mod, net_mod);
   
+	runsimTimer.SetOwner(this, RUNSIM_TIMER_ID);
+
 	// Menu items
 	wxMenu *fileMenu = new wxMenu;
 	fileMenu->Append(wxID_OPEN);
@@ -85,16 +89,19 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	// Run and continue simulation buttons
 	simctrl_run = new wxButton(simctrls_container, SIMCTRL_BUTTON_RUN_ID, _("Run"));
 	simctrl_continue = new wxButton(simctrls_container, SIMCTRL_BUTTON_CONT_ID, _("Continue"));
-	simctrls_button_sizer->Add(simctrl_run, 0, wxALL, 10);
-	simctrls_button_sizer->Add(simctrl_continue, 0, wxALL, 10);
+	simctrls_button_sizer->Add(simctrl_run, 0, wxALL & ~wxBOTTOM, 10);
+	simctrls_button_sizer->Add(simctrl_continue, 0, wxALL & ~wxBOTTOM, 10);
 	// Simulation cycle number spinner
 	simctrls_cycles_sizer->Add(new wxStaticText(simctrls_container, wxID_ANY, _("Cycles")), 0, wxALL|wxALIGN_CENTER_VERTICAL, 10);
 	spin = new wxSpinCtrl(simctrls_container, MY_SPINCNTRL_ID, wxString(wxT("42")));
 	spin->SetRange(1,1000000);
 	simctrls_cycles_sizer->Add(spin, 0, wxALL, 10);
+	// Run continuously button
+	simctrl_runcontinuous = new wxButton(simctrls_container, SIMCTRL_BUTTON_RUNCONT_ID, _("Run continuously"));
 
 	simctrls_sizer->Add(simctrls_cycles_sizer);
 	simctrls_sizer->Add(simctrls_button_sizer);
+	simctrls_sizer->Add(simctrl_runcontinuous, 0, wxALL | wxEXPAND, 10);
 	simctrls_container->SetSizerAndFit(simctrls_sizer);
 
 	// Buttons to open add/remove monitor dialogs
@@ -263,6 +270,11 @@ void MyFrame::OnButtonContinue(wxCommandEvent &event)
 	c->Simulate(spin->GetValue(),false);
 }
 
+void MyFrame::OnButtonRunContinuously(wxCommandEvent& event)
+{
+	SetContinuousRun(!runsimTimer.IsRunning());
+}
+
 void MyFrame::OnButtonAddMon(wxCommandEvent& event)// "Add monitors" button clicked
 {
 	int oldMonCount = c->mmz()->moncount();
@@ -296,7 +308,31 @@ void MyFrame::OnButtonEditDevs(wxCommandEvent& event)// "Edit devices" button cl
 	UpdateControlStates();
 }
 
+void MyFrame::SetContinuousRun(bool state)
+{
+	if (state == runsimTimer.IsRunning()) return;
 
+	if (state)
+	{
+		if (!runsimTimer.Start(10))
+		{
+			ShowErrorMsgDialog(this, _("Could not start timer"));
+			return;
+		}
+		simctrl_runcontinuous->SetLabel(_("Stop"));
+	}
+	else
+	{
+		runsimTimer.Stop();
+		simctrl_runcontinuous->SetLabel(_("Run continuously"));
+	}
+}
+
+void MyFrame::OnRunSimTimer(wxTimerEvent& event)
+{
+	if (!c->Simulate(1,false))
+		SetContinuousRun(false);
+}
 
 AddMonitorsDialog::AddMonitorsDialog(circuit* circ, wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
 	wxDialog(parent, wxID_ANY, title, pos, size, style)

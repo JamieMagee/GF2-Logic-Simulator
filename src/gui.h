@@ -35,9 +35,11 @@ class MyFrame: public wxFrame
 	wxPanel *simctrls_container;
 	wxButton *simctrl_run;
 	wxButton *simctrl_continue;
+	wxButton *simctrl_runcontinuous;
 	wxButton *monitors_add_btn;
 	wxButton *monitors_rem_btn;
 	circuit* c;
+	wxTimer runsimTimer;
 
   void OnExit(wxCommandEvent& event);     // callback for exit menu item
   void OnAbout(wxCommandEvent& event);    // callback for about menu item
@@ -47,8 +49,11 @@ class MyFrame: public wxFrame
 	void OnButtonAddMon(wxCommandEvent& event);
 	void OnButtonDelMon(wxCommandEvent& event);
 	void OnButtonEditDevs(wxCommandEvent& event);
+	void OnButtonRunContinuously(wxCommandEvent& event);
+	void SetContinuousRun(bool state);
 	void UpdateControlStates();
 	void OnMenuClearCircuit(wxCommandEvent &event);
+	void OnRunSimTimer(wxTimerEvent& event);
  
   DECLARE_EVENT_TABLE()
 };
