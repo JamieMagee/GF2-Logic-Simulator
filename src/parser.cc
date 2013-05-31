@@ -512,14 +512,22 @@ bool parser::newMonitor()
 				{
 					smz->getsymbol(cursym, curname, curint);
 					outplink olist = netz->findoutput(devtype, curname);
-					if (cursym == iosym && olist != NULL)
+					bool originalMonitor = mmz->IsMonitored(olist);
+					if (!originalMonitor)
 					{
-						mmz->makemonitor(monitorName, curname, correctOperation);
-						return errorOccurance;
+						if (cursym == iosym && olist != NULL)
+						{
+							mmz->makemonitor(monitorName, curname, correctOperation);
+							return errorOccurance;
+						}
+						else
+						{
+							erz->newError(34); //Not valid output for dtype
+						}
 					}
 					else
 					{
-						erz->newError(34); //Not valid output for dtype
+						erz->newWarning(2); //repeated monitors
 					}
 				}
 				else

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.3-1.40.12 (TeX Live 2011) (format=pdflatex 2012.9.11)  30 MAY 2013 14:04
+This is pdfTeX, Version 3.1415926-2.3-1.40.12 (TeX Live 2011) (format=pdflatex 2012.9.11)  31 MAY 2013 11:01
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -422,11 +422,7 @@ File: lstlang1.sty 2004/09/05 1.3 listings language file
 )
 (/usr/share/texlive/texmf-dist/tex/latex/listings/lstmisc.sty
 File: lstmisc.sty 2007/02/22 1.4 (Carsten Heinz)
-) (./report2.aux
-
-LaTeX Warning: Label `fig:default' multiply defined.
-
-)
+) (./report2.aux)
 \openout1 = `report2.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 57.
@@ -538,99 +534,84 @@ e
 ))
 \c@lstlisting=\count118
 
-(../../src/parser.h
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 14.
- (/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
-File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
-)
-LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <8> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 14.
-)
 [1
 
 {/usr/share/texlive/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-(../../src/parser.cc
+(../../examples/xor.gf2)
+<../../examples/xor.png, id=11, 649.16211pt x 235.19447pt>
+File: ../../examples/xor.png Graphic file (type png)
+
+<use ../../examples/xor.png>
+Package pdftex.def Info: ../../examples/xor.png used on input line 104.
+(pdftex.def)             Requested size: 227.62204pt x 82.46643pt.
+ (../../examples/4bitadder.gf2
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 2.
+
+(/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
+File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <8> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 2.
+ [2 <../../examples/xor.png>]) <../../examples/4-bit-adder.png, id=18, 649.1621
+1pt x 242.80185pt>
+File: ../../examples/4-bit-adder.png Graphic file (type png)
+
+<use ../../examples/4-bit-adder.png>
+Package pdftex.def Info: ../../examples/4-bit-adder.png used on input line 115.
+
+(pdftex.def)             Requested size: 455.24408pt x 170.27133pt.
+ [3] (../../examples/sipo.gf2)
+<../../examples/sipo.png, id=22, 649.16211pt x 129.95921pt>
+File: ../../examples/sipo.png Graphic file (type png)
+
+<use ../../examples/sipo.png>
+Package pdftex.def Info: ../../examples/sipo.png used on input line 127.
+(pdftex.def)             Requested size: 341.43306pt x 68.35254pt.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[4 <../../examples/4-bit-adder.png>] (../../examples/gateddlatch.gf2)
+<../../examples/gated-d-latch.png, id=26, 649.16211pt x 293.51764pt>
+File: ../../examples/gated-d-latch.png Graphic file (type png)
+
+<use ../../examples/gated-d-latch.png>
+Package pdftex.def Info: ../../examples/gated-d-latch.png used on input line 14
+0.
+(pdftex.def)             Requested size: 341.43306pt x 154.37674pt.
+ [5 <../../examples/sipo.png> <../../examples/gated-d-latch.png>] (../../src/pa
+rser.h) (../../src/parser.cc
 LaTeX Font Info:    Try loading font information for OML+cmr on input line 1.
- (/usr/share/texlive/texmf-dist/tex/latex/base/omlcmr.fd
+
+(/usr/share/texlive/texmf-dist/tex/latex/base/omlcmr.fd
 File: omlcmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OML/cmr/m/n' in size <8> not available
 (Font)              Font shape `OML/cmm/m/it' tried instead on input line 1.
-
-[2] [3] [4] [5] [6] [7]) (../../src/error.h) (../../src/error.cc [8] [9])
-(../../examples/xor.gf2)
-<../../examples/xor.png, id=40, 649.16211pt x 235.19447pt>
-File: ../../examples/xor.png Graphic file (type png)
-
-<use ../../examples/xor.png>
-Package pdftex.def Info: ../../examples/xor.png used on input line 88.
-(pdftex.def)             Requested size: 227.62204pt x 82.46643pt.
- [10] (../../examples/4bitadder.gf2 [11 <../../examples/xor.png>])
-<../../examples/4-bit-adder.png, id=47, 649.16211pt x 242.80185pt>
-File: ../../examples/4-bit-adder.png Graphic file (type png)
-
-<use ../../examples/4-bit-adder.png>
-Package pdftex.def Info: ../../examples/4-bit-adder.png used on input line 99.
-(pdftex.def)             Requested size: 455.24408pt x 170.27133pt.
- (../../examples/sipo.gf2 [12 <../../examples/4-bit-adder.png>])
-<../../examples/sipo.png, id=51, 649.16211pt x 129.95921pt>
-File: ../../examples/sipo.png Graphic file (type png)
-
-<use ../../examples/sipo.png>
-Package pdftex.def Info: ../../examples/sipo.png used on input line 111.
-(pdftex.def)             Requested size: 341.43306pt x 68.35254pt.
- (../../examples/gateddlatch.gf2 [13 <../../examples/sipo.png>])
-<../../examples/gated-d-latch.png, id=56, 649.16211pt x 293.51764pt>
-File: ../../examples/gated-d-latch.png Graphic file (type png)
-
-<use ../../examples/gated-d-latch.png>
-Package pdftex.def Info: ../../examples/gated-d-latch.png used on input line 12
-4.
-(pdftex.def)             Requested size: 341.43306pt x 154.37674pt.
- [14 <../../examples/gated-d-latch.png>]
-<default.png, id=60, 720.6925pt x 562.1pt>
-File: default.png Graphic file (type png)
- <use default.png>
-Package pdftex.def Info: default.png used on input line 139.
-(pdftex.def)             Requested size: 204.85672pt x 159.77132pt.
-
-<simulation.png, id=61, 719.68875pt x 565.11125pt>
-File: simulation.png Graphic file (type png)
- <use simulation.png>
-Package pdftex.def Info: simulation.png used on input line 150.
-(pdftex.def)             Requested size: 204.85672pt x 160.86005pt.
-
-<monitors.png, id=62, 196.735pt x 301.125pt>
-File: monitors.png Graphic file (type png)
- <use monitors.png>
-Package pdftex.def Info: monitors.png used on input line 157.
-(pdftex.def)             Requested size: 102.42836pt x 156.77428pt.
- [15 <./default.png> <./simulation.png> <./monitors.png>] (./report2.aux)
-
-LaTeX Warning: There were multiply-defined labels.
-
- ) 
+ [6] [7] [8] [9]
+[10] [11] [12]) [13] (../../src/error.h) (../../src/error.cc [14] [15])
+[16] (./report2.aux) ) 
 Here is how much of TeX's memory you used:
- 5093 strings out of 493723
- 67604 string characters out of 3149524
- 617800 words of memory out of 3000000
- 8266 multiletter control sequences out of 15000+200000
+ 5107 strings out of 493723
+ 67776 string characters out of 3149524
+ 562939 words of memory out of 3000000
+ 8283 multiletter control sequences out of 15000+200000
  8731 words of font info for 32 fonts, out of 3000000 for 9000
  831 hyphenation exceptions out of 8191
- 38i,6n,58p,427b,1633s stack positions out of 5000i,500n,10000p,200000b,50000s
-</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
-r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/shar
-e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texli
-ve/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texm
-f-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb></usr/share/texlive/texmf-dist/f
-onts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/typ
-e1/public/amsfonts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/publi
-c/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfo
-nts/cm/cmtt10.pfb>
-Output written on report2.pdf (15 pages, 374445 bytes).
+ 38i,6n,58p,357b,1633s stack positions out of 5000i,500n,10000p,200000b,50000s
+</usr/share/texlive/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/c
+mbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.p
+fb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></us
+r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb></usr/share/
+texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/
+texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texlive/texmf-di
+st/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/font
+s/type1/public/amsfonts/cm/cmtt10.pfb>
+Output written on report2.pdf (16 pages, 271120 bytes).
 PDF statistics:
  96 PDF objects out of 1000 (max. 8388607)
- 62 compressed objects within 1 object stream
+ 64 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 36 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 21 words of extra memory for PDF output out of 10000 (max. 10000000)
 

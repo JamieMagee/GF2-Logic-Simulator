@@ -62,20 +62,36 @@
 \small Tim Hillel (th389) - Team 8
 \end{center}
 
-\section{Code Listings}
-\subsection{Parser Class}
-\subsubsection{parser.h}
-\lstinputlisting[caption=parser.h]{../../src/parser.h}
-\subsubsection{parser.cc}
-\lstinputlisting[caption=parser.cc]{../../src/parser.cc}
+\section{User Guide}
+\begin{description}
+\item[1. Open logic simulator] \hspace{0.1em}
+\begin{description}
+ \item[Using terminal]\hfill \\
+Open a terminal and setting the directory to the \texttt{./logsim/src} folder. Start the application by entering \texttt{./logsim}. To open a known definition file, follow this by the directory of the definiton file, and skip instruction 2.
+ \item[Using file browser]\hfill \\ 
+Browse to \texttt{./logsim/src} and double click on the \texttt{logsim} executable file.
+\end{description}
+\item[2. Open definition file]\hfill \\ 
+Click \texttt{File} menu and select \texttt{Open} to open the file selection dialogue. Only definition files with the extension \texttt{.gf2} will be displayed. The default directory is \texttt{./examples}. Browse to the required definition file and double click to open it.
+\item[3. Errors]\hfill \\
+If the definition file contains errors, the message \texttt{Failed to load file} will display in the display panel and any errors in the definition file will be written to the message window. If there are no errors the message \texttt{No simulation results. Use the run button.} will display, and the simulator is ready to run.
+\item[4. Run simulation]\hfill \\
+Enter a number of clock cycles required in the \texttt{Simulation} box, either using the up and down arrows or entering the number as text. The default value is 42. Click run once the required value has been entered.
+\item [5. Output]\hfill \\
+The monitored signals will be displayed in the left display panel. The simulation can be continued by the specified number of clock cycles by pressing the continue button. This can be repeated multiple times. Scrollbars will appear once there is too much data to display in the display panel; these can be used to scroll across the display.
+\item[6. Change switch states]\hfill \\
+Click the check box next to a switch in the \texttt{Switches} box to change its state (ticked box will be high, unticked low). Run or continue the simulation to see the effect on the circuit.
+\item[7. Add monitors]\hfill \\
+Click the \texttt{Add monitors} button to open the dialogue box. Select the desired output(s) to monitor and then click \texttt{OK} to add these outputs to the display panel. Mulitple outputs can be selected by holding the \texttt{ctrl} button.
+\item[8. Remove monitors]
+To remove monitors, clock the \texttt{Remove monitors} button to open the dialogue box. Select the desired monitor(s) to remove and then click \texttt{OK}. Mulitple outputs can be selected by holding the \texttt{ctrl} button. The selected monitors will be removed from the display panel.
+\item[9. Edit devices]\hfill \\
+Click the \texttt{Edit devices} button to open the dialogue box. Select the required device to edit in the left hand panel, and use the options within the dialogue box to change the device name, type and number of inputs (if applicable).
+\end{description}
 
-I was mainly responsible for \texttt{parser.cc}, with input from Jamie Magee on the \texttt{connectionList} and \texttt{monitorList} functions. (Final ratio was around 75\% my work, 25\% his work.) 
+Note that changes made in steps 6-9 will only make changes within the simulation and will not change the definition files.
 
-\subsection{Error Class}
-\subsubsection{error.h}
-\lstinputlisting[caption=error.h]{../../src/error.h}
-\subsubsection{error.cc}
-\lstinputlisting[caption=error.cc]{../../src/error.cc}
+\pagebreak
 
 \section{Test Definition Files}
 
@@ -130,37 +146,20 @@ I was mainly responsible for \texttt{parser.cc}, with input from Jamie Magee on 
 
 \pagebreak
 
-\section{User Guide}
+\section{Code Listings}
+\subsection{Parser Class}
+\subsubsection{parser.h}
+\lstinputlisting[caption=parser.h]{../../src/parser.h}
+\subsubsection{parser.cc}
+\lstinputlisting[caption=parser.cc]{../../src/parser.cc}
 
-To start the logic simulator, open a terminal window and browse to the \texttt{src} folder. Start the application by typing \texttt{./logsim} followed by the return key. You will then be presented with the default view.
+I was mainly responsible for \texttt{parser.cc}, with input from Jamie Magee on the \texttt{connectionList} and \texttt{monitorList} functions. (Final ratio was around 80\% my work, 20\% his work.) 
 
-\begin{figure}[h]
- \centering
- \includegraphics[width=.4\textwidth]{default}
- \caption{The default view upon opening the Logic Simulator}
- \label{fig:default}
-\end{figure}
+\subsection{Error Class}
+\subsubsection{error.h}
+\lstinputlisting[caption=error.h]{../../src/error.h}
+\subsubsection{error.cc}
+\lstinputlisting[caption=error.cc]{../../src/error.cc}
 
-To open a definition file, click the \texttt{File} menu followed by the \texttt{Open} option. You will be presented with a file selection dialogue. The file selection dialogue will only show definition files (Files with the \texttt{.gf2} file extension). Upon selecting a file, any errors in the definition file will be written to the message window, otherwise the Logic Simulator is ready to use. 
-
-In order to run a simulation you must first enter a number of cycles you wish the simulation to run for (default is \texttt{42}) then press the run button. The monitored signals will be displayed in the left display panel. You may choose to continue the simulation by pressing the continue button.
-
-\begin{figure}[h]
- \centering
- \includegraphics[width=.4\textwidth]{simulation}
- \caption{The  view upon running a simulation}
- \label{fig:default}
-\end{figure}
-
-\begin{wrapfigure}{l}{0.5\textwidth}
-  \begin{center}
-    \includegraphics[width=0.2\textwidth]{monitors}
-  \end{center}
-  \caption{Add monitors dialogue}
-\end{wrapfigure}
-
-You can also edit the monitors from within the logic simulator. To add monitors, click the \texttt{Add monitors} button and select the monitor, or monitors, you wish to add followed by the \texttt{OK} button. To remove monitors, press the \texttt{Remove monitors} button and select the monitor, or monitors, you wish to remove followed by the \texttt{OK} button
-
-In addition, if your circuit contains any  switches, you can change the state of the switch by changing the state of the check box beside its name.
 
 \end{document}
