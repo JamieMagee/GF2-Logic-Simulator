@@ -247,7 +247,7 @@ bool parser::newDevice(int deviceType)
 		}
 		else
 		{
-			erz->newError(34);//attempting to give two devices the same name, choose an alternative name
+			erz->newError(27);//attempting to give two devices the same name, choose an alternative name
 			errorOccurance=true;
 		}
 	}
