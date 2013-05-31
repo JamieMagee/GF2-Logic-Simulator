@@ -21,6 +21,7 @@ class error
 		void symbolError(bool deviceDone, bool connectionDone, bool monitorDone);
 		void newWarning(int warningCode);
 		void countSymbols();
+		void monitorWarning(namestring repeatedMonitor);
 		
 		bool anyErrors();//outputs total number of errors and warnings and returns 1 if any errors are present
 };
