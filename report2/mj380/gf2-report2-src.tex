@@ -7,7 +7,7 @@
 
 % Squash a bit more text onto a page
 \usepackage{geometry}
-\geometry{verbose,tmargin=15mm,bmargin=20mm,lmargin=20mm,rmargin=20mm}
+\geometry{verbose,tmargin=10mm,bmargin=20mm,lmargin=15mm,rmargin=15mm}
 
 \usepackage{graphicx}
 \usepackage{listings}
@@ -42,15 +42,13 @@
   basicstyle=\ttfamily\fontsize{10}{10}\selectfont,      % the size of the fonts that are used for the code
   breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
   breaklines=true,                 % sets automatic line breaking
-  captionpos=b,                    % sets the caption-position to bottom
-  commentstyle=\color{mygreen},    % comment style
+  captionpos=t,                    % sets the caption-position to bottom
   deletekeywords={...},            % if you want to delete keywords from the given language
   escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
   extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
   frame=single,                    % adds a frame around the code
   keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
   columns=flexible,
-  keywordstyle=\color{blue},       % keyword style
   language=C++,                    % the language of the code
   morekeywords={*,DEVICES,
   				CONNECTIONS,
@@ -64,16 +62,20 @@
   showstringspaces=false,          % underline spaces within strings only
   showtabs=false,                  % show tabs within strings adding particular underscores
   stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
-  stringstyle=\color{mymauve},     % string literal style
   tabsize=2,                       % sets default tabsize to 2 spaces
-  title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+  title=\lstname,                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+  commentstyle=\color{mygreen},    % comment style
+  keywordstyle=\color{blue},       % keyword style
+  stringstyle=\color{mymauve},     % string literal style
+%  keywordstyle=\pmb
 }
 
 \begin{document}
-\renewcommand{\contentsname}{Appendix A: Source Code - table of contents}
-\tableofcontents{}\pagebreak
+\setcounter{section}{2}
+\setcounter{page}{8}
 
-\appendix
+\renewcommand{\contentsname}{Source code - table of contents}
+\tableofcontents{}\pagebreak
 
 \section{Source code}
 
@@ -87,31 +89,31 @@ I wrote all the changes to the supplied source code listed here, except for the 
 
 \textbf{Summary:} Three functions added, mainly for use by the device editing part of the GUI. Small modification to \texttt{updateclocks()} so that changing \texttt{frequency} after running the simulation can no longer cause a clock to stop changing state. \texttt{maxmachinecycles} is now dynamically set depending on the number of devices, to make it less likely that simulation will fail unnecessarily. It will still fail if an inverter is connected to itself, but will no longer fail for 20 inverters connected in series. 
 
-\lstinputlisting[language=diff,caption=devices.h]{src/devices.h.diff}
-\lstinputlisting[language=diff,caption=devices.cc]{src/devices.cc.diff}
+\lstinputlisting[language=diff,caption=devices.h diff]{src/devices.h.diff}
+\lstinputlisting[language=diff,caption=devices.cc diff]{src/devices.cc.diff}
 
 \subsubsection{network}
 
 \textbf{Summary:} Functions added for getting linked list length, deleting or disconnecting a device, and obtaining device and input/output name strings. \texttt{outputrec} now has a pointer to the parent device, to make it easier for the device editing part of the GUI to find which device an output is connected to. 
 
-\lstinputlisting[language=diff,caption=network.h]{src/network.h.diff}
-\lstinputlisting[language=diff,caption=network.cc]{src/network.cc.diff}
+\lstinputlisting[language=diff,caption=network.h diff]{src/network.h.diff}
+\lstinputlisting[language=diff,caption=network.cc diff]{src/network.cc.diff}
 
 \subsubsection{logsim}
 
 \textbf{Summary:} Command line argument is now optional for the GUI, and a \texttt{MyFrame} member function is used to load the file if using the GUI. Additional class \texttt{error} added to count and display errors which occur during parsing.
 
-\lstinputlisting[language=diff,caption=logsim.h]{src/logsim.h.diff}
+\lstinputlisting[language=diff,caption=logsim.h diff]{src/logsim.h.diff}
 \lstinputlisting[language=C++,caption=logsim.cc]{src/logsim.cc}
 
 \subsubsection{monitors}
 
 \textbf{Summary:} Converted to use STL vectors, and to use pointers to the device and output objects instead of the \texttt{name} for each. New functions \texttt{getsamplecount}, \texttt{getsignalstring}, \texttt{IsMonitored} added.
 
-\lstinputlisting[language=C++,caption=monitor.h]{src/monitor.h}
+\lstinputlisting[language=diff,caption=monitor.h diff]{src/monitor.h.diff}
 \lstinputlisting[language=C++,caption=monitor.cc]{src/monitor.cc}
 
-
+\clearpage
 \subsection{GUI}
 
 I was responsible for the whole of the GUI, except for some contributions by other team members to the \texttt{MyFrame::loadFile()} function.
@@ -140,6 +142,7 @@ I was responsible for the whole of the GUI, except for some contributions by oth
 \lstinputlisting[language=C++,caption=gui-devices-infopanels.cc]{src/gui-devices-infopanels.cc}
 
 % Not sure whether this needs including or not, plus appendix is quite long enough already
+% \clearpage
 % \subsection{Test programs}
 % I wrote automated tests for the \texttt{names} and \texttt{scanner} classes. 
 % 
