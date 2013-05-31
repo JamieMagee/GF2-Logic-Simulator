@@ -243,7 +243,7 @@ MyGLCanvas::MyGLCanvas(circuit* circ, wxWindow *parent, wxWindowID id,
 		c->monitorSamplesChanged.Attach(this, &MyGLCanvas::ClearErrorMessage);
 		OnMonitorsChanged();
 	}
-	SetScrollRate(10,10);
+	SetScrollRate(1,1);
 	minXScale = 2;
 	maxXScale = 50;
 }

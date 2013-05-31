@@ -191,6 +191,7 @@ monitor::monitor (names* names_mod, network* network_mod)
 {
   nmz = names_mod;
   netz = network_mod;
+  resetmonitor();
 }
 
 // Returns the name of the monitored signal as a string

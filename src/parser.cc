@@ -512,8 +512,8 @@ bool parser::newMonitor()
 				{
 					smz->getsymbol(cursym, curname, curint);
 					outplink olist = netz->findoutput(devtype, curname);
-					bool originalMonitor = mmz->IsMonitored(olist);
-					if (!originalMonitor)
+					bool alreadyMonitored = mmz->IsMonitored(olist);
+					if (!alreadyMonitored)
 					{
 						if (cursym == iosym && olist != NULL)
 						{
@@ -527,7 +527,17 @@ bool parser::newMonitor()
 					}
 					else
 					{
-						erz->newWarning(2); //repeated monitors
+						namestring repeatedMonitor = smz->nmz->getnamestring(curname);
+						erz->monitorWarning(repeatedMonitor); //repeated monitors
+						if (cursym == iosym && olist != NULL)
+						{
+							mmz->makemonitor(monitorName, curname, correctOperation);
+							return errorOccurance;
+						}
+						else
+						{
+							erz->newError(34); //Not valid output for dtype
+						}
 					}
 				}
 				else
@@ -536,7 +546,18 @@ bool parser::newMonitor()
 					errorOccurance=true;
 				}
 			default:
-				mmz->makemonitor(monitorName, blankname, correctOperation);
+				outplink olist = netz->findoutput(devtype, blankname);
+				bool alreadyMonitored = mmz->IsMonitored(olist);
+					if (!alreadyMonitored)
+					{
+						mmz->makemonitor(monitorName, blankname, correctOperation);
+					}
+					else
+					{
+						namestring repeatedMonitor = smz->nmz->getnamestring(curname);
+						erz->monitorWarning(repeatedMonitor); //repeated monitors
+						mmz->makemonitor(monitorName, curname, correctOperation);
+					}
 				return errorOccurance;
 		}
 	}

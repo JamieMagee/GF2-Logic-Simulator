@@ -106,6 +106,12 @@ void error::symbolError(bool deviceDone, bool connectionDone, bool monitorDone)
 		errorCount ++;
 }
 
+void error::monitorWarning(namestring repeatedMonitor)
+{
+	cout << "Warning 0x0002: The connection " << repeatedMonitor << " is already being monitored. Please check this is what is required" << endl;
+	warningCount ++;
+}
+
 bool error::anyErrors()
 {
 	if (errorCount == 0)
