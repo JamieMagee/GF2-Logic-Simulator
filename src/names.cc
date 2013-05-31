@@ -22,7 +22,7 @@ names::names(void)  /* the constructor */
 	namelist.push_back("NOR"); //9
 	namelist.push_back("DTYPE"); //10
 	namelist.push_back("XOR"); //11
-	namelist.push_back("SIGGEN") //12
+	namelist.push_back("SIGGEN"); //12
 	namelist.push_back("I1"); //13
 	namelist.push_back("I2"); //14
 	namelist.push_back("I3"); //15

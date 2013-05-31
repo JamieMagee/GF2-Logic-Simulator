@@ -194,7 +194,7 @@ void devices::makedevice (devicekind dkind, name did, int variant, bool& ok)
       makedtype(did);
       break;
     case siggen:
-	  makesiggen(did, variant, ok);
+	  makesiggen(did, variant);
 	  break;
   }
 }

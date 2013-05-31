@@ -55,7 +55,8 @@ error::error(scanner* scanner_mod)  /* the constructor */
 	firstTime=true;
 	warninglist.push_back("Warning 0x0000: You have not specified any connections. Please check this is what is required");//0
 	warninglist.push_back("Warning 0x0001: You have not specified any monitors. Please check this is what is required");//1
-	warninglist.push_back("Warning 0x0002: This connection is already being monitored. Please check this is what is required");//2
+	warninglist.push_back("Warning 0x0002: RESERVED");//2 reserved for repeatedMonitor function
+	warninglist.push_back("Warning 0x0003: RESERVED");//2 reserved for repeatedConnection function
 	smz = scanner_mod;
 }
 
@@ -110,13 +111,13 @@ void error::symbolError(bool deviceDone, bool connectionDone, bool monitorDone)
 
 void error::monitorWarning(namestring repeatedMonitor)
 {
-	cout << "Warning 0x0002: The output " << repeatedMonitor << " is already being monitored. Please check this is what is required" << endl;
+	cout << "Warning 0x0002: The output " << repeatedMonitor << " is being monitored multiple times. Please check this is what is required" << endl;
 	warningCount ++;
 }
 
 void error::connectionWarning(namestring repeatedInput, namestring repeatedOutput)
 {
-	cout << "Warning 0x003: The connection of output " << repeatedOutput << " to input " << repeatedInput << " has been specified multiple times. This has been treated as one instance of the same connection."
+	cout << "Warning 0x003: The connection of output " << repeatedOutput << " to input " << repeatedInput << " has been specified multiple times. This has been treated as one instance of the same connection." <<endl;
 	warningCount ++;
 }
 

@@ -397,7 +397,7 @@ bool parser::newConnection()
 									netz->makeconnection(connectionInName, inputPin, connectionOutName, blankname, correctOperation);
 									return errorOccurance;
 								}
-								else if (ilist->connect==findoutput(connectionOutName, blankname))
+								else if (ilist->connect==netz->findoutput(devtype, blankname))
 								{
 									namestring repeatedInput = smz->nmz->getnamestring(connectionInName);
 									namestring repeatedOutput = smz->nmz->getnamestring(connectionOutName);

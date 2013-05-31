@@ -22,7 +22,7 @@ class error
 		void newWarning(int warningCode);
 		void countSymbols();
 		void monitorWarning(namestring repeatedMonitor);
-		void connectionWarning(namestring repeatedInput, namestring repeatedOutput)
+		void connectionWarning(namestring repeatedInput, namestring repeatedOutput);
 		bool anyErrors();//outputs total number of errors and warnings and returns 1 if any errors are present
 };
 
