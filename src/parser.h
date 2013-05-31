@@ -19,6 +19,7 @@ class parser
 		bool newDevice(int deviceType);
 		bool newConnection();
 		bool newMonitor();
+		bool isBinary(int signal);
 		network* netz; // instantiations of various classes for parser to use.
 		devices* dmz;
 		monitor* mmz;

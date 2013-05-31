@@ -45,7 +45,7 @@ error::error(scanner* scanner_mod)  /* the constructor */
 	errorlist.push_back("Error 0x0020: Block must be terminated with 'END'");//32
 	errorlist.push_back("Error 0x0021: Cannot name a device as a reserved word, for a list of reserved words check reservedWords.txt in docs");//33
 	errorlist.push_back("Error 0x0022: Not a valid output for a dtype");//34
-	errorlist.push_back("RESERVED");//35 RESERVED FOR symbolError() function
+	errorlist.push_back("Error 0x0023: SIGGEN only accepts a binary input");//35 RESERVED FOR symbolError() function
 	
 	errorCount = 0;
 	warningCount = 0;
