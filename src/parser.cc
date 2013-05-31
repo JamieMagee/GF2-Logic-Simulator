@@ -503,7 +503,7 @@ bool parser::newMonitor()
 				{
 					smz->getsymbol(cursym, curname, curint);
 					outplink olist = netz->findoutput(devtype, curname);
-					bool originalMonitor = mmz->IsMonitored(outplink o);
+					bool originalMonitor = mmz->IsMonitored(olist);
 					if (!originalMonitor)
 					{
 						if (cursym == iosym && olist != NULL)
