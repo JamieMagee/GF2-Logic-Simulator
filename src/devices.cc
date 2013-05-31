@@ -152,6 +152,17 @@ void devices::makedtype (name id)
   d->memory = low;
 }
 
+/***********************************************************************
+ *
+ * Used to make new clock devices.
+ * Called by makedevice.
+ *
+ */
+void devices::makesiggen (name id, int signal)
+{
+	devlink d;
+	
+}
 
 /***********************************************************************
  *
@@ -324,6 +335,18 @@ void devices::execclock(devlink d)
       signalupdate (low, d->olist->sig);
   }
 }
+
+/***********************************************************************
+ *
+ * Used to simulate the operation of siggen devices.
+ * Called by executedevices.
+ *
+ */
+void devices::execsiggen(devlink d)
+{
+	
+} 
+
 
 
 /***********************************************************************
