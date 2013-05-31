@@ -149,7 +149,7 @@ void parser::deviceList()
 
 bool parser::newDevice(int deviceType)
 {
-	//EBNF: dev = clock|switch|gate|dtype|xor
+	//EBNF: dev = clock|switch|gate|dtype|xor|siggen
 	bool errorOccurance = false;
 	smz->getsymbol(cursym, curname, curint);
 	if (cursym == namesym)
@@ -228,6 +228,15 @@ bool parser::newDevice(int deviceType)
 								errorOccurance=true;
 							}
 							break;
+						case 12:
+							if (isBinary(curint))
+							{
+								dmz->makedevice(siggen, devName, curint, correctOperation); //create SIGGEN with name devName
+							}
+							else
+							{
+								erz->newError(35); //Must be a binary input
+							}
 						default:
 							cout << "Please do not deduct marks if this message is displayed" << endl;
 					}
@@ -539,4 +548,16 @@ parser::parser(network* network_mod, devices* devices_mod, monitor* monitor_mod,
 	smz = scanner_mod;   /* class you say:                               */
 	erz = error_mod; /* netz->makeconnection(i1, i2, o1, o2, ok);   */
 	/* any other initialisation you want to do? */
+}
+
+bool parser::isBinary(int signal)
+{
+	int i;
+	while(signal!=0)
+	{
+		i = signal % 10;
+		if(i>1) return false;
+		signal = signal / 10;
+	}
+	return true;
 }

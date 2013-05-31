@@ -44,8 +44,8 @@ void scanner::getsymbol(symbol& s, name& id, int& num)
 				else if (id == 1) s = consym;
 				else if (id == 2) s = monsym;
 				else if (id == 3) s = endsym;
-				else if (id > 3 && id < 12) s = classsym;
-				else if (id > 11 && id < 34) s = iosym;
+				else if (id > 3 && id < 13) s = classsym;
+				else if (id > 12 && id < 35) s = iosym;
 				else s = namesym;
 			}
 			else

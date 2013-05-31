@@ -22,28 +22,29 @@ names::names(void)  /* the constructor */
 	namelist.push_back("NOR"); //9
 	namelist.push_back("DTYPE"); //10
 	namelist.push_back("XOR"); //11
-	namelist.push_back("I1"); //12
-	namelist.push_back("I2"); //13
-	namelist.push_back("I3"); //14
-	namelist.push_back("I4"); //15
-	namelist.push_back("I5"); //16
-	namelist.push_back("I6"); //17
-	namelist.push_back("I7"); //18
-	namelist.push_back("I8"); //19
-	namelist.push_back("I9"); //20
-	namelist.push_back("I10"); //21
-	namelist.push_back("I11"); //22
-	namelist.push_back("I12"); //23
-	namelist.push_back("I13"); //24
-	namelist.push_back("I14"); //25
-	namelist.push_back("I15"); //26
-	namelist.push_back("I16"); //27
-	namelist.push_back("DATA"); //28
-	namelist.push_back("CLK"); //29
-	namelist.push_back("SET"); //30
-	namelist.push_back("CLEAR"); //31
-	namelist.push_back("Q"); //32
-	namelist.push_back("QBAR"); //33
+	namelist.push_back("SIGGEN") //12
+	namelist.push_back("I1"); //13
+	namelist.push_back("I2"); //14
+	namelist.push_back("I3"); //15
+	namelist.push_back("I4"); //16
+	namelist.push_back("I5"); //17
+	namelist.push_back("I6"); //18
+	namelist.push_back("I7"); //19
+	namelist.push_back("I8"); //20
+	namelist.push_back("I9"); //21
+	namelist.push_back("I10"); //22
+	namelist.push_back("I11"); //23
+	namelist.push_back("I12"); //24
+	namelist.push_back("I13"); //25
+	namelist.push_back("I14"); //26
+	namelist.push_back("I15"); //27
+	namelist.push_back("I16"); //28
+	namelist.push_back("DATA"); //29
+	namelist.push_back("CLK"); //30
+	namelist.push_back("SET"); //31
+	namelist.push_back("CLEAR"); //32
+	namelist.push_back("Q"); //33
+	namelist.push_back("QBAR"); //34
 }
 
 name names::lookup(namestring str)

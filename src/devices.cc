@@ -182,6 +182,9 @@ void devices::makedevice (devicekind dkind, name did, int variant, bool& ok)
     case dtype:
       makedtype(did);
       break;
+    case siggen:
+	  makesiggen(did, variant, ok);
+	  break;
   }
 }
 
@@ -379,7 +382,8 @@ void devices::executedevices (bool& ok)
         case andgate:  execgate (d, high, high); break;
         case nandgate: execgate (d, high, low);  break;
         case xorgate:  execxorgate (d);          break;
-        case dtype:    execdtype (d);            break;     
+        case dtype:    execdtype (d);            break;   
+        case siggen:   execsiggen (d);           break;
       }
       if (machinecycle==1) count++;
       if (debugging)
@@ -450,6 +454,7 @@ devices::devices (names* names_mod, network* net_mod)
   dtab[norgate]   =  nmz->lookup("NOR");
   dtab[xorgate]   =  nmz->lookup("XOR");
   dtab[dtype]     =  nmz->lookup("DTYPE");
+  dtab[siggen]	  =  nmz->lookup("SIGGEN");
   dtab[baddevice] =  blankname;
   debugging = false;
   datapin = nmz->lookup("DATA");
