@@ -22,6 +22,8 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_MENU(wxID_OPEN, MyFrame::OnOpenFile)
   EVT_MENU(MENU_OPTIONS_EDIT, MyFrame::OnMenuOptionsEdit)
   EVT_MENU(MENU_OPTIONS_RESET, MyFrame::OnMenuOptionsReset)
+  EVT_MENU(MENU_OPTIONS_FASTERCR, MyFrame::OnMenuFasterCR)
+  EVT_MENU(MENU_OPTIONS_SLOWERCR, MyFrame::OnMenuSlowerCR)
   EVT_BUTTON(SIMCTRL_BUTTON_RUN_ID, MyFrame::OnButtonRun)
   EVT_BUTTON(SIMCTRL_BUTTON_CONT_ID, MyFrame::OnButtonContinue)
   EVT_BUTTON(SIMCTRL_BUTTON_RUNCONT_ID, MyFrame::OnButtonRunContinuously)
@@ -108,7 +110,7 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	simctrls_button_sizer->Add(simctrl_continue, 0, wxALL & ~wxBOTTOM, 10);
 	// Simulation cycle number spinner
 	simctrls_cycles_sizer->Add(new wxStaticText(simctrls_container, wxID_ANY, _("Cycles")), 0, wxALL|wxALIGN_CENTER_VERTICAL, 10);
-	spin = new wxSpinCtrl(simctrls_container, MY_SPINCNTRL_ID, wxString(wxT("42")));
+	spin = new wxSpinCtrl(simctrls_container, MY_SPINCNTRL_ID, wxString(wxT("10")));
 	spin->SetRange(1,1000000);
 	simctrls_cycles_sizer->Add(spin, 0, wxALL, 10);
 	// Run continuously button
@@ -184,6 +186,36 @@ void MyFrame::OnMenuOptionsEdit(wxCommandEvent &event)
 void MyFrame::OnMenuOptionsReset(wxCommandEvent &event)
 {
 	options->ResetOptions();
+	options->optionsChanged.Trigger();
+}
+
+void MyFrame::OnMenuFasterCR(wxCommandEvent &event)
+{
+	if (!runsimTimer.IsRunning())
+	{
+		SetContinuousRun(true);
+		return;
+	}
+	if (options->continuousRate<10)
+		options->continuousRate += 1;
+	else
+		options->continuousRate += 10;
+	if (options->continuousRate > 100000) options->continuousRate = 100000;
+	options->optionsChanged.Trigger();
+}
+
+void MyFrame::OnMenuSlowerCR(wxCommandEvent &event)
+{
+	if (options->continuousRate<=1)
+	{
+		SetContinuousRun(false);
+		return;
+	}
+	if (options->continuousRate<=10)
+		options->continuousRate -= 1;
+	else
+		options->continuousRate -= 10;
+	options->optionsChanged.Trigger();
 }
 
 void MyFrame::OnFileReload(wxCommandEvent &event)

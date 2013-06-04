@@ -25,8 +25,9 @@ class monitor {
   network* netz;    // version of the network class to use.
 
   montable mtab;                 // table of monitored signals
-  int cycles;                        // counts clock cycles
-  vector<bool> sampleTypes;
+  int cycles;                        // counts number of samples
+  int simcycles;                        // counts number of simulation cycles
+  vector<int> simCycleNums;
 
  public:
   void makemonitor (name dev, name outp, bool& ok);
@@ -73,6 +74,7 @@ class monitor {
   bool IsMonitored(outplink o);
 
   bool IsMachineCycle(int c);
+  int GetSimCycleNum(int c);
 
 };
 

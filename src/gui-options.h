@@ -13,14 +13,17 @@ class LogsimOptions
 {
 public:
 	LogsimOptions();
+	~LogsimOptions();
 
 	double xScaleMin, xScaleMax;
-	int spacingMin, spacingMax;
+	int sigHeightMin, sigHeightMax;
 	int continuousRate;
 	bool debugMachineCycles, debugSim;
 	ObserverSubject optionsChanged;
 
 	void ResetOptions();
+	void Load();
+	void Save();
 };
 
 class OptionsDialog : public wxDialog
@@ -29,8 +32,8 @@ private:
 	LogsimOptions *options;
 	wxSpinCtrl* xScaleMinCtrl;
 	wxSpinCtrl* xScaleMaxCtrl;
-	wxSpinCtrl* spacingMinCtrl;
-	wxSpinCtrl* spacingMaxCtrl;
+	wxSpinCtrl* sigHeightMinCtrl;
+	wxSpinCtrl* sigHeightMaxCtrl;
 	wxSpinCtrl* continuousRateCtrl;
 	wxCheckBox* debugMachineCyclesCtrl;
 	wxCheckBox* debugSimCtrl;

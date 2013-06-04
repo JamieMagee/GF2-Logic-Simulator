@@ -66,6 +66,8 @@ class MyFrame: public wxFrame
 	void OnMenuClearCircuit(wxCommandEvent &event);
 	void OnMenuOptionsEdit(wxCommandEvent &event);
 	void OnMenuOptionsReset(wxCommandEvent &event);
+	void OnMenuFasterCR(wxCommandEvent &event);
+	void OnMenuSlowerCR(wxCommandEvent &event);
 	void OnFileReload(wxCommandEvent &event);
 	void OnRunSimTimer(wxTimerEvent& event);
 	void OnOptionsChanged();

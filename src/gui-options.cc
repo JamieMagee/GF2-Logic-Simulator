@@ -6,19 +6,51 @@
 
 LogsimOptions::LogsimOptions()
 {
+	Load();
+	optionsChanged.Attach(this, &LogsimOptions::Save);
+}
+
+LogsimOptions::~LogsimOptions()
+{
+	optionsChanged.Detach(this);
+}
+
+void LogsimOptions::Save()
+{
+	wxConfig *config = new wxConfig(wxT("GF2Logsim-2013-8"));
+	config->Write(wxT("xScaleMin"), xScaleMin);
+	config->Write(wxT("xScaleMax"), xScaleMax);
+	config->Write(wxT("sigHeightMin"), sigHeightMin);
+	config->Write(wxT("sigHeightMax"), sigHeightMax);
+	config->Write(wxT("continuousRate"), continuousRate);
+	config->Write(wxT("debugMachineCycles"), debugMachineCycles);
+	config->Write(wxT("debugSim"), debugSim);
+	delete config;
+}
+
+void LogsimOptions::Load()
+{
 	ResetOptions();
+	wxConfig *config = new wxConfig(wxT("GF2Logsim-2013-8"));
+	config->Read(wxT("xScaleMin"), &xScaleMin);
+	config->Read(wxT("xScaleMax"), &xScaleMax);
+	config->Read(wxT("sigHeightMin"), &sigHeightMin);
+	config->Read(wxT("sigHeightMax"), &sigHeightMax);
+	config->Read(wxT("continuousRate"), &continuousRate);
+	config->Read(wxT("debugMachineCycles"), &debugMachineCycles);
+	config->Read(wxT("debugSim"), &debugSim);
+	delete config;
 }
 
 void LogsimOptions::ResetOptions()
 {
 	xScaleMin = 2;
 	xScaleMax = 40;
-	spacingMin = 50;
-	spacingMax = 200;
+	sigHeightMin = 50;
+	sigHeightMax = 200;
 	continuousRate = 50;
 	debugMachineCycles = false;
 	debugSim = false;
-	optionsChanged.Trigger();
 }
 
 OptionsDialog::OptionsDialog(LogsimOptions* options_in, wxWindow* parent, wxWindowID id, const wxString& title) :
@@ -34,12 +66,6 @@ OptionsDialog::OptionsDialog(LogsimOptions* options_in, wxWindow* parent, wxWind
 	wxBoxSizer* rightSizer = new wxBoxSizer(wxVERTICAL);
 	wxGridBagSizer* tracesSizer = new wxGridBagSizer();
 	wxGridBagSizer* miscSizer = new wxGridBagSizer();
-	/* 	OPTIONS_XSCALE_MIN_ID,
-	OPTIONS_XSCALE_MAX_ID,
-	OPTIONS_SPACING_MIN_ID,
-	OPTIONS_SPACING_MAX_ID,
-	OPTIONS_DEBUG_MACHINECYCLES_ID,
-	OPTIONS_DEBUG_SIMULATION_ID */
 	int row = 0;
 	xScaleMinCtrl = new wxSpinCtrl(this, OPTIONS_XSCALE_MIN_ID);
 	xScaleMinCtrl->SetRange(2,1000);
@@ -47,12 +73,12 @@ OptionsDialog::OptionsDialog(LogsimOptions* options_in, wxWindow* parent, wxWind
 	xScaleMaxCtrl = new wxSpinCtrl(this, OPTIONS_XSCALE_MAX_ID);
 	xScaleMaxCtrl->SetRange(2,1000);
 	xScaleMaxCtrl->SetValue(options->xScaleMax);
-	spacingMinCtrl = new wxSpinCtrl(this, OPTIONS_SPACING_MIN_ID);
-	spacingMinCtrl->SetRange(30,1000);
-	spacingMinCtrl->SetValue(options->spacingMin);
-	spacingMaxCtrl = new wxSpinCtrl(this, OPTIONS_SPACING_MAX_ID);
-	spacingMaxCtrl->SetRange(30,1000);
-	spacingMaxCtrl->SetValue(options->spacingMax);
+	sigHeightMinCtrl = new wxSpinCtrl(this, OPTIONS_SIGHEIGHT_MIN_ID);
+	sigHeightMinCtrl->SetRange(30,1000);
+	sigHeightMinCtrl->SetValue(options->sigHeightMin);
+	sigHeightMaxCtrl = new wxSpinCtrl(this, OPTIONS_SIGHEIGHT_MAX_ID);
+	sigHeightMaxCtrl->SetRange(30,1000);
+	sigHeightMaxCtrl->SetValue(options->sigHeightMax);
 
 	tracesSizer->Add(new wxStaticText(this, wxID_ANY, _("Min horizontal scale (pixels per cycle):")), wxGBPosition(row,0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxALL | wxALIGN_RIGHT, 1);
 	tracesSizer->Add(xScaleMinCtrl, wxGBPosition(row,1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxALL | wxEXPAND, 1);
@@ -60,11 +86,11 @@ OptionsDialog::OptionsDialog(LogsimOptions* options_in, wxWindow* parent, wxWind
 	tracesSizer->Add(new wxStaticText(this, wxID_ANY, _("Max horizontal scale (pixels per cycle):")), wxGBPosition(row,0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxALL | wxALIGN_RIGHT, 1);
 	tracesSizer->Add(xScaleMaxCtrl, wxGBPosition(row,1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxALL | wxEXPAND, 1);
 	row++;
-	tracesSizer->Add(new wxStaticText(this, wxID_ANY, _("Min vertical spacing (pixels):")), wxGBPosition(row,0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxALL | wxALIGN_RIGHT, 1);
-	tracesSizer->Add(spacingMinCtrl, wxGBPosition(row,1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxALL | wxEXPAND, 1);
+	tracesSizer->Add(new wxStaticText(this, wxID_ANY, _("Min signal height (pixels):")), wxGBPosition(row,0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxALL | wxALIGN_RIGHT, 1);
+	tracesSizer->Add(sigHeightMinCtrl, wxGBPosition(row,1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxALL | wxEXPAND, 1);
 	row++;
-	tracesSizer->Add(new wxStaticText(this, wxID_ANY, _("Max vertical spacing (pixels):")), wxGBPosition(row,0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxALL | wxALIGN_RIGHT, 1);
-	tracesSizer->Add(spacingMaxCtrl, wxGBPosition(row,1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxALL | wxEXPAND, 1);
+	tracesSizer->Add(new wxStaticText(this, wxID_ANY, _("Max signal height (pixels):")), wxGBPosition(row,0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxALL | wxALIGN_RIGHT, 1);
+	tracesSizer->Add(sigHeightMaxCtrl, wxGBPosition(row,1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxALL | wxEXPAND, 1);
 	row++;
 	tracesSizer->AddGrowableCol(0,5);
 	tracesSizer->AddGrowableCol(1,2);
@@ -107,10 +133,10 @@ void OptionsDialog::OnInputChanged(wxCommandEvent& event)
 		xScaleMaxCtrl->SetValue(xScaleMinCtrl->GetValue());
 	if (event.GetId()==OPTIONS_XSCALE_MAX_ID && xScaleMinCtrl->GetValue() > xScaleMaxCtrl->GetValue())
 		xScaleMinCtrl->SetValue(xScaleMaxCtrl->GetValue());
-	if (event.GetId()==OPTIONS_SPACING_MIN_ID && spacingMinCtrl->GetValue() > spacingMaxCtrl->GetValue())
-		spacingMaxCtrl->SetValue(spacingMinCtrl->GetValue());
-	if (event.GetId()==OPTIONS_SPACING_MAX_ID && spacingMinCtrl->GetValue() > spacingMaxCtrl->GetValue())
-		spacingMinCtrl->SetValue(spacingMaxCtrl->GetValue());
+	if (event.GetId()==OPTIONS_SIGHEIGHT_MIN_ID && sigHeightMinCtrl->GetValue() > sigHeightMaxCtrl->GetValue())
+		sigHeightMaxCtrl->SetValue(sigHeightMinCtrl->GetValue());
+	if (event.GetId()==OPTIONS_SIGHEIGHT_MAX_ID && sigHeightMinCtrl->GetValue() > sigHeightMaxCtrl->GetValue())
+		sigHeightMinCtrl->SetValue(sigHeightMaxCtrl->GetValue());
 }
 
 void OptionsDialog::OnOK(wxCommandEvent& event)
@@ -126,14 +152,14 @@ void OptionsDialog::OnOK(wxCommandEvent& event)
 		options->xScaleMax = xScaleMaxCtrl->GetValue();
 		changedSomething = true;
 	}
-	if (spacingMinCtrl->GetValue() != options->spacingMin)
+	if (sigHeightMinCtrl->GetValue() != options->sigHeightMin)
 	{
-		options->spacingMin = spacingMinCtrl->GetValue();
+		options->sigHeightMin = sigHeightMinCtrl->GetValue();
 		changedSomething = true;
 	}
-	if (spacingMaxCtrl->GetValue() != options->spacingMax)
+	if (sigHeightMaxCtrl->GetValue() != options->sigHeightMax)
 	{
-		options->spacingMax = spacingMaxCtrl->GetValue();
+		options->sigHeightMax = sigHeightMaxCtrl->GetValue();
 		changedSomething = true;
 	}
 
@@ -142,9 +168,9 @@ void OptionsDialog::OnOK(wxCommandEvent& event)
 		options->xScaleMin = options->xScaleMax;
 		changedSomething = true;
 	}
-	if (options->spacingMin > options->spacingMax)
+	if (options->sigHeightMin > options->sigHeightMax)
 	{
-		options->xScaleMin = options->xScaleMax;
+		options->sigHeightMin = options->sigHeightMax;
 		changedSomething = true;
 	}
 
@@ -157,6 +183,11 @@ void OptionsDialog::OnOK(wxCommandEvent& event)
 	if (debugMachineCyclesCtrl->IsChecked() != options->debugMachineCycles)
 	{
 		options->debugMachineCycles = debugMachineCyclesCtrl->IsChecked();
+		if (options->debugMachineCycles)
+		{
+			cout << "Machine cycles debug enabled." << endl;
+			cout << "A red dashed line with a red simulation cycle number below and to the left indicates the end of that simulation cycle." << endl;
+		}
 		changedSomething = true;
 	}
 	if (debugSimCtrl->IsChecked() != options->debugSim)
@@ -168,7 +199,7 @@ void OptionsDialog::OnOK(wxCommandEvent& event)
 	{
 		options->optionsChanged.Trigger();
 	}
-	EndModal(wxID_OK);
+	if (event.GetId()==wxID_OK) EndModal(wxID_OK);
 }
 
 BEGIN_EVENT_TABLE(OptionsDialog, wxDialog)

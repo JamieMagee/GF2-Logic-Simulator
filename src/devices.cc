@@ -457,7 +457,7 @@ void devices::executedevices (bool& ok, monitor* mmz)
   } while ((! steadystate) && (machinecycle < maxmachinecycles));
   if (debugging)
     cout << "End of execution cycle" << endl;
-    updatesiggens();
+  updatesiggens();
   ok = steadystate;
 }
 

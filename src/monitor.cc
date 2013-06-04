@@ -98,7 +98,8 @@ void monitor::resetmonitor (void)
   for (n = 0; n < moncount (); n++)
     mtab[n].disp.clear();
   cycles = 0;
-  sampleTypes.clear();
+  simcycles = 0;
+  simCycleNums.clear();
 }
 
 
@@ -113,7 +114,10 @@ void monitor::recordsignals (bool isMachineCycle)
   int n;
   for (n = 0; n < moncount (); n++)
     mtab[n].disp.push_back(getmonsignal(n));
-  sampleTypes.push_back(isMachineCycle);
+  if (isMachineCycle)
+    simCycleNums.push_back(-1);
+  else
+    simCycleNums.push_back(simcycles++);
   cycles++;
 }
 
@@ -214,6 +218,11 @@ bool monitor::IsMonitored(outplink o)
 
 bool monitor::IsMachineCycle(int c)
 {
-	if (c < cycles) return sampleTypes[c];
-	return false;
+	return (GetSimCycleNum(c)<0);
+}
+
+int monitor::GetSimCycleNum(int c)
+{
+	if (c>=0 && c < cycles) return simCycleNums[c];
+	return -1;
 }

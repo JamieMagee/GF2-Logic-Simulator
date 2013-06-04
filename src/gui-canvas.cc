@@ -187,10 +187,10 @@ void GLCanvasMonitorTrace::Draw(MyGLCanvas *canvas, const wxRect& visibleRegion)
 	glEnable(GL_LINE_STIPPLE);
 	for (i=firstCycle; i<=cycleLimit; i++)
 	{
-		if ((i!=0 && i!=totalCycles && (i-firstCycle)%axisLabelInterval==0) || (options->debugMachineCycles && i>0 && !c->mmz()->IsMachineCycle(i-1)))
+		if ((i!=0 && i!=totalCycles && (i-firstCycle)%axisLabelInterval==0) || (i>0 && options->debugMachineCycles && !c->mmz()->IsMachineCycle(i-1)))
 		{
 			glBegin(GL_LINE_STRIP);
-			if (options->debugMachineCycles && !c->mmz()->IsMachineCycle(i-1))//i-1 to draw the line at the end of the area where the cycle is drawn
+			if (i>0 && options->debugMachineCycles && !c->mmz()->IsMachineCycle(i-1))
 				glColor4f(1.0, 0.0, 0.0, 0.8);
 			else
 				glColor4f(0.0, 0.0, 0.0, 0.2);
@@ -198,13 +198,35 @@ void GLCanvasMonitorTrace::Draw(MyGLCanvas *canvas, const wxRect& visibleRegion)
 			glVertex2i(xOffset+xScale*i, yCentre+sigHeight/2+padding);
 			glEnd();
 		}
-		if ((i-firstCycle)%axisLabelInterval==0)
+		if (options->debugMachineCycles)
 		{
-			glColor4f(0.0, 0.0, 0.0, 1.0);
-			wxString labelText;
-			labelText.Printf(wxT("%d"), i);
-			int labelWidth = GetGlutTextWidth(labelText, GLUT_BITMAP_HELVETICA_10);
-			DrawGlutText(xOffset+xScale*i - labelWidth/2, yCentre-sigHeight/2-padding-11, labelText, GLUT_BITMAP_HELVETICA_10);
+			if ((i-firstCycle+1)%axisLabelInterval==0 && i<cycleLimit)
+			{
+				glColor4f(0.0, 0.0, 0.0, 1.0);
+				wxString labelText;
+				labelText.Printf(wxT("%d"), i+1);
+				int labelWidth = GetGlutTextWidth(labelText, GLUT_BITMAP_HELVETICA_10);
+				DrawGlutText(xOffset+xScale*i + xScale/2 - labelWidth/2, yCentre-sigHeight/2-padding-11, labelText, GLUT_BITMAP_HELVETICA_10);
+				if (!c->mmz()->IsMachineCycle(i))
+				{
+					glColor4f(1.0, 0.0, 0.0, 1.0);
+					wxString labelText;
+					labelText.Printf(wxT("%d"), c->mmz()->GetSimCycleNum(i)+1);
+					int labelWidth = GetGlutTextWidth(labelText, GLUT_BITMAP_HELVETICA_10);
+					DrawGlutText(xOffset+xScale*i + xScale/2 - labelWidth/2, yCentre-sigHeight/2-padding-11-14, labelText, GLUT_BITMAP_HELVETICA_10);
+				}
+			}
+		}
+		else
+		{
+			if ((i-firstCycle+1)%axisLabelInterval==0 && i<cycleLimit && !c->mmz()->IsMachineCycle(i))
+			{
+				glColor4f(0.0, 0.0, 0.0, 1.0);
+				wxString labelText;
+				labelText.Printf(wxT("%d"), c->mmz()->GetSimCycleNum(i)+1);
+				int labelWidth = GetGlutTextWidth(labelText, GLUT_BITMAP_HELVETICA_10);
+				DrawGlutText(xOffset+xScale*i + xScale/2 - labelWidth/2, yCentre-sigHeight/2-padding-11, labelText, GLUT_BITMAP_HELVETICA_10);
+			}
 		}
 	}
 	glDisable(GL_LINE_STIPPLE);
@@ -300,7 +322,11 @@ void MyGLCanvas::UpdateMinCanvasSize()
 	// Make sure all the traces fit in the canvas
 	int xOffset = maxMonNameWidth+5;
 	int maxXTextWidth = ceil(log10(totalCycles))*8;// estimate of max x axis scale text width
-	SetVirtualSize(options->xScaleMin*totalCycles+15+xOffset+maxXTextWidth/2,options->spacingMin*mons.size()+10);
+	int labelsHeight;
+	if (options->debugMachineCycles) labelsHeight = 28;
+	else labelsHeight = 14;
+	int minSpacing = options->sigHeightMin/0.8 + labelsHeight;
+	SetVirtualSize(options->xScaleMin*totalCycles+15+xOffset+maxXTextWidth/2,minSpacing*mons.size()+10);
 }
 
 // Notify of a change to the number of displayed cycles
@@ -356,9 +382,15 @@ void MyGLCanvas::Render()
 		int canvasHeight = GetClientSize().GetHeight();
 		int canvasWidth = GetClientSize().GetWidth();
 		int spacing = (canvasHeight-10)/monCount;
-		if (spacing>options->spacingMax) spacing = options->spacingMax;
-		if (spacing<options->spacingMin) spacing = options->spacingMin;
-		int height = 0.8*(spacing-14);
+
+		int labelsHeight;
+		if (options->debugMachineCycles) labelsHeight = 28;
+		else labelsHeight = 14;
+		int minSpacing = options->sigHeightMin/0.8 + labelsHeight;
+		int maxSpacing = options->sigHeightMax/0.8 + labelsHeight;
+		if (spacing>maxSpacing) spacing = maxSpacing;
+		if (spacing<minSpacing) spacing = minSpacing;
+		int height = 0.8*(spacing-labelsHeight);
 		int xOffset = maxMonNameWidth+10;
 		double xScale = double(canvasWidth-xOffset-10)/c->GetTotalCycles();
 		if (xScale<options->xScaleMin) xScale = options->xScaleMin;
