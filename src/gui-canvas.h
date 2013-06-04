@@ -65,6 +65,7 @@ class MyGLCanvas: public wxGLCanvas, public wxScrollHelperNative
   void Render(); // function to draw canvas contents
   void OnMonitorSamplesChanged();
   void OnMonitorsChanged();
+  void OnOptionsChanged();
   void UpdateMinCanvasSize();
   void SetErrorMessage(wxString txt);
   void ClearErrorMessage();

@@ -20,6 +20,8 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_MENU(MENU_CLEAR_CIRCUIT, MyFrame::OnMenuClearCircuit)
   EVT_MENU(MENU_RELOAD_FILE, MyFrame::OnFileReload)
   EVT_MENU(wxID_OPEN, MyFrame::OnOpenFile)
+  EVT_MENU(MENU_OPTIONS_EDIT, MyFrame::OnMenuOptionsEdit)
+  EVT_MENU(MENU_OPTIONS_RESET, MyFrame::OnMenuOptionsReset)
   EVT_BUTTON(SIMCTRL_BUTTON_RUN_ID, MyFrame::OnButtonRun)
   EVT_BUTTON(SIMCTRL_BUTTON_CONT_ID, MyFrame::OnButtonContinue)
   EVT_BUTTON(SIMCTRL_BUTTON_RUNCONT_ID, MyFrame::OnButtonRunContinuously)
@@ -45,9 +47,12 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	filedlgName = _("");
 	filedlgDir = _("../examples/");
 	options = new LogsimOptions();
+	runsimSecondCalls = 1;
+	runsimSecondDone = 0.0;
 	runsimTimer.SetOwner(this, RUNSIM_TIMER_ID);
 
 	// Menu items
+	wxMenuBar *menuBar = new wxMenuBar;
 	fileMenu = new wxMenu;
 	fileMenu->Append(wxID_OPEN);
 	fileMenu->Append(MENU_RELOAD_FILE, _("Reload\tCtrl+R"));
@@ -56,8 +61,13 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	fileMenu->AppendSeparator();
 	fileMenu->Append(wxID_ABOUT, _("&About"));
 	fileMenu->Append(wxID_EXIT, _("&Quit"));
-	wxMenuBar *menuBar = new wxMenuBar;
 	menuBar->Append(fileMenu, _("&File"));
+	wxMenu* optionsMenu = new wxMenu;
+	optionsMenu->Append(MENU_OPTIONS_EDIT, _("Edit options"));
+	optionsMenu->Append(MENU_OPTIONS_RESET, _("Reset options"));
+	optionsMenu->Append(MENU_OPTIONS_FASTERCR, _("Faster continuous run\tCtrl+."));
+	optionsMenu->Append(MENU_OPTIONS_SLOWERCR, _("Slower continuous run\tCtrl+,"));
+	menuBar->Append(optionsMenu, _("&Options"));
 	SetMenuBar(menuBar);
 
 	// Everything is contained in a wxPanel for improved appearance in wine/windows, as
@@ -134,6 +144,7 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	c->circuitChanged.Attach(this, &MyFrame::UpdateControlStates);
 	c->monitorsChanged.Attach(this, &MyFrame::UpdateControlStates);
 	c->monitorSamplesChanged.Attach(this, &MyFrame::UpdateControlStates);
+	options->optionsChanged.Attach(this, &MyFrame::OnOptionsChanged);
 	UpdateControlStates();
 }
 
@@ -142,6 +153,7 @@ MyFrame::~MyFrame()
 	c->circuitChanged.Detach(this);
 	c->monitorsChanged.Detach(this);
 	c->monitorSamplesChanged.Detach(this);
+	options->optionsChanged.Detach(this);
 	delete outputTextRedirect;
 }
 
@@ -161,6 +173,17 @@ void MyFrame::OnAbout(wxCommandEvent &event)
 void MyFrame::OnMenuClearCircuit(wxCommandEvent &event)
 {
 	c->Clear();
+}
+
+void MyFrame::OnMenuOptionsEdit(wxCommandEvent &event)
+{
+	OptionsDialog dlg(options, this, wxID_ANY, _("Edit options"));
+	dlg.ShowModal();
+}
+
+void MyFrame::OnMenuOptionsReset(wxCommandEvent &event)
+{
+	options->ResetOptions();
 }
 
 void MyFrame::OnFileReload(wxCommandEvent &event)
@@ -295,6 +318,11 @@ void MyFrame::OnButtonRunContinuously(wxCommandEvent& event)
 	SetContinuousRun(!runsimTimer.IsRunning());
 }
 
+void MyFrame::OnOptionsChanged()
+{
+	c->dmz()->debug(options->debugSim);
+}
+
 void MyFrame::OnButtonAddMon(wxCommandEvent& event)// "Add monitors" button clicked
 {
 	int oldMonCount = c->mmz()->moncount();
@@ -341,7 +369,7 @@ void MyFrame::SetContinuousRun(bool state)
 				someEmpty = true;
 		}
 		if (someEmpty) c->ResetMonitors();
-		if (!runsimTimer.Start(10))
+		if (!runsimTimer.Start(1000/runsimTimerFrequency))
 		{
 			ShowErrorMsgDialog(this, _("Could not start timer"));
 			return;
@@ -357,8 +385,20 @@ void MyFrame::SetContinuousRun(bool state)
 
 void MyFrame::OnRunSimTimer(wxTimerEvent& event)
 {
-	if (!c->Simulate(1, false, options->debugMachineCycles))
-		SetContinuousRun(false);
+	if (runsimSecondCalls>50)
+	{
+		runsimSecondDone = 0.0;
+		runsimSecondCalls = 1;
+	}
+	double aimForFraction = (double)runsimSecondCalls / runsimTimerFrequency;
+	int thisCycles = round((aimForFraction-runsimSecondDone) * options->continuousRate);
+	runsimSecondDone += (double)thisCycles / options->continuousRate;
+	runsimSecondCalls++;
+	if (thisCycles>0)
+	{
+		if (!c->Simulate(thisCycles, false, options->debugMachineCycles))
+			SetContinuousRun(false);
+	}
 }
 
 AddMonitorsDialog::AddMonitorsDialog(circuit* circ, wxWindow* parent, const wxString& title, const wxPoint& pos, const wxSize& size, long style):

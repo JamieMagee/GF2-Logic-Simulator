@@ -187,7 +187,7 @@ void GLCanvasMonitorTrace::Draw(MyGLCanvas *canvas, const wxRect& visibleRegion)
 	glEnable(GL_LINE_STIPPLE);
 	for (i=firstCycle; i<=cycleLimit; i++)
 	{
-		if ((i!=0 && i!=totalCycles && (i-firstCycle)%axisLabelInterval==0) || (options->debugMachineCycles && i>1 && !c->mmz()->IsMachineCycle(i-1)))
+		if ((i!=0 && i!=totalCycles && (i-firstCycle)%axisLabelInterval==0) || (options->debugMachineCycles && i>0 && !c->mmz()->IsMachineCycle(i-1)))
 		{
 			glBegin(GL_LINE_STRIP);
 			if (options->debugMachineCycles && !c->mmz()->IsMachineCycle(i-1))//i-1 to draw the line at the end of the area where the cycle is drawn
@@ -251,6 +251,7 @@ MyGLCanvas::MyGLCanvas(circuit* circ, LogsimOptions* options_in, wxWindow *paren
 		c->monitorSamplesChanged.Attach(this, &MyGLCanvas::ClearErrorMessage);
 		OnMonitorsChanged();
 	}
+	options->optionsChanged.Attach(this, &MyGLCanvas::OnOptionsChanged);
 	SetScrollRate(1,1);
 }
 
@@ -261,6 +262,16 @@ MyGLCanvas::~MyGLCanvas()
 		c->monitorsChanged.Detach(this);
 		c->monitorSamplesChanged.Detach(this);
 	}
+	if (options)
+	{
+		options->optionsChanged.Detach(this);
+	}
+}
+
+void MyGLCanvas::OnOptionsChanged()
+{
+	UpdateMinCanvasSize();
+	Redraw();
 }
 
 void MyGLCanvas::Redraw()

@@ -19,6 +19,8 @@
 
 using namespace std;
 
+const int runsimTimerFrequency = 100;
+
 class MyFrame: public wxFrame
 {
  public:
@@ -41,6 +43,9 @@ class MyFrame: public wxFrame
 	wxButton *monitors_rem_btn;
 	circuit* c;
 	wxTimer runsimTimer;
+	// Number of timer calls, and fraction of required cycles run so far, for this second
+	int runsimSecondCalls;
+	double runsimSecondDone;
 	wxMenu *fileMenu;
 	
 	wxString filedlgName, filedlgDir;
@@ -59,8 +64,11 @@ class MyFrame: public wxFrame
 	void SetContinuousRun(bool state);
 	void UpdateControlStates();
 	void OnMenuClearCircuit(wxCommandEvent &event);
+	void OnMenuOptionsEdit(wxCommandEvent &event);
+	void OnMenuOptionsReset(wxCommandEvent &event);
 	void OnFileReload(wxCommandEvent &event);
 	void OnRunSimTimer(wxTimerEvent& event);
+	void OnOptionsChanged();
  
   DECLARE_EVENT_TABLE()
 };

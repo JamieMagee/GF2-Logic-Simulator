@@ -303,7 +303,6 @@ void network::randomisedevices()
 	
 	for (devlink d = devs; d != NULL; d = d->next) 
 	{
-		cout << d->kind << endl;
 		if (d->kind != aclock)
 		{
 			devlist.push_back(d);
@@ -324,14 +323,12 @@ void network::randomisedevices()
 		if (prevDevice==NULL) devs = devlist[i];
 		else prevDevice->next = devlist[i];
 		prevDevice = devlist[i];
-		cout << devlist[i]->kind << endl;
 	}
 	for (std::vector<int>::size_type i = 0; i != clklist.size(); i++) 
 	{
 		if (prevDevice==NULL) devs = clklist[i];
 		else prevDevice->next = clklist[i];
 		prevDevice = clklist[i];
-		cout << clklist[i]->kind << endl;
 	}
 	if (prevDevice!=NULL) prevDevice->next = NULL;
 	lastdev = prevDevice;
