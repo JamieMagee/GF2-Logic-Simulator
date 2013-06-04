@@ -10,7 +10,7 @@ using namespace std;
 //const int maxlength = 8;    /* max chars in a name string   */
 const int blankname = -1;   /* special name                 */
 
-const int lastreservedname = 33;
+const int lastreservedname = 34;
 
 typedef int name;
 typedef string namestring;
