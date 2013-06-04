@@ -30,7 +30,9 @@ protected:
 	wxStaticText* devicekindStaticText;
 
 	wxSpinCtrl* spinCtrl;
+	wxTextCtrl* textCtrl;
 	DevicekindDropdown* gateTypeDropdown;
+	string waveformText;
 
 	void UpdateApplyButtonState();
 	void OnInputChanged(wxCommandEvent& event);

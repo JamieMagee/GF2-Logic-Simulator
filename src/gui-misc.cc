@@ -63,7 +63,7 @@ BEGIN_EVENT_TABLE(SwitchesCheckListBox, wxCheckListBox)
 END_EVENT_TABLE()
 
 
-wxString devicekindstrings[baddevice] = {_("Switch"), _("Clock"), _("AND gate"), _("NAND gate"), _("OR gate"), _("NOR gate"), _("XOR gate"), _("D-type flip-flop")};
+wxString devicekindstrings[baddevice] = {_("Switch"), _("Clock"), _("AND gate"), _("NAND gate"), _("OR gate"), _("NOR gate"), _("XOR gate"), _("D-type flip-flop"), _("Signal generator")};
 
 DevicekindDropdown::DevicekindDropdown(wxWindow* parent, wxWindowID id, vector<devicekind> filterDevicekinds) :
 	wxComboBox(parent, id, wxT(""), wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_READONLY)
