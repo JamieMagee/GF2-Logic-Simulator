@@ -17,7 +17,7 @@ LogsimOptions::~LogsimOptions()
 
 void LogsimOptions::Save()
 {
-	wxConfig *config = new wxConfig(wxT("GF2Logsim-2013-8"));
+	wxConfig *config = new wxConfig(configName);
 	config->Write(wxT("xScaleMin"), xScaleMin);
 	config->Write(wxT("xScaleMax"), xScaleMax);
 	config->Write(wxT("sigHeightMin"), sigHeightMin);
@@ -31,7 +31,7 @@ void LogsimOptions::Save()
 void LogsimOptions::Load()
 {
 	ResetOptions();
-	wxConfig *config = new wxConfig(wxT("GF2Logsim-2013-8"));
+	wxConfig *config = new wxConfig(configName);
 	config->Read(wxT("xScaleMin"), &xScaleMin);
 	config->Read(wxT("xScaleMax"), &xScaleMax);
 	config->Read(wxT("sigHeightMin"), &sigHeightMin);

@@ -9,6 +9,8 @@
 #include <wx/statbox.h>
 #include <wx/checkbox.h>
 
+const wxString configName = wxT("GF2Logsim-2013-8");
+
 class LogsimOptions
 {
 public:

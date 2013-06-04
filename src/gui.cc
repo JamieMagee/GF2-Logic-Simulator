@@ -7,6 +7,7 @@
 #include "parser.h"
 #include "gui-devices.h"
 #include "gui-id.h"
+#include <wx/config.h>
 
 using namespace std;
 
@@ -20,6 +21,7 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_MENU(MENU_CLEAR_CIRCUIT, MyFrame::OnMenuClearCircuit)
   EVT_MENU(MENU_RELOAD_FILE, MyFrame::OnFileReload)
   EVT_MENU(wxID_OPEN, MyFrame::OnOpenFile)
+  EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, MyFrame::OnMRUFile)
   EVT_MENU(MENU_OPTIONS_EDIT, MyFrame::OnMenuOptionsEdit)
   EVT_MENU(MENU_OPTIONS_RESET, MyFrame::OnMenuOptionsReset)
   EVT_MENU(MENU_OPTIONS_FASTERCR, MyFrame::OnMenuFasterCR)
@@ -63,6 +65,14 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	fileMenu->AppendSeparator();
 	fileMenu->Append(wxID_ABOUT, _("&About"));
 	fileMenu->Append(wxID_EXIT, _("&Quit"));
+
+	fileHistory = new wxFileHistory(9);
+	fileHistory->UseMenu(fileMenu);
+	wxConfig *config = new wxConfig(configName);
+	fileHistory->Load(*config);
+	delete config;
+	config = NULL;
+
 	menuBar->Append(fileMenu, _("&File"));
 	wxMenu* optionsMenu = new wxMenu;
 	optionsMenu->Append(MENU_OPTIONS_EDIT, _("Edit options"));
@@ -156,6 +166,12 @@ MyFrame::~MyFrame()
 	c->monitorsChanged.Detach(this);
 	c->monitorSamplesChanged.Detach(this);
 	options->optionsChanged.Detach(this);
+	options->Save();
+
+	wxConfig *config = new wxConfig(configName);
+	fileHistory->Save(*config);
+	delete config;
+
 	delete outputTextRedirect;
 }
 
@@ -234,12 +250,19 @@ void MyFrame::OnOpenFile(wxCommandEvent &event)
 	loadFile(openFileDialog.GetPath().mb_str());
 }
 
+void MyFrame::OnMRUFile(wxCommandEvent& event)
+{
+	wxString f(fileHistory->GetHistoryFile(event.GetId() - wxID_FILE1));
+	if (!f.empty()) loadFile(f.mb_str());
+}
+
 bool MyFrame::loadFile(const char * filename)
 // load a file (can be called by menu File->Open or for the command line argument)
 {
 	bool result; //True if file is opened correctly
 
 	fileMenu->Enable(MENU_RELOAD_FILE, true);
+	fileHistory->AddFileToHistory(wxString(filename, wxConvUTF8));
 	lastFilePath = filename;
 
 	// Clear log window

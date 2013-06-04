@@ -9,6 +9,7 @@
 #include <wx/listbox.h>
 #include <wx/scrolwin.h>
 #include <wx/panel.h>
+#include <wx/docview.h>
 #include "names.h"
 #include "devices.h"
 #include "monitor.h"
@@ -47,6 +48,7 @@ class MyFrame: public wxFrame
 	int runsimSecondCalls;
 	double runsimSecondDone;
 	wxMenu *fileMenu;
+	wxFileHistory* fileHistory;
 	
 	wxString filedlgName, filedlgDir;
 	string lastFilePath;
@@ -68,6 +70,7 @@ class MyFrame: public wxFrame
 	void OnMenuOptionsReset(wxCommandEvent &event);
 	void OnMenuFasterCR(wxCommandEvent &event);
 	void OnMenuSlowerCR(wxCommandEvent &event);
+	void OnMRUFile(wxCommandEvent& event);
 	void OnFileReload(wxCommandEvent &event);
 	void OnRunSimTimer(wxTimerEvent& event);
 	void OnOptionsChanged();
