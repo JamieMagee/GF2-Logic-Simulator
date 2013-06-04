@@ -299,8 +299,10 @@ void devices::execxorgate(devlink d)
  * nonzero setup time, and a zero hold time.
  *
  */
-void devices::execdtype (devlink d)
+void devices::execdtype (devlink d, int cycles)
 {
+  int holdtime = 2;
+  asignal random = {low,high}
   asignal datainput, clkinput, setinput, clrinput;
   inplink i;
   outplink qout, qbarout;
@@ -310,14 +312,20 @@ void devices::execdtype (devlink d)
   i = netz->findinput (d, setpin);  setinput  = i->connect->sig;
   qout = netz->findoutput (d, qpin);
   qbarout = netz->findoutput (d, qbarpin);
-  if ((clkinput == rising) && ((datainput == high) || (datainput == falling)))
-    d->memory = high;
-  if ((clkinput == rising) && ((datainput == low) || (datainput == rising)))
-    d->memory = low;
-  if (setinput == high)
-    d->memory = high;
-  if (clrinput == high)
-    d->memory = low;
+  if (cycles <= holdtime)
+  {
+	  steadystate=false;
+	  if ((clkinput == rising) && ((datainput == rising) || (datainput == falling)))
+		d->memory = random[rand()%1];
+	  if ((clkinput == rising) && (datainput == low))
+		d->memory = low;
+	  if ((clkinput == rising) && (datainput == high))
+		d->memory = high;
+	  if (setinput == high)
+		d->memory = high;
+	  if (clrinput == high)
+		d->memory = low;
+	}
   signalupdate (d->memory, qout->sig);
   signalupdate (inv (d->memory), qbarout->sig);
 }
