@@ -98,7 +98,7 @@ public:
 	// Clear recorded samples
 	void ResetMonitors();
 	// Simulate the logic circuit, optionally clearing monitors beforehand
-	bool Simulate(int ncycles, bool resetBefore=true);
+	bool Simulate(int ncycles, bool resetBefore=true, bool logMachineCycles=false);
 	// GetUnmonitoredOutputs returns true if there are unmonitored outputs in the circuit
 	//   unmonitoredOutputsRet is an optional pointer to a vector to hold the list of unmonitored outputs
 	bool GetUnmonitoredOutputs(CircuitElementInfoVector * unmonitoredOutputsRet=NULL);

@@ -44,6 +44,7 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	c = new circuit(names_mod, devices_mod, monitor_mod, net_mod);
 	filedlgName = _("");
 	filedlgDir = _("../examples/");
+	options = new LogsimOptions();
 	runsimTimer.SetOwner(this, RUNSIM_TIMER_ID);
 
 	// Menu items
@@ -66,7 +67,7 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	wxBoxSizer *leftsizer = new wxBoxSizer(wxVERTICAL);
 
 	// Canvas for drawing monitor traces
-	canvas = new MyGLCanvas(c, mainPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
+	canvas = new MyGLCanvas(c, options, mainPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN);
 	leftsizer->Add(canvas, 3, wxEXPAND | wxALL, 10);
 
 	// Create the log textbox, mainly for displaying error messages from the parser, captures everything sent to cout
@@ -279,14 +280,14 @@ void MyFrame::UpdateControlStates()
 void MyFrame::OnButtonRun(wxCommandEvent &event)
   // Callback for the run simulation button
 {
-	c->Simulate(spin->GetValue(),true);
+	c->Simulate(spin->GetValue(), true, options->debugMachineCycles);
 	simctrl_continue->Enable();
 }
 
 void MyFrame::OnButtonContinue(wxCommandEvent &event)
   // Callback for the continue simulation button
 {
-	c->Simulate(spin->GetValue(),false);
+	c->Simulate(spin->GetValue(), false, options->debugMachineCycles);
 }
 
 void MyFrame::OnButtonRunContinuously(wxCommandEvent& event)
@@ -356,7 +357,7 @@ void MyFrame::SetContinuousRun(bool state)
 
 void MyFrame::OnRunSimTimer(wxTimerEvent& event)
 {
-	if (!c->Simulate(1,false))
+	if (!c->Simulate(1, false, options->debugMachineCycles))
 		SetContinuousRun(false);
 }
 

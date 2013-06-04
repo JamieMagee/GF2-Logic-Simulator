@@ -3,6 +3,7 @@
 
 #include "circuit.h"
 #include "gui-misc.h"
+#include "gui-options.h"
 #include <wx/wx.h>
 #include <wx/glcanvas.h>
 
@@ -17,7 +18,7 @@ class GLCanvasMonitorTrace
 {
 public:
 	GLCanvasMonitorTrace();
-	GLCanvasMonitorTrace(int newMonId, circuit* c);
+	GLCanvasMonitorTrace(int newMonId, circuit* c, LogsimOptions* options_in);
 	// Get or set the monitor id (the "n" in "n'th monitor" in monitor class calls, also determines position)
 	int GetMonitorId();
 	void SetMonitorId(int newMonId);
@@ -40,6 +41,7 @@ public:
 private:
 	int monId;
 	circuit* c;
+	LogsimOptions* options;
 	wxString monName;// cached monitor name, to avoid constructing it again every time the signal is drawn
 	int monNameWidth;// width in pixels of monitor name
 	bool geometrySet;// whether SetGeometry() has been called
@@ -58,7 +60,7 @@ private:
 class MyGLCanvas: public wxGLCanvas, public wxScrollHelperNative
 {
  public:
-  MyGLCanvas(circuit* circ, wxWindow *parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = 0, const wxString& name = wxT("MyGLCanvas"));
+  MyGLCanvas(circuit* circ, LogsimOptions* options_in, wxWindow *parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = 0, const wxString& name = wxT("MyGLCanvas"));
   ~MyGLCanvas();
   void Render(); // function to draw canvas contents
   void OnMonitorSamplesChanged();
@@ -69,6 +71,7 @@ class MyGLCanvas: public wxGLCanvas, public wxScrollHelperNative
  private:
   bool init;                         // has the GL context been initialised?
   circuit* c;
+  LogsimOptions* options;
   int maxMonNameWidth;
   vector<GLCanvasMonitorTrace> mons;
   void InitGL();                     // function to initialise GL context
@@ -79,7 +82,6 @@ class MyGLCanvas: public wxGLCanvas, public wxScrollHelperNative
   void Redraw();
   wxString errorMessage;
   int scrollX, scrollY;
-  int minXScale, maxXScale;
 public:
   virtual void ScrollWindow(int dx, int dy, const wxRect* rect = (wxRect *)NULL);
 

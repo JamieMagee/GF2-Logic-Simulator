@@ -26,6 +26,7 @@ class monitor {
 
   montable mtab;                 // table of monitored signals
   int cycles;                        // counts clock cycles
+  vector<bool> sampleTypes;
 
  public:
   void makemonitor (name dev, name outp, bool& ok);
@@ -52,7 +53,7 @@ class monitor {
   void resetmonitor (void);
     /* Initialises monitor memory in preparation for a new output sequence */
  
-  void recordsignals (void);
+  void recordsignals (bool isMachineCycle=false);
     /* Called every clock cycle to record the state of each monitored      */
     /* signal.                                                             */
  
@@ -70,6 +71,8 @@ class monitor {
 
   // Returns true if the given output is being monitored
   bool IsMonitored(outplink o);
+
+  bool IsMachineCycle(int c);
 
 };
 

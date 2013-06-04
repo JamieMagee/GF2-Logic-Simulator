@@ -42,13 +42,14 @@ void wxRect_GlVertex(const wxRect& r)
 
 // GLCanvasMonitorTrace - class to handle drawing of one monitor trace
 GLCanvasMonitorTrace::GLCanvasMonitorTrace() :
-	monId(-1), c(NULL), monName(wxT("")), monNameWidth(0), geometrySet(false)
+	monId(-1), c(NULL), options(NULL), monName(wxT("")), monNameWidth(0), geometrySet(false)
 {}
 
-GLCanvasMonitorTrace::GLCanvasMonitorTrace(int newMonId, circuit* circ) :
+GLCanvasMonitorTrace::GLCanvasMonitorTrace(int newMonId, circuit* circ, LogsimOptions* options_in) :
 	geometrySet(false)
 {
 	c = circ;
+	options = options_in;
 	SetMonitorId(newMonId);
 }
 
@@ -184,21 +185,27 @@ void GLCanvasMonitorTrace::Draw(MyGLCanvas *canvas, const wxRect& visibleRegion)
 		cycleLimit = totalCycles;
 	glLineStipple(2, 0xAAAA);
 	glEnable(GL_LINE_STIPPLE);
-	for (i=firstCycle; i<=cycleLimit; i+=axisLabelInterval)
+	for (i=firstCycle; i<=cycleLimit; i++)
 	{
-		if (i!=0 && i!=totalCycles)
+		if ((i!=0 && i!=totalCycles && (i-firstCycle)%axisLabelInterval==0) || (options->debugMachineCycles && i>1 && !c->mmz()->IsMachineCycle(i-1)))
 		{
 			glBegin(GL_LINE_STRIP);
-			glColor4f(0.0, 0.0, 0.0, 0.2);
+			if (options->debugMachineCycles && !c->mmz()->IsMachineCycle(i-1))//i-1 to draw the line at the end of the area where the cycle is drawn
+				glColor4f(1.0, 0.0, 0.0, 0.8);
+			else
+				glColor4f(0.0, 0.0, 0.0, 0.2);
 			glVertex2i(xOffset+xScale*i, yCentre-sigHeight/2-padding);
 			glVertex2i(xOffset+xScale*i, yCentre+sigHeight/2+padding);
 			glEnd();
 		}
-		glColor4f(0.0, 0.0, 0.0, 1.0);
-		wxString labelText;
-		labelText.Printf(wxT("%d"), i);
-		int labelWidth = GetGlutTextWidth(labelText, GLUT_BITMAP_HELVETICA_10);
-		DrawGlutText(xOffset+xScale*i - labelWidth/2, yCentre-sigHeight/2-padding-11, labelText, GLUT_BITMAP_HELVETICA_10);
+		if ((i-firstCycle)%axisLabelInterval==0)
+		{
+			glColor4f(0.0, 0.0, 0.0, 1.0);
+			wxString labelText;
+			labelText.Printf(wxT("%d"), i);
+			int labelWidth = GetGlutTextWidth(labelText, GLUT_BITMAP_HELVETICA_10);
+			DrawGlutText(xOffset+xScale*i - labelWidth/2, yCentre-sigHeight/2-padding-11, labelText, GLUT_BITMAP_HELVETICA_10);
+		}
 	}
 	glDisable(GL_LINE_STIPPLE);
 }
@@ -228,7 +235,7 @@ END_EVENT_TABLE()
   
 int wxglcanvas_attrib_list[5] = {WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16, 0};
 
-MyGLCanvas::MyGLCanvas(circuit* circ, wxWindow *parent, wxWindowID id,
+MyGLCanvas::MyGLCanvas(circuit* circ, LogsimOptions* options_in, wxWindow *parent, wxWindowID id,
 	const wxPoint& pos, const wxSize& size, long style, const wxString& name):
     wxGLCanvas(parent, id, pos, size, style, name, wxglcanvas_attrib_list),
 	wxScrollHelperNative(this), scrollX(0), scrollY(0)
@@ -236,6 +243,7 @@ MyGLCanvas::MyGLCanvas(circuit* circ, wxWindow *parent, wxWindowID id,
 {
 	init = false;
 	c = circ;
+	options = options_in;
 	if (c)
 	{
 		c->monitorsChanged.Attach(this, &MyGLCanvas::OnMonitorsChanged);
@@ -244,8 +252,6 @@ MyGLCanvas::MyGLCanvas(circuit* circ, wxWindow *parent, wxWindowID id,
 		OnMonitorsChanged();
 	}
 	SetScrollRate(1,1);
-	minXScale = 2;
-	maxXScale = 50;
 }
 
 MyGLCanvas::~MyGLCanvas()
@@ -283,7 +289,7 @@ void MyGLCanvas::UpdateMinCanvasSize()
 	// Make sure all the traces fit in the canvas
 	int xOffset = maxMonNameWidth+5;
 	int maxXTextWidth = ceil(log10(totalCycles))*8;// estimate of max x axis scale text width
-	SetVirtualSize(minXScale*totalCycles+15+xOffset+maxXTextWidth/2,50*mons.size()+10);
+	SetVirtualSize(options->xScaleMin*totalCycles+15+xOffset+maxXTextWidth/2,options->spacingMin*mons.size()+10);
 }
 
 // Notify of a change to the number of displayed cycles
@@ -311,7 +317,7 @@ void MyGLCanvas::OnMonitorsChanged()
 	int continuedCycles = c->GetContinuedCycles();
 	for (int i=0; i<monCount; i++)
 	{
-		mons[i] = GLCanvasMonitorTrace(i, c);
+		mons[i] = GLCanvasMonitorTrace(i, c, options);
 		mons[i].OnMonitorSamplesChanged(totalCycles, continuedCycles);
 		if (mons[i].GetNameWidth()>maxMonNameWidth)
 			maxMonNameWidth = mons[i].GetNameWidth();
@@ -339,13 +345,13 @@ void MyGLCanvas::Render()
 		int canvasHeight = GetClientSize().GetHeight();
 		int canvasWidth = GetClientSize().GetWidth();
 		int spacing = (canvasHeight-10)/monCount;
-		if (spacing>200) spacing = 200;
-		if (spacing<50) spacing = 50;
+		if (spacing>options->spacingMax) spacing = options->spacingMax;
+		if (spacing<options->spacingMin) spacing = options->spacingMin;
 		int height = 0.8*(spacing-14);
 		int xOffset = maxMonNameWidth+10;
 		double xScale = double(canvasWidth-xOffset-10)/c->GetTotalCycles();
-		if (xScale<minXScale) xScale = minXScale;
-		if (xScale>50) xScale = 50;
+		if (xScale<options->xScaleMin) xScale = options->xScaleMin;
+		if (xScale>options->xScaleMax) xScale = options->xScaleMax;
 
 		wxRect visibleRegion(0,0,canvasWidth,canvasHeight);
 

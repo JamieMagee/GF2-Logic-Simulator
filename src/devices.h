@@ -3,6 +3,9 @@
 
 #include "names.h"
 #include "network.h"
+#include "monitor.h"
+
+class monitor;
 
 class devices{
   names* nmz;      // the version of the names module we use.
@@ -44,7 +47,7 @@ public:
     /* Sets the state of the named switch. 'ok' returns false if switch    */
     /* not found.                                                          */
  
-  void executedevices (bool& ok);
+  void executedevices (bool& ok, monitor* mmz=NULL);
     /* Executes all devices in the network to simulate one complete clock  */
     /* cycle. 'ok' is returned false if network fails to stabilise (i.e.   */
     /* it is oscillating). */                                             

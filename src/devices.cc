@@ -1,4 +1,5 @@
 #include "devices.h"
+#include "monitor.h"
 #include <iostream>
 #include <string>
 
@@ -410,7 +411,7 @@ void devices::updatesiggens (void)
  * it is oscillating).                                            
  *
  */
-void devices::executedevices (bool& ok)
+void devices::executedevices (bool& ok, monitor* mmz)
 {
   int maxmachinecycles = 20;
   int count = 0;
@@ -439,8 +440,10 @@ void devices::executedevices (bool& ok)
       }
       if (machinecycle==1) count++;
       if (debugging)
-	showdevice (d);
+        showdevice (d);
     }
+    if (mmz)
+        mmz->recordsignals(true);
     if (machinecycle==1) maxmachinecycles = 20 + 2*count;
   } while ((! steadystate) && (machinecycle < maxmachinecycles));
   if (debugging)

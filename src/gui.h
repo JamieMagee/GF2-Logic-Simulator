@@ -2,6 +2,7 @@
 #define gui_h
 
 #include "gui-canvas.h"
+#include "gui-options.h"
 #include <wx/wx.h>
 #include <wx/spinctrl.h>
 #include <wx/textctrl.h>
@@ -44,6 +45,7 @@ class MyFrame: public wxFrame
 	
 	wxString filedlgName, filedlgDir;
 	string lastFilePath;
+	LogsimOptions *options;
 
   void OnExit(wxCommandEvent& event);     // callback for exit menu item
   void OnAbout(wxCommandEvent& event);    // callback for about menu item

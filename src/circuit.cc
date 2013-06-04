@@ -143,7 +143,7 @@ void circuit::ResetMonitors()
 	monitorSamplesChanged.Trigger();
 }
 
-bool circuit::Simulate(int ncycles, bool resetBefore)
+bool circuit::Simulate(int ncycles, bool resetBefore, bool logMachineCycles)
 {
 	if (resetBefore)
 	{
@@ -158,13 +158,27 @@ bool circuit::Simulate(int ncycles, bool resetBefore)
 
 	while (n > 0 && ok)
 	{
-		dmz()->executedevices(ok);
+		if (logMachineCycles)
+		{
+			dmz()->executedevices(ok, mmz());
+		}
+		else
+		{
+			dmz()->executedevices(ok);
+		}
 		if (ok)
 		{
 			n--;
-			totalCycles++;
-			continuedCycles++;
-			mmz()->recordsignals();
+			if (logMachineCycles)
+			{
+				int samples = mmz()->getsamplecount(0);
+				while (((samples+1)%20) != 0)
+				{
+					mmz()->recordsignals(true);
+					samples++;
+				}
+			}
+			mmz()->recordsignals(false);
 		}
 		else
 		{
@@ -172,6 +186,8 @@ bool circuit::Simulate(int ncycles, bool resetBefore)
 			ok = false;
 		}
 	}
+	continuedCycles = mmz()->getsamplecount(0) - totalCycles;
+	totalCycles += continuedCycles;
 
 	monitorSamplesChanged.Trigger();
 	return ok;
