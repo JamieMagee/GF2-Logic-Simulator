@@ -1,7 +1,6 @@
 #include "devices.h"
 #include "monitor.h"
-#include <iostream>
-#include <string>
+
 
 using namespace std;
 
@@ -301,8 +300,8 @@ void devices::execxorgate(devlink d)
  */
 void devices::execdtype (devlink d, int cycles)
 {
-  int holdtime = 2;
-  asignal random = {low,high}
+  static const asignal arr[] = {low,high};
+  vector<asignal> random (arr, arr + sizeof(arr) / sizeof(arr[0]));
   asignal datainput, clkinput, setinput, clrinput;
   inplink i;
   outplink qout, qbarout;
@@ -312,20 +311,22 @@ void devices::execdtype (devlink d, int cycles)
   i = netz->findinput (d, setpin);  setinput  = i->connect->sig;
   qout = netz->findoutput (d, qpin);
   qbarout = netz->findoutput (d, qbarpin);
-  if (cycles <= holdtime)
-  {
-	  steadystate=false;
 	  if ((clkinput == rising) && ((datainput == rising) || (datainput == falling)))
-		d->memory = random[rand()%1];
-	  if ((clkinput == rising) && (datainput == low))
+	  {
+		d->memory = random[rand()%2];
+	  }
+	  if ((clkinput == rising)  && (datainput == low))
+	  {
 		d->memory = low;
-	  if ((clkinput == rising) && (datainput == high))
+	  }
+	  if ((clkinput == rising)  && (datainput == high))
+	  {
 		d->memory = high;
+	  }
 	  if (setinput == high)
 		d->memory = high;
 	  if (clrinput == high)
 		d->memory = low;
-	}
   signalupdate (d->memory, qout->sig);
   signalupdate (inv (d->memory), qbarout->sig);
 }
@@ -443,7 +444,7 @@ void devices::executedevices (bool& ok, monitor* mmz)
         case andgate:  execgate (d, high, high); break;
         case nandgate: execgate (d, high, low);  break;
         case xorgate:  execxorgate (d);          break;
-        case dtype:    execdtype (d);            break;   
+        case dtype:    execdtype (d, machinecycle);break;   
         case siggen:   execsiggen (d);           break;
       }
       if (machinecycle==1) count++;
