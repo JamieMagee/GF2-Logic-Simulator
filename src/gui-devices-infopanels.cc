@@ -374,6 +374,19 @@ DeviceDetailsPanel::DeviceDetailsPanel(circuit* circ, SelectedDevice* selectedDe
 			gridsizer->Add(new wxStaticText(this, wxID_ANY, _("Inputs:")), wxGBPosition(1,3), wxDefaultSpan, wxLEFT | wxBOTTOM | wxALIGN_CENTER_VERTICAL, 10);
 			gridsizer->Add(spinCtrl, wxGBPosition(1,4), wxDefaultSpan, (wxALL & ~wxTOP) | wxEXPAND | wxALIGN_CENTER_VERTICAL, 10);
 		}
+		else if (d->kind == siggen)
+		{
+			waveformText = "";
+			for (int i=0; i<d->waveform.size(); i++)
+			{
+				if (i && i%10 == 0) waveformText.push_back(' ');// separate with spaces for readability
+				waveformText.push_back(d->waveform[i]?'1':'0');
+			}
+			textCtrl = new wxTextCtrl(this, wxID_ANY, wxString(waveformText.c_str(), wxConvUTF8));
+			gridsizer->Add(new wxStaticText(this, wxID_ANY, _("Waveform:")), wxGBPosition(1,3), wxDefaultSpan, wxLEFT | wxBOTTOM | wxALIGN_CENTER_VERTICAL, 10);
+			gridsizer->Add(textCtrl, wxGBPosition(1,4), wxDefaultSpan, (wxALL & ~wxTOP) | wxEXPAND | wxALIGN_CENTER_VERTICAL, 10);
+		}
+
 		mainSizer->Add(gridsizer, 0, wxEXPAND);
 
 		// Delete device button, and button for applying changes to device details
@@ -434,6 +447,32 @@ void DeviceDetailsPanel::OnApply(wxCommandEvent& event)
 			changedSomething = true;
 		}
 	}
+	else if (d->kind == siggen)
+	{
+		if (waveformText != string(textCtrl->GetValue().mb_str()))
+		{
+			string tmp = string(textCtrl->GetValue().mb_str());
+			sequence waveform;
+			bool ok = true;
+			for (int i=0; i<tmp.length(); i++)
+			{
+				if (tmp[i] == ' ') continue;
+				if (tmp[i] != '0' && tmp[i] != '1')
+				{
+					ShowErrorMsgDialog(this, _("Waveform text can only contain '1's and '0's"));
+					ok = false;
+					break;
+				}
+				waveform.push_back(tmp[i]=='1');
+			}
+			if (ok)
+			{
+				d->waveform.swap(waveform);
+				waveformText.swap(tmp);
+				changedSomething = true;
+			}
+		}
+	}
 
 	if (changedSomething)
 	{
@@ -465,6 +504,11 @@ void DeviceDetailsPanel::UpdateApplyButtonState()
 			if (GetLinkedListLength(d->ilist) != spinCtrl->GetValue())
 				updateBtn->Enable();
 			if (d->kind != gateTypeDropdown->GetDevicekind())
+				updateBtn->Enable();
+		}
+		else if (d->kind == siggen)
+		{
+			if (waveformText != string(textCtrl->GetValue().mb_str()))
 				updateBtn->Enable();
 		}
 	}

@@ -274,6 +274,13 @@ void NewDeviceDialog::OnOK(wxCommandEvent& event)
 		c->dmz()->makedevice(dk, devname, 1, ok);
 	else if (dk==aclock)
 		c->dmz()->makedevice(dk, devname, 5, ok);
+	else if (dk==siggen)
+	{
+		sequence waveform;
+		waveform.push_back(1);
+		waveform.push_back(0);
+		c->dmz()->makesiggen(devname, waveform);
+	}
 	else
 		c->dmz()->makedevice(dk, devname, 2, ok);
 
