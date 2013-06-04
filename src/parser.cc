@@ -84,13 +84,13 @@ bool parser::readin(void)
 void parser::deviceList()
 {
 	//EBNF: devices = 'DEVICES' dev {';' dev} ';' 'END'
-	bool deviceError;
+	bool alreadyGotNextSymbol;
 	if (!devicePresent)
 	{
 		smz->getsymbol(cursym, curname, curint, numstring);
 		if (cursym == classsym)
 		{
-			deviceError = newDevice(curname);
+			alreadyGotNextSymbol = newDevice(curname);
 			devicePresent = true;
 		}
 		else if (cursym == endsym)
@@ -102,7 +102,7 @@ void parser::deviceList()
 		{
 			erz->newError(4); //need a device type
 		}
-		if (!deviceError)
+		if (!alreadyGotNextSymbol)
 		{
 			smz->getsymbol(cursym, curname, curint, numstring);
 		}
@@ -112,7 +112,7 @@ void parser::deviceList()
 		smz->getsymbol(cursym, curname, curint, numstring);
 		if (cursym == classsym)
 		{
-			deviceError = newDevice(curname);
+			alreadyGotNextSymbol = newDevice(curname);
 		}
 		else if (cursym == endsym)
 		{
@@ -127,12 +127,12 @@ void parser::deviceList()
 		{
 			erz->newError(5);//Expecting device name or END after semicolon (device name must start with letter)
 		}
-		if (!deviceError)
+		if (!alreadyGotNextSymbol)
 		{
 			smz->getsymbol(cursym, curname, curint, numstring);
 		}
 	}
-	if (!deviceError) erz->newError(24);//must end line in semicolon
+	if (!alreadyGotNextSymbol) erz->newError(24);//must end line in semicolon
 	while (cursym != semicol && cursym != endsym && cursym != eofsym)
 	{
 		smz->getsymbol(cursym, curname, curint, numstring);
@@ -151,7 +151,7 @@ void parser::deviceList()
 bool parser::newDevice(int deviceType)
 {
 	//EBNF: dev = clock|switch|gate|dtype|xor|siggen
-	bool errorOccurance = false;
+	bool symbolSkip = false;
 	smz->getsymbol(cursym, curname, curint, numstring);
 	if (cursym == namesym)
 	{
@@ -162,12 +162,12 @@ bool parser::newDevice(int deviceType)
 			if (deviceType == 10)
 			{
 				dmz->makedevice(dtype, devName, 0, correctOperation);	//create DTYPE with name devName
-				return errorOccurance;
+				return symbolSkip;
 			}
 			if (deviceType == 11)
 			{
 				dmz->makedevice(xorgate, devName, 2, correctOperation); //create XOR with name devName
-				return errorOccurance;
+				return symbolSkip;
 			}
 			smz->getsymbol(cursym, curname, curint, numstring);
 			if (cursym == colon)
@@ -185,7 +185,7 @@ bool parser::newDevice(int deviceType)
 							else
 							{
 								erz->newError(6);//clock must have number greater than 0
-								errorOccurance=true;
+								symbolSkip=true;
 							}
 							break;
 						case 5:
@@ -196,7 +196,7 @@ bool parser::newDevice(int deviceType)
 							else
 							{
 								erz->newError(7);//switch must have either 0 or 1
-								errorOccurance=true;
+								symbolSkip=true;
 							}
 							break;
 						case 6:
@@ -226,7 +226,7 @@ bool parser::newDevice(int deviceType)
 							else
 							{
 								erz->newError(8);//must have between 1 and 16 inputs to a GATE
-								errorOccurance=true;
+								symbolSkip=true;
 							}
 							break;
 						case 12:
@@ -237,48 +237,67 @@ bool parser::newDevice(int deviceType)
 								{
 									waveform.push_back(numstring[i]=='1');
 								}
+								smz->getsymbol(cursym, curname, curint, numstring);
+								symbolSkip=true;
+								while (cursym==numsym)
+								{
+									if (isBinary(numstring))
+									{									
+										for (int i=0; i<numstring.length(); i++)
+										{
+											waveform.push_back(numstring[i]=='1');
+										}
+										smz->getsymbol(cursym, curname, curint, numstring);
+									}
+									else
+									{
+										erz->newError(36); //Must be a binary input
+										symbolSkip=true;
+										break;
+									}
+								}
 								dmz->makesiggen(devName, waveform); //create SIGGEN with name devName
 							}
 							else
 							{
 								erz->newError(36); //Must be a binary input
-								errorOccurance=true;
+								symbolSkip=true;
 							}
 							break;
 						default:
 							break;
 					}
-					return errorOccurance;
+					return symbolSkip;
 				}
 				else
 				{
 					erz->newError(9);//clock needs clock cycle number
-					errorOccurance=true;
+					symbolSkip=true;
 				}
 			}
 			else
 			{
 				erz->newError(10);//need colon after name for CLOCK/SWITCH/GATE type
-				errorOccurance=true;
+				symbolSkip=true;
 			}
 		}
 		else
 		{
 			erz->newError(27);//attempting to give two devices the same name, choose an alternative name
-			errorOccurance=true;
+			symbolSkip=true;
 		}
 	}
 	else if (cursym!=badsym)
 	{
 		erz->newError(33);//using reserved word as device name
-		errorOccurance=true;
+		symbolSkip=true;
 	}
 	else
 	{
 		erz->newError(11);//name must begin with letter and only containing letter number and _
-		errorOccurance=true;
+		symbolSkip=true;
 	}
-	return errorOccurance;
+	return symbolSkip;
 }
 
 void parser::connectionList()
@@ -353,7 +372,7 @@ void parser::connectionList()
 bool parser::newConnection()
 {
 	//EBNF: con = devicename'.'input '=' devicename['.'output]
-	bool errorOccurance = false;
+	bool symbolSkip = false;
 	devlink devtype = netz->finddevice(curname);
 	if (devtype != NULL)
 	{
@@ -388,18 +407,20 @@ bool parser::newConnection()
 										if (ilist->connect==NULL)
 										{
 											netz->makeconnection(connectionInName, inputPin, connectionOutName, curname, correctOperation);
-											return errorOccurance;
+											return symbolSkip;
 										}
-											else if (ilist->connect==netz->findoutput(devtype, blankname))
+										else if (ilist->connect==netz->findoutput(devtype, curname))
 										{
 											namestring repeatedInput = smz->nmz->getnamestring(connectionInName);
-											namestring repeatedOutput = smz->nmz->getnamestring(connectionOutName);
+											namestring repeatedOutputDevice = smz->nmz->getnamestring(connectionOutName);
+											namestring repeatedOutputPin = smz->nmz->getnamestring(curname);
+											namestring repeatedOutput = repeatedOutputDevice + "." + repeatedOutputPin;
 											erz->connectionWarning(repeatedInput, repeatedOutput);//generate warnning for repeated connection
 										}
 										else
 										{
 											erz->newError(37);//attempting to input 2 ouputs into same input
-											errorOccurance=true;
+											symbolSkip=true;
 										}
 									}
 									else
@@ -410,14 +431,15 @@ bool parser::newConnection()
 								else
 								{
 									erz->newError(14);	//Expect a dot after dtype
-									errorOccurance=true;
+									symbolSkip=true;
 								}
+								break;
 							default:
 							//check the connection is unique
 								if (ilist->connect==NULL)
 								{
 									netz->makeconnection(connectionInName, inputPin, connectionOutName, blankname, correctOperation);
-									return errorOccurance;
+									return symbolSkip;
 								}
 								else if (ilist->connect==netz->findoutput(devtype, blankname))
 								{
@@ -428,40 +450,41 @@ bool parser::newConnection()
 								else
 								{
 									erz->newError(37);//attempting to input 2 ouputs into same input
-									errorOccurance=true;
+									symbolSkip=true;
 								}
+								break;
 						}
 					}
 					else
 					{
 						erz->newError(15); //Device does not exist
-						errorOccurance=true;
+						symbolSkip=true;
 					}
 				}
 				else
 				{
 					erz->newError(16);//Must specify output to connect to input with equals sign
-					errorOccurance=true;
+					symbolSkip=true;
 				}
 			}
 			else
 			{
 				erz->newError(17);//specify valid input gate after dot
-				errorOccurance=true;
+				symbolSkip=true;
 			}
 		}
 		else
 		{
 			erz->newError(18);//need to seperate connection input with a '.' (or need to specify input)
-			errorOccurance=true;
+			symbolSkip=true;
 		}
 	}
 	else
 	{
 		erz->newError(19); //Device does not exist
-		errorOccurance=true;
+		symbolSkip=true;
 	}
-	return errorOccurance;
+	return symbolSkip;
 }
 
 void parser::monitorList()
@@ -536,7 +559,7 @@ void parser::monitorList()
 bool parser::newMonitor()
 {
 	//EBNF: mon = devicename['.'output]
-	bool errorOccurance = false;
+	bool symbolSkip = false;
 	devlink devtype = netz->finddevice(curname);
 	if (devtype != NULL)
 	{
@@ -555,7 +578,7 @@ bool parser::newMonitor()
 						if (cursym == iosym && olist != NULL)
 						{
 							mmz->makemonitor(monitorName, curname, correctOperation);
-							return errorOccurance;
+							return symbolSkip;
 						}
 						else
 						{
@@ -564,12 +587,14 @@ bool parser::newMonitor()
 					}
 					else
 					{
-						namestring repeatedMonitor = smz->nmz->getnamestring(curname);
+						namestring repeatedMonitorDevice = smz->nmz->getnamestring(monitorName);
+						namestring repeatedMonitorPin = smz->nmz->getnamestring(curname);
+						namestring repeatedMonitor = repeatedMonitorDevice + "." + repeatedMonitorPin;
 						erz->monitorWarning(repeatedMonitor); //repeated monitors
 						if (cursym == iosym && olist != NULL)
 						{
 							mmz->makemonitor(monitorName, curname, correctOperation);
-							return errorOccurance;
+							return symbolSkip;
 						}
 						else
 						{
@@ -580,7 +605,7 @@ bool parser::newMonitor()
 				else
 				{
 					erz->newError(22);	//Expect a dot after dtype
-					errorOccurance=true;
+					symbolSkip=true;
 				}
 			default:
 				outplink olist = netz->findoutput(devtype, blankname);
@@ -595,15 +620,15 @@ bool parser::newMonitor()
 						erz->monitorWarning(repeatedMonitor); //repeated monitors
 						mmz->makemonitor(monitorName, curname, correctOperation);
 					}
-				return errorOccurance;
+				return symbolSkip;
 		}
 	}
 	else
 	{
 		erz->newError(23);//bad device monitor
-		errorOccurance=true;
+		symbolSkip=true;
 	}
-	return errorOccurance;
+	return symbolSkip;
 }
 
 bool parser::isBinary(string numstring)

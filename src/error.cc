@@ -147,7 +147,7 @@ bool error::anyErrors()
 		}
 		else if (warningCount > 1)
 		{
-			cout << "There is 1 error and " << warningCount << "warnings" << endl;
+			cout << "There is 1 error and " << warningCount << " warnings" << endl;
 		}
 		return 1;
 	}
