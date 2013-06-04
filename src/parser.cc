@@ -220,7 +220,7 @@ bool parser::newDevice(int deviceType)
 										dmz->makedevice(norgate, devName, curint, correctOperation);//create nor gate with curint and devName
 										break;
 									default:
-										cout << "How on earth have you managed to get here?" << endl;
+										break;
 								}
 							}
 							else
@@ -246,7 +246,7 @@ bool parser::newDevice(int deviceType)
 							}
 							break;
 						default:
-							cout << "Please do not deduct marks if this message is displayed" << endl;
+							break;
 					}
 					return errorOccurance;
 				}
@@ -385,8 +385,22 @@ bool parser::newConnection()
 									outplink olist = netz->findoutput(devtype, curname);
 									if (cursym == iosym && olist != NULL)
 									{
-										netz->makeconnection(connectionInName, inputPin, connectionOutName, curname, correctOperation);
-										return errorOccurance;
+										if (ilist->connect==NULL)
+										{
+											netz->makeconnection(connectionInName, inputPin, connectionOutName, curname, correctOperation);
+											return errorOccurance;
+										}
+											else if (ilist->connect==netz->findoutput(devtype, blankname))
+										{
+											namestring repeatedInput = smz->nmz->getnamestring(connectionInName);
+											namestring repeatedOutput = smz->nmz->getnamestring(connectionOutName);
+											erz->connectionWarning(repeatedInput, repeatedOutput);//generate warnning for repeated connection
+										}
+										else
+										{
+											erz->newError(37);//attempting to input 2 ouputs into same input
+											errorOccurance=true;
+										}
 									}
 									else
 									{
@@ -409,11 +423,12 @@ bool parser::newConnection()
 								{
 									namestring repeatedInput = smz->nmz->getnamestring(connectionInName);
 									namestring repeatedOutput = smz->nmz->getnamestring(connectionOutName);
-									erz->connectionWarning(repeatedInput, repeatedOutput);
+									erz->connectionWarning(repeatedInput, repeatedOutput);//generate warnning for repeated connection
 								}
 								else
 								{
 									erz->newError(37);//attempting to input 2 ouputs into same input
+									errorOccurance=true;
 								}
 						}
 					}
