@@ -301,7 +301,6 @@ void network::randomisedevices()
 	vector<devlink> devlist;
 	vector<devlink> clklist;
 	
-	cout << "Sorted" << endl;
 	for (devlink d = devs; d != NULL; d = d->next) 
 	{
 		cout << d->kind << endl;
@@ -314,9 +313,10 @@ void network::randomisedevices()
 			clklist.push_back(d);
 		}
 	}
+	
 	std::random_shuffle(devlist.begin(), devlist.end());
 	std::random_shuffle(clklist.begin(), clklist.end());
-	cout << "Shuffled" << endl;
+
 	devlink prevDevice = NULL;
 	devs = NULL;
 	for (std::vector<int>::size_type i = 0; i != devlist.size(); i++) 
