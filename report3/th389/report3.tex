@@ -58,16 +58,16 @@
 \begin{document}
 %\contentsname{IIA GF2 Software: Final Report}
 \begin{center}
-\LARGE \textbf{IIA GF2 Software: Final Report}
+\Huge \textbf{IIA GF2 Software: Final Report}
 
-\small Tim Hillel (th389) \\ Team 8 \\ Downing College
+\large Tim Hillel (th389) \\ Team 8 \\ Downing College
 \end{center}
 
 \tableofcontents
 \pagebreak
 
 \section{Description}
-Our logic simulator is able to simulate any number of circuits which include the following devices:
+The aim of the project was to implement a logic simulator that is able to simulate logic circuits which include the following devices:
 
 \begin{itemize}
 \item Clocks
@@ -80,6 +80,7 @@ Our logic simulator is able to simulate any number of circuits which include the
 \item D-Type flip-flops
 \item Signal generators
 
+
 \begin{figure}[h]
  \centering
  %\includegraphics[width=8cm]{../docs/uml.png}
@@ -89,9 +90,10 @@ Our logic simulator is able to simulate any number of circuits which include the
 
 
 \end{itemize}
-\section{Development Style}
+\pagebreak
+\section{Teamwork and Development Style}
 
-We split the development of our logic simulator into five major phases: specification, design, implementation, testing and maintenance. The timeframe was then decided for each task and each task was assigned to either a team member or the whole team, depending on the nature of the task.
+In the project planning stage, we split the development of our logic simulator into five major phases: specification, design, implementation, testing and maintenance. The timeframe was then decided for each task and each task was assigned to either a team member or the whole team, depending on the nature of the task. This is shown in the Gantt chart in Appendix F. Overall we found we stuck well to the planned timescale, often completing tasks before the internal deadlines we had set, which allowed longer for incremental improvements to code in the testing and debugging stages.
 
 Each member of the team was also assigned a general project role as follows:
 
@@ -101,11 +103,27 @@ Each member of the team was also assigned a general project role as follows:
 
 \textbf{Client representative:} (M Jackson) - Responsible for ensuring that the project meets the client's requirements for the logic simulator as defined in Appendix A of the GF2 Project Handout.
 
-We made significant use of git for revision control, as well as GitHub for tracking bugs in the software and features required by the client.
+Overall this system worked relatively effectively, as each member of the team had both technical and general tasks which they were responsible for. We did find during the running of the project that there was not a strong need for a strict organisational structure. This was mainly due to the extensive use of git for revision control through GitHub. This allowed each member of the team to test, edit and change any code within the project remotely, whilst fully tracking any changes made to code. GitHub allowed issues to be raised when bugs were found that would require more than a quick fix or when functionality of a class did not exactly meet the client's specification.
+
+Occassionally this allowed for problems when multiple users edited the same file before attempting to push it to the repository, but \texttt{git merge} was used to deal with these issues effectively.
+
+We also found that the breakdown of the tasks we had initially planned for were not completely equal, as an example the names and scanner class implemented a lot of the code written in the preliminary exercises, and so Jamie Magee, who was assigned to this task, had time to help Tim Hillel with the parser. GitHub allowed the team to track which tasks required more input and so a member could assist when they had finished their section, such as Jamie Magee helping with \texttt{parser.cc}. Whilst Martin Jackson's primary task was the GUI during the developement phase, he was also always on hand to help debug problems in the other classes.
+
+For the maintenance phase of the project, each team member was assigned to one of the modifications required:
+
+\textbf{Nonzero Hold Time of Bistables:} J Maggee
+
+\textbf{Signal Generators:} T Hillel
+
+\textbf{Continious Simulation:} M Jackson
+
+Again we found that the tasks were not balanced; the nonzero hold time of bistables modification was a more involved task, and so Martin Jackson helped Jamie Maggee with this task whilst Tim Hillel implemented general maintenance changes as suggested by feedback from Interim Report 2.
+
+Overall, the team worked very effectively through the task and there were no issues that caused any major problems. Using GitHub to manage the task definitely aided with the efficeincy of the team, and the experience has provided useful skills for the future.
 
 \section{My Contribution}
 
-I took on responsibility for writing the names and scanner classes. In addition, I wrote approximately 25\% of the parser class. Once the majority of the software was written, I designed a definition file for each error and warning our logic simulator can throw and then wrote a shell script which would attempt to run each definition file, and record the output from our logic simulator. The shell script can be found in code listing \ref{test-script}
+I was mainly responsible for the parser and error detection, which was implemented in a seperate error class. 
 
 \section{Testing}
 
@@ -128,14 +146,14 @@ Please see attatched Interim Report 2 for test definition files for functions im
 \subsection{SIGGEN}
 
 \subsubsection{Definition File}
-\lstinputlisting[caption=siggen.gf2 - Note defined a very long waveform to display ability to take waveform of arbritary length, as well as one waveform defined with whitespace in sequence to show this functionality]{../../examples/siggen.gf2}
+\lstinputlisting[caption=siggen.gf2 - Note defined a very long waveform to test ability to take waveform of arbritary length; defined other waveform with spaces in sequence to test this ability]{../../examples/siggen.gf2}
 
 \subsubsection{Circuit Diagram}
 \begin{figure}[h]
  \centering
- \includegraphics[width=8cm]{../../examples/siggen.png}
+ \includegraphics[width=8cm]{../../examples/xor.png} %TODO: SIGGEN Diagram
  \caption{Circuit diagram of two Signal Generators conencted to a 2-input AND gate}
- \label{fig:example-xor}
+ \label{fig:example-siggen}
 \end{figure}
 
 \pagebreak
@@ -151,4 +169,25 @@ Please see attatched Interim Report 2 for test definition files for functions im
 
 \section{File Listing}
 
+\pagebreak
+\section{Gantt Chart}
+\begin{figure}[h]
+ \centering
+  \includegraphics[height=19cm]{Gantt-Chart.png}
+ \caption{Gantt chart showing key events in development cycle}
+ \label{fig:ganttchart}
+\end{figure}
+\pagebreak
+
+\section{Class Diagram}
+\begin{figure}[h]
+ \centering
+  \includegraphics[height=19cm]{Gantt-Chart.png} %TODO: class diagram of logic simulator
+ \caption{Class diagram of logic simulator}
+ \label{fig:classdiagram}
+\end{figure}
+
+
+\clearpage
 \end{document}
+
