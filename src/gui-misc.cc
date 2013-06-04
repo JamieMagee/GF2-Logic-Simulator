@@ -29,6 +29,7 @@ void SwitchesCheckListBox::OnCircuitChanged()
 		d = d->next;
 	}
 	switches.UpdateSignalNames(c);
+	sort(switches.begin(), switches.end(), CircuitElementInfo_namestrcmp);
 	wxArrayString switchNames;
 	CircuitElementInfoVector_to_wxArrayString(switches, switchNames);
 	Set(switchNames);
