@@ -4,9 +4,6 @@
 #include "names.h"
 #include <string>
 #include <vector>
-#include <iostream>
-//#include <stdlib.h>
-#include <algorithm>
 
 using namespace std;
 
@@ -116,7 +113,6 @@ class network {
   devlink devs;          // the list of devices
   devlink lastdev;       // last device in list of devices
 
-  void randomisedevices(void);
 };
 
 #endif /* network_h */

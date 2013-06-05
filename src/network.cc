@@ -192,7 +192,6 @@ void network::checknetwork (bool& ok, bool silent)
         }
         ok = false;
       }
-    randomisedevices();
 }
 
 
@@ -296,40 +295,3 @@ string network::getsignalstring(devlink d, inplink i)
 	return getsignalstring(d->id, i->id);
 }
 
-void network::randomisedevices()
-{
-	vector<devlink> devlist;
-	vector<devlink> clklist;
-	
-	for (devlink d = devs; d != NULL; d = d->next) 
-	{
-		if (d->kind != aclock)
-		{
-			devlist.push_back(d);
-		}
-		else
-		{
-			clklist.push_back(d);
-		}
-	}
-	
-	std::random_shuffle(devlist.begin(), devlist.end());
-	std::random_shuffle(clklist.begin(), clklist.end());
-
-	devlink prevDevice = NULL;
-	devs = NULL;
-	for (std::vector<int>::size_type i = 0; i != devlist.size(); i++) 
-	{
-		if (prevDevice==NULL) devs = devlist[i];
-		else prevDevice->next = devlist[i];
-		prevDevice = devlist[i];
-	}
-	for (std::vector<int>::size_type i = 0; i != clklist.size(); i++) 
-	{
-		if (prevDevice==NULL) devs = clklist[i];
-		else prevDevice->next = clklist[i];
-		prevDevice = clklist[i];
-	}
-	if (prevDevice!=NULL) prevDevice->next = NULL;
-	lastdev = prevDevice;
-}
