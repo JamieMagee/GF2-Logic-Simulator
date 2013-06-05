@@ -202,16 +202,18 @@ void ScannerTests::checkSyms(string testDescription, string inputTxt, vector<Sca
 	f.close();
 
 	names *nmz = new names();
-	scanner *smz = new scanner(nmz, fileName.c_str());
-	bool ok = true;
+	bool ok;
+	scanner *smz = new scanner(nmz, fileName.c_str(), ok);
+	ok = true;
 	symbol sym;
 	name id;
 	int num;
+	string numstring;
 	for (int i=0; i<expected.size(); i++)
 	{
 		id = blankname;
 		num = 0;
-		smz->getsymbol(sym, id, num);
+		smz->getsymbol(sym, id, num, numstring);
 		if (!expected[i].matches(nmz, sym, id, num))
 		{
 			ok = false;
