@@ -79,7 +79,9 @@ Our logic simulator is able to simulate any number of circuits which include the
 \item Signal generators
 \end{itemize}
 
-It is able to scan, parse and execute circuits written in the language as specified in our EBNF in Appendix~\ref{sec:EBNF}. For a complete guide on how to operate our logic simulator, please see the user guide in Appendix~\ref{sec:guide}.
+It uses files written in the language as specified in our EBNF in Appendix~\ref{sec:EBNF}, with the file extension \texttt{.gf2} and have MIME type \texttt{text/plain}. Errors in a definition file are reported fully to the user upon reading a definition file, and give unique error codes for each different type of error. There is no limit on the number of devices in a network (except for that implied by the available memory of the computer). There may also be an unlimited number of monitors. For a complete guide on how to operate our logic simulator, please see the user guide in Appendix~\ref{sec:guide}.
+
+For the structure of our logic simulator we made use of modularisation through the use of object oriented programming. The logic circuit is internally represented using the network class, in addition to the devices class which stores details about the properties of each device. When a file is opened, it is read by the parser class, by creating an instance of the scanner class
 
 \section{Development Style}
 
@@ -109,13 +111,15 @@ Overall I believe our team worked efficiently, and as a result we were able to a
 
 \section{My Contribution}
 
-I took on responsibility for writing the names and scanner classes. In addition, I wrote approximately 25\% of the parser class. Once the majority of the software was written, I designed a definition file for each error and warning our logic simulator can throw and then wrote a shell script which would attempt to run each definition file, and record the output from our logic simulator. In addition to testing for errors, I wrote a shell script which would run through each of our test definition files, in Appendix~\ref{sec:examples}, and record the output. Both the shell scripts can be found in Appendix~\ref{sec:tests}.
+I took on responsibility for writing the names and scanner classes. In addition, I wrote approximately 25\% of the parser class. the names class stores a list of all the words used within a definition file, and methods to manipulate them. It is initialised with only the reserved words, but can be populated as a definition file is read. the scanner class reads through the definition file, character by character, and is able to return complete symbols to the parser. It is able to return the internal representation of a symbol, the type of symbol and optionally the value. The parser class analyses the definition file as it is read in according to the rules laid out in our EBNF. It is then able to create devices, connections and monitors that are laid out in the definition file. I wrote the \texttt{newConnection, monitorList} and \texttt{newMonitor} methods. The \texttt{newConnection} and \texttt{newMonitor} methods deal with reading in a connection and monitor respectively, and creating them using the network and monitor classes respectively. The \texttt{monitorList} class deals with reading in an entire \texttt{MONITOR} block, as defined by our EBNF, which can be seen in Appendix~\ref{sec:EBNF}
 
-During the maintenance phase of the project, I undertook the task to implement a non-zero hold time for d-type flip flops. This also included randomising the order of execution of devices.
+Once the majority of the software was written, I designed a definition file for each error and warning our logic simulator can throw and then wrote a shell script which would attempt to run each definition file, and record the output from our logic simulator. In addition to testing for errors, I wrote a shell script which would run through each of our test definition files, in Appendix~\ref{sec:examples}, and record the output. Both the shell scripts can be found in Appendix~\ref{sec:tests}.
+
+During the maintenance phase of the project, I undertook the task to implement a non-zero hold time for d-type flip flops, as well as randomising the order of execution of devices. the non-deterministic characteristics of d-types required editing of the devices class, specifically the \texttt{execdtype} method. Randomising the order of execution of devices was implemented in the network class, and required reading the values from the existing devices list, shuffling the list (while still retaining clocks at the end of the list) and writing it back.
 
 \section{Testing}
 
-We used two main tests of testing - unit and system testing - both of which are industry standard practices. For our unit testing, Martin wrote an errors class which compared the actual output from various units of code, to the expected output. For system testing I wrote a shell script which passed definition files to the logic simulator and recorded the output in a text file. There were two variatons on the shell script: One which ran known good definition files and therefore had to input the commands to run the simulation in addition to recording the output; Another which ran known bad definition files and only expected parsing errors which it recorded.
+We used two main tests of testing - unit and system testing - both of which are industry standard practices. For our unit testing, Martin wrote an errors class which compared the actual output from various units of code, to the expected output. For system testing I wrote a shell script which passed definition files to the logic simulator and recorded the output in a text file. There were two variations on the shell script: One which ran known good definition files and therefore had to input the commands to run the simulation in addition to recording the output; Another which ran known bad definition files and only expected parsing errors which it recorded.
 
 \section{Conclusions}
 
@@ -250,18 +254,21 @@ All supplied definition files and circuit diagrams were written and designed by 
 
 \begin{figure}[h]
         \centering
-        \includegraphics[width=.6\textwidth]{../../report2/jam96/simulation}
+        \includegraphics[width=.8\textwidth]{../../report2/jam96/simulation}
         \caption{The view upon running a simulation}
         \label{fig:simulation}
 \end{figure}
 
-\textbf{Running simulations:} In order to run a simulation you must first enter a number of cycles you wish the simulation to run for (default is \texttt{42}) then press the run button. The monitored signals will be displayed in the left display panel. You may choose to continue the simulation by pressing the \texttt{Continue} button, or run the simulation continuously by pressing the \texttt{Continuous Simulation} button.
+\textbf{Running simulations:} In order to run a simulation you must first enter a number of cycles you wish the simulation to run for (default is \texttt{10}) then press the run button. The monitored signals will be displayed in the left display panel. You may choose to continue the simulation by pressing the \texttt{Continue} button, or run the simulation continuously by pressing the \texttt{Continuous Simulation} button.
 
 \textbf{Adding or removing monitors:} You can edit the signals that are monitored and displayed in the main window. To add monitors, click the \texttt{Add monitors} button and select the monitor, or monitors, you wish to add followed by the \texttt{OK} button. To remove monitors, press the \texttt{Remove monitors} button and select the monitor, or monitors, you wish to remove followed by the \texttt{OK} button
 
 \textbf{Editing devices:} To edit devices, click the \texttt{Edit devices} button. From the Edit devices dialogue you can change the device's name, type and number of inputs (if applicable). You can also change the inputs to, or ouputs from a device.
 
 \textbf{Changing switch states:} If your circuit contains any  switches, you can change the state of the switch by changing the state of the check box beside its name.
+
+\textbf{Changing simulator settings:} You can change certain settings relating to the operation of the logic simulator. Click the \texttt{Options} menu and from here you can change or reset settings as well as adjust the continuous run speed. By clicking \texttt{Edit options} you can change the trace options and debugging options.
+
 
 \pagebreak
 
