@@ -326,13 +326,20 @@ void devices::execdtype (devlink d, int cycles)
 		else
 		{
 			d->holdCountdown--;
+			if (d->holdCountdown==0)
+			{
+				d->memory = datainput;
+			}
+			else
+			{
+				steadystate = false;
+			}
 		}
 	}
 	if (clkinput == rising)
 	{
 		if (d->steadyCounter>=2)
 		{
-			d->memory = datainput;
 			d->holdCountdown = 1;
 		}
 		else
