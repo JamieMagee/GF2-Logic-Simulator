@@ -1,1 +1,0 @@
-./astyle -A1TSCYpHUxek1W1y --recursive  ../src/*.cpp  ../src/*.h
