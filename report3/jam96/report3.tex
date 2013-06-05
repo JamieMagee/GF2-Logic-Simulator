@@ -121,7 +121,7 @@ During the maintenance phase of the project, I undertook the task to implement a
 \section{Testing}
 
 We used two main tests of testing - unit and system testing - both of which are industry standard practices. For our unit testing, Martin wrote an errors class which compared the actual output from various units of code, to the expected output. For system testing I wrote a shell script which passed definition files to the logic simulator and recorded the output in a text file. There were two variations on the shell script: One which ran known good definition files and therefore had to input the commands to run the simulation in addition to recording the output; Another which ran known bad definition files and only expected parsing errors which it recorded. An example of the output produced by the the test shell script is as follows:
-
+\pagebreak
 \begin{verbatim}
 processing sipo.gf2...
 Logic Simulator: interactive command interface
@@ -149,14 +149,17 @@ There is 1 error
 
 \section{Conclusions}
 
-Overall I believe that we worked well as a team, and were able to achieve the requirements set out by the client.
+Overall I believe that we worked well as a team, and were able to achieve the requirements set out by the client. We made effective use of \texttt{git} for revision control, bug tracking and feature requests. This allowed us to focus more on writing code, and less time on code management. Due to our extensive tests - both unit and system - we were able to quickly identify bugs in our code before committing them to our GitHub repository. This again, allowed more time to be spent on writing code, and less time hunting down bugs. 
 
 If we had more time I would improve our logic simulator by:
 
 \begin{itemize}
 \item Implementing a WYSIWYG GUI
 \item Improving the parser to allow simple error correction
-\item Expand the device library to include JK flip-flops
+\item Expand the device library to include JK flip-flops and XNOR gates
+\item Rearrange monitors in the GUI by dragging and dropping
+\item Save changes made to a circuit using the GUI, to the definition file
+\item Export the monitors from the GUI to CSV or PNG
 \end{itemize}
 
 \pagebreak
