@@ -265,6 +265,9 @@ bool MyFrame::loadFile(const char * filename)
 
 	fileMenu->Enable(MENU_RELOAD_FILE, true);
 	fileHistory->AddFileToHistory(wxString(filename, wxConvUTF8));
+	wxConfig *config = new wxConfig(configName);
+	fileHistory->Save(*config);
+	delete config;
 	lastFilePath = filename;
 
 	// Clear log window
