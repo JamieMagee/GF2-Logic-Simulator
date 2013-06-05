@@ -156,6 +156,7 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	c->circuitChanged.Attach(this, &MyFrame::UpdateControlStates);
 	c->monitorsChanged.Attach(this, &MyFrame::UpdateControlStates);
 	c->monitorSamplesChanged.Attach(this, &MyFrame::UpdateControlStates);
+	c->circuitChanged.Attach(this, &MyFrame::OnOptionsChanged);
 	options->optionsChanged.Attach(this, &MyFrame::OnOptionsChanged);
 	OnOptionsChanged();
 	UpdateControlStates();
