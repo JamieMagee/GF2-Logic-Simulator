@@ -1,0 +1,61 @@
+/*
+This circuit demonstrates one case of randomised device order working,
+and two problems with it.
+
+When run with randomised device order:
+For D1, rising data edge is always one machinecycle after the rising clock edge.
+For D2, rising data edge is always one machinecycle before the rising clock edge.
+The input therefore changes within the setup/hold time, around the time
+of the rising clock edge, yet the output is always determinate.
+D1 is always high, D2 is always low. The device order only affects when the D1 rise occurs.
+
+D3, where data and clk rising edges occur simultaneously, has a random output.
+*/
+
+DEVICES
+SWITCH R:0;
+SWITCH S:0;
+
+CLOCK data1:1;
+DTYPE D1;
+OR clk1:1;
+
+CLOCK clk2:1;
+DTYPE D2;
+OR data2:1;
+
+CLOCK clk3:1;
+DTYPE D3;
+
+END
+
+CONNECTIONS
+clk1.I1 = data1;
+D1.DATA = data1;
+D1.CLK = clk1;
+D1.SET = S;
+D1.CLEAR = R;
+
+data2.I1 = clk2;
+D2.DATA = data2;
+D2.CLK = clk2;
+D2.SET = S;
+D2.CLEAR = R;
+
+D3.DATA = clk3;
+D3.CLK = clk3;
+D3.SET = S;
+D3.CLEAR = R;
+
+END
+
+MONITORS
+data1;
+clk1;
+D1.Q;
+data2;
+clk2;
+D2.Q;
+clk3;
+D3.Q;
+END
