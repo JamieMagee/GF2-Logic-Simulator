@@ -25,7 +25,7 @@ void LogsimOptions::Save()
 	config->Write(wxT("continuousRate"), continuousRate);
 	config->Write(wxT("debugMachineCycles"), debugMachineCycles);
 	config->Write(wxT("debugSim"), debugSim);
-	config->Write(wxT("debugSimIndeterminate"), debugSim);
+	config->Write(wxT("debugSimIndeterminate"), debugSimIndeterminate);
 	delete config;
 }
 
@@ -40,7 +40,7 @@ void LogsimOptions::Load()
 	config->Read(wxT("continuousRate"), &continuousRate);
 	config->Read(wxT("debugMachineCycles"), &debugMachineCycles);
 	config->Read(wxT("debugSim"), &debugSim);
-	config->Read(wxT("debugSimIndeterminate"), &debugSim);
+	config->Read(wxT("debugSimIndeterminate"), &debugSimIndeterminate);
 	delete config;
 }
 
