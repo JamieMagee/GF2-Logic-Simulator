@@ -1,0 +1,40 @@
+/* Demonstration of effect of device declaration order on D-type behaviour
+   With the original code, D1 is high, D2 is low. Outcome is random for both
+   D1 and D2 with both the randomised device order implementation and the final implementation of the D-type maintenance modifications. */
+
+DEVICES
+SWITCH R:0;
+SWITCH S:0;
+
+CLOCK clk:1;
+OR clk1:1; /* rising clk edge delayed by 1 machine cycle */
+OR clk2:1; /* rising clk edge delayed by 2 machine cycles */
+
+DTYPE D1;
+OR clk2o:1; /* rising clk edge delayed by 1 machine cycle for D1 or 2 for D2 */
+DTYPE D2;
+
+END
+
+CONNECTIONS
+clk2o.I1 = clk1;
+clk2.I1 = clk1;
+clk1.I1 = clk;
+
+D1.CLK = clk2;
+D2.CLK = clk2;
+D1.DATA = clk2o;
+D2.DATA = clk2o;
+
+D1.SET = S;
+D1.CLEAR = R;
+D2.SET = S;
+D2.CLEAR = R;
+END
+
+MONITORS
+clk2;
+clk2o;
+D1.Q;
+D2.Q;
+END

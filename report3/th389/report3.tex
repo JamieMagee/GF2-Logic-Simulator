@@ -107,7 +107,7 @@ Overall this system worked relatively effectively, as each member of the team ha
 
 Occassionally this allowed for problems when multiple users edited the same file before attempting to push it to the repository, but \texttt{git merge} was used to deal with these issues effectively.
 
-We also found that the breakdown of the tasks we had initially planned for were not completely equal, as an example the names and scanner class implemented a lot of the code written in the preliminary exercises, and so Jamie Magee, who was assigned to this task, had time to help Tim Hillel with the parser. GitHub allowed the team to track which tasks required more input and so a member could assist when they had finished their section, such as Jamie Magee helping with \texttt{parser.cc}. Whilst Martin Jackson's primary task was the GUI during the developement phase, he was also always on hand to help debug problems in the other classes.
+We also found that the breakdown of the tasks we had initially planned for were not completely equal, as an example the names and scanner class implemented a lot of the code written in the preliminary exercises, and so Jamie Magee, who was assigned to this task, had time to help me with the parser. GitHub allowed the team to track which tasks required more input and so a member could assist when they had finished their section, such as Jamie Magee helping with \texttt{parser.cc}. Whilst Martin Jackson's primary task was the GUI during the developement phase, he was also always on hand to help debug problems in the other classes.
 
 For the maintenance phase of the project, each team member was assigned to one of the modifications required:
 
@@ -117,13 +117,19 @@ For the maintenance phase of the project, each team member was assigned to one o
 
 \textbf{Continious Simulation:} M Jackson
 
-Again we found that the tasks were not balanced; the nonzero hold time of bistables modification was a more involved task, and so Martin Jackson helped Jamie Maggee with this task whilst Tim Hillel implemented general maintenance changes as suggested by feedback from Interim Report 2.
+Again we found that the tasks were not balanced; the nonzero hold time of bistables modification was a more involved task, and so Martin Jackson helped Jamie Maggee with this task whilst I implemented general maintenance changes as suggested by feedback from Interim Report 2.
 
 Overall, the team worked very effectively through the task and there were no issues that caused any major problems. Using GitHub to manage the task definitely aided with the efficeincy of the team, and the experience has provided useful skills for the future.
 
 \section{My Contribution}
 
-I was mainly responsible for the parser and error detection, which was implemented in a seperate error class. 
+For the design and implementation stages of the project, I was mainly responsible for the parser and error detection, which was implemented in a seperate error class. The parser operates by calling the scanner class, which has internal functions to skip whitspace and comments, returning the code one symbol at a time, out of \texttt{namesym, numsym, devsym, consym, monsym, endsym, classsym, iosym, colon, semicol, equals, dot, badsym} and \texttt{eofsym}. If the symbol is not the one expected according to the EBNF, an error function is called in the error class, passing the associated error code. The error class then looks up the error code on a lookup table, which is a vector of error messages, and outputs the error message, as well as increasing the \textt{errorCount}. A function is also called in the scanner class, which outputs the line the error occured on as well as where on the line the error occured, up to the next semicolon. Parsing then continues from the next line.
+
+Warnings were implemented using a similar technique, except warnings within the error class do not call the function outputting the line and position the error occured on, as this would cause code to be skipped by the parser. Instead, where a warning needed to output more specific information, for instance the specific output that was being monitered multiple times, this information was parsed from the parser to the warning function within the errors class, and outputted along with the warning message.
+
+To help with the readability of the code, each line of the EBNF was implemented as a seperate function within the parser.
+
+Within the maintenance phase, I was responsible for implementing signal generators within the logic simulator. This involved modifying all of the scanner, names, parser, devices and error classes, as well as the EBNF. Changes within the GUI were handled by Martin Jackson. The majority 
 
 \section{Testing}
 
@@ -151,7 +157,7 @@ Please see attatched Interim Report 2 for test definition files for functions im
 \subsubsection{Circuit Diagram}
 \begin{figure}[h]
  \centering
- \includegraphics[width=8cm]{../../examples/xor.png} %TODO: SIGGEN Diagram
+ \includegraphics[width=8cm]{../../examples/siggen.png} %TODO: SIGGEN Diagram
  \caption{Circuit diagram of two Signal Generators conencted to a 2-input AND gate}
  \label{fig:example-siggen}
 \end{figure}

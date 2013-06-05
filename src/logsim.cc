@@ -3,7 +3,7 @@
 #include "gui.h"
 #include <GL/glut.h>
 
-#define USE_GUI
+//#define USE_GUI
 
 IMPLEMENT_APP(MyApp)
   

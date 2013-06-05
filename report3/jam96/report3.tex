@@ -14,6 +14,7 @@
 \usepackage{amsmath}
 \usepackage{color}
 \usepackage{dirtree}
+\usepackage{verbatim}
 
 % Indent verbatim environments
 \makeatletter \def\verbatim@processline{\hspace*{2em}\the\verbatim@line\par}\makeatother
@@ -81,7 +82,7 @@ Our logic simulator is able to simulate any number of circuits which include the
 
 It uses files written in the language as specified in our EBNF in Appendix~\ref{sec:EBNF}, with the file extension \texttt{.gf2} and have MIME type \texttt{text/plain}. Errors in a definition file are reported fully to the user upon reading a definition file, and give unique error codes for each different type of error. There is no limit on the number of devices in a network (except for that implied by the available memory of the computer). There may also be an unlimited number of monitors. For a complete guide on how to operate our logic simulator, please see the user guide in Appendix~\ref{sec:guide}.
 
-For the structure of our logic simulator we made use of modularisation through the use of object oriented programming. The logic circuit is internally represented using the network class, in addition to the devices class which stores details about the properties of each device. When a file is opened, it is read by the parser class, by creating an instance of the scanner class
+For the structure of our logic simulator we made use of modularisation through the use of object oriented programming. The logic circuit is internally represented using the network class, in addition to the devices class which stores details about the properties of each device. Names of devices are represented internally by a unique integer. The names class handles the storage of names as they are read in, as well as storing a list of reserved names upon instantiation. When a file is opened, it is read by the parser class, by creating an instance of the scanner class which reads through the definition file character, by character, building them up into symbols which are returned to the parser. Depending on the order of the symbols that were read in, the parser can create devices, connections or monitors (or throw errors). Once the entire definition file has been read in, the gui class interprets commands issued by the user and makes appropriate calls to the network, monitor and devices classes. 
 
 \section{Development Style}
 
@@ -119,7 +120,32 @@ During the maintenance phase of the project, I undertook the task to implement a
 
 \section{Testing}
 
-We used two main tests of testing - unit and system testing - both of which are industry standard practices. For our unit testing, Martin wrote an errors class which compared the actual output from various units of code, to the expected output. For system testing I wrote a shell script which passed definition files to the logic simulator and recorded the output in a text file. There were two variations on the shell script: One which ran known good definition files and therefore had to input the commands to run the simulation in addition to recording the output; Another which ran known bad definition files and only expected parsing errors which it recorded.
+We used two main tests of testing - unit and system testing - both of which are industry standard practices. For our unit testing, Martin wrote an errors class which compared the actual output from various units of code, to the expected output. For system testing I wrote a shell script which passed definition files to the logic simulator and recorded the output in a text file. There were two variations on the shell script: One which ran known good definition files and therefore had to input the commands to run the simulation in addition to recording the output; Another which ran known bad definition files and only expected parsing errors which it recorded. An example of the output produced by the the test shell script is as follows:
+
+\begin{verbatim}
+processing sipo.gf2...
+Logic Simulator: interactive command interface
+# Running for 50 cycles
+CLK2               :_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+D1.Q               :___--__--__--__--__--__--__--__--__--__--__--__--_
+D2.Q               :_____--__--__--__--__--__--__--__--__--__--__--__-
+D3.Q               :_______--__--__--__--__--__--__--__--__--__--__--_
+D4.Q               :_________--__--__--__--__--__--__--__--__--__--__-
+# Logic Simulator: terminating.
+\end{verbatim}
+
+An example of the output produced by the error shell script is as follows:
+
+\begin{verbatim}
+processing 12.gf2...
+Line 11:
+1.I1 = S1;
+^
+Error 0x000C: Connection must start with the name of a device
+Unconnected Input : G1.I1
+There is 1 error
+\end{verbatim}
+
 
 \section{Conclusions}
 

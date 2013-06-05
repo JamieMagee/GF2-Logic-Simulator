@@ -11,6 +11,7 @@ The following are reserved words and so cannot be used as device names:
 	NOR
 	DTYPE
 	XOR
+	SIGGEN
 	I1
 	I2
 	I3
