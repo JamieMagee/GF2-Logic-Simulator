@@ -17,13 +17,14 @@ class devices{
   name        clkpin, datapin, setpin;
   name        clrpin, qpin, qbarpin;     /* Input and Output Pin names */
   bool        debugging;
+  bool        debuggingIndeterminate;
 
   void showdevice (devlink d);
   void makeswitch (name id, int setting, bool& ok);
   void makeclock (name id, int frequency);
   void makegate (devicekind dkind, name did, int ninputs, bool& ok);
   void makedtype (name id);
-  void signalupdate (asignal target, asignal& sig);
+  void signalupdate (asignal target, outplink o);
   asignal inv (asignal s);
   void execswitch (devlink d);
   void execgate (devlink d, asignal x, asignal y);
@@ -61,6 +62,8 @@ public:
  
   void debug (bool on);
     /* Used to set debugging switch.                                       */
+  void debugIndeterminate(bool on);
+    /* Used to set dtype maintenance debugging switch.                     */
 
   // Changes the number of inputs for a gate
   void SetGateInputCount(devlink d, int newCount);

@@ -136,6 +136,7 @@ void network::addoutput (devlink dev, name oid)
   o->dev = dev;
   o->id = oid;
   o->sig = low;
+  o->nextsig = low;
   o->next = dev->olist;
   dev->olist = o;
 }

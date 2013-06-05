@@ -157,6 +157,7 @@ MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos, co
 	c->monitorsChanged.Attach(this, &MyFrame::UpdateControlStates);
 	c->monitorSamplesChanged.Attach(this, &MyFrame::UpdateControlStates);
 	options->optionsChanged.Attach(this, &MyFrame::OnOptionsChanged);
+	OnOptionsChanged();
 	UpdateControlStates();
 }
 
@@ -376,6 +377,7 @@ void MyFrame::OnButtonRunContinuously(wxCommandEvent& event)
 void MyFrame::OnOptionsChanged()
 {
 	c->dmz()->debug(options->debugSim);
+	c->dmz()->debugIndeterminate(options->debugSimIndeterminate);
 }
 
 void MyFrame::OnButtonAddMon(wxCommandEvent& event)// "Add monitors" button clicked

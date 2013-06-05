@@ -150,6 +150,8 @@ void devices::makedtype (name id)
   netz->addoutput (d, qpin);
   netz->addoutput (d, qbarpin);
   d->memory = low;
+  d->holdCountdown = 0;
+  d->steadyCounter = 0;
 }
 
 /***********************************************************************
@@ -204,25 +206,23 @@ void devices::makedevice (devicekind dkind, name did, int variant, bool& ok)
 
 /***********************************************************************
  *
- * Update signal `sig' in the direction of signal `target'.
- * Set steadystate to false if this results in a change in sig.
+ * Update output `o' in the direction of signal `target'.
+ * Set steadystate to false if this results in a change in o->sig.
  *
  */
-void devices::signalupdate (asignal target, asignal& sig)
+void devices::signalupdate (asignal target, outplink o)
 {
-  asignal oldsig;
-  oldsig = sig;
-  switch (sig) {
+  switch (o->sig) {
     case falling:
     case low:
-      sig = (target == high) ? rising : low;
+      o->nextsig = (target == high) ? rising : low;
       break;
     case rising:
     case high:
-      sig = (target == low) ? falling : high;
+      o->nextsig = (target == low) ? falling : high;
       break;
   }
-  if (sig != oldsig)
+  if (o->nextsig != o->sig)
     steadystate = false;
 }
 
@@ -246,7 +246,7 @@ asignal devices::inv (asignal s)
  */
 void devices::execswitch (devlink d)
 {
-  signalupdate (d->swstate, d->olist->sig);
+  signalupdate (d->swstate, d->olist);
 }
 
 
@@ -268,7 +268,7 @@ void devices::execgate (devlink d, asignal x, asignal y)
       newoutp = inv (y);
     inp = inp->next;
   }
-  signalupdate (newoutp, outp->sig);
+  signalupdate (newoutp, outp);
 }
 
 
@@ -285,7 +285,7 @@ void devices::execxorgate(devlink d)
     newoutp = low;
   else
     newoutp = high;
-  signalupdate (newoutp, d->olist->sig);
+  signalupdate (newoutp, d->olist);
 }
 
 
@@ -300,35 +300,63 @@ void devices::execxorgate(devlink d)
  */
 void devices::execdtype (devlink d, int cycles)
 {
-  static const asignal arr[] = {low,high};
-  vector<asignal> random (arr, arr + sizeof(arr) / sizeof(arr[0]));
-  asignal datainput, clkinput, setinput, clrinput;
-  inplink i;
-  outplink qout, qbarout;
-  i = netz->findinput (d, datapin); datainput = i->connect->sig;
-  i = netz->findinput (d, clkpin);  clkinput  = i->connect->sig;
-  i = netz->findinput (d, clrpin);  clrinput  = i->connect->sig;
-  i = netz->findinput (d, setpin);  setinput  = i->connect->sig;
-  qout = netz->findoutput (d, qpin);
-  qbarout = netz->findoutput (d, qbarpin);
-	  if ((clkinput == rising) && ((datainput == rising) || (datainput == falling)))
-	  {
-		d->memory = random[rand()%2];
-	  }
-	  if ((clkinput == rising)  && (datainput == low))
-	  {
-		d->memory = low;
-	  }
-	  if ((clkinput == rising)  && (datainput == high))
-	  {
+	asignal datainput, clkinput, setinput, clrinput;
+	inplink i;
+	outplink qout, qbarout;
+	i = netz->findinput (d, datapin); datainput = i->connect->sig;
+	i = netz->findinput (d, clkpin);  clkinput  = i->connect->sig;
+	i = netz->findinput (d, clrpin);  clrinput  = i->connect->sig;
+	i = netz->findinput (d, setpin);  setinput  = i->connect->sig;
+	qout = netz->findoutput (d, qpin);
+	qbarout = netz->findoutput (d, qbarpin);
+	if (datainput==rising || datainput == falling)
+		d->steadyCounter = 0;
+	else if (d->steadyCounter<3)
+		d->steadyCounter++;
+	if (d->holdCountdown>0)
+	{
+		if (datainput==rising || datainput == falling)
+		{
+			d->memory = (rand()%2 ? high : low);
+			if (debuggingIndeterminate)
+			{
+				cout << "Warning: indeterminate output for D-type " << nmz->getnamestring(d->id) << ", input changed during hold time" << endl;
+			}
+		}
+		else
+		{
+			d->holdCountdown--;
+		}
+	}
+	if (clkinput == rising)
+	{
+		if (d->steadyCounter>=2)
+		{
+			d->memory = datainput;
+			d->holdCountdown = 1;
+		}
+		else
+		{
+			d->memory = (rand()%2 ? high : low);
+			if (debuggingIndeterminate)
+			{
+				if (d->steadyCounter==0)
+				{
+					cout << "Warning: indeterminate output for D-type " << nmz->getnamestring(d->id) << ", input changed during clock rise" << endl;
+				}
+				else
+				{
+					cout << "Warning: indeterminate output for D-type " << nmz->getnamestring(d->id) << ", input changed during setup time" << endl;
+				}
+			}
+		}
+	}
+	if (setinput == high)
 		d->memory = high;
-	  }
-	  if (setinput == high)
-		d->memory = high;
-	  if (clrinput == high)
+	if (clrinput == high)
 		d->memory = low;
-  signalupdate (d->memory, qout->sig);
-  signalupdate (inv (d->memory), qbarout->sig);
+	signalupdate (d->memory, qout);
+	signalupdate (inv (d->memory), qbarout);
 }
 
 
@@ -340,12 +368,7 @@ void devices::execdtype (devlink d, int cycles)
  */
 void devices::execclock(devlink d)
 {
-  if (d->olist->sig == rising)
-    signalupdate (high, d->olist->sig);
-  else {
-    if (d->olist->sig == falling)
-      signalupdate (low, d->olist->sig);
-  }
+  signalupdate(d->memory, d->olist);
 }
 
 /***********************************************************************
@@ -358,11 +381,11 @@ void devices::execsiggen(devlink d)
 {
 	if (d->waveform[d->counter])
 	{
-		signalupdate (high, d->olist->sig);
+		signalupdate (high, d->olist);
 	}
 	else
 	{
-		signalupdate (low, d->olist->sig);
+		signalupdate (low, d->olist);
 	}
 }
 
@@ -380,11 +403,15 @@ void devices::updateclocks (void)
   for (d = netz->devicelist (); d != NULL; d = d->next) {
     if (d->kind == aclock) {
       if (d->counter >= d->frequency) {
-	d->counter = 0;
-	if (d->olist->sig == high)
-	  d->olist->sig = falling;
-	else
-	  d->olist->sig = rising;
+		d->counter = 0;
+		if (d->olist->sig == high)
+		{
+		  d->memory = low;
+		}
+		else
+		{
+		  d->memory = high;
+		}
       }
       (d->counter)++;
     }
@@ -451,6 +478,11 @@ void devices::executedevices (bool& ok, monitor* mmz)
       if (debugging)
         showdevice (d);
     }
+    for (d = netz->devicelist (); d != NULL; d = d->next) {
+		for (outplink o = d->olist; o != NULL; o = o->next) {
+			o->sig = o->nextsig;
+		}
+	}
     if (mmz)
         mmz->recordsignals(true);
     if (machinecycle==1) maxmachinecycles = 20 + 2*count;
@@ -499,6 +531,10 @@ void devices::debug (bool on)
 {
   debugging = on;
 }
+void devices::debugIndeterminate (bool on)
+{
+  debuggingIndeterminate = on;
+}
 
 
 /***********************************************************************
@@ -522,6 +558,7 @@ devices::devices (names* names_mod, network* net_mod)
   dtab[siggen]	  =  nmz->lookup("SIGGEN");
   dtab[baddevice] =  blankname;
   debugging = false;
+  debuggingIndeterminate = false;
   datapin = nmz->lookup("DATA");
   clkpin  = nmz->lookup("CLK");
   setpin  = nmz->lookup("SET");

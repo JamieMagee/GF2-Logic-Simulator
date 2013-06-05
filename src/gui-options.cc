@@ -25,6 +25,7 @@ void LogsimOptions::Save()
 	config->Write(wxT("continuousRate"), continuousRate);
 	config->Write(wxT("debugMachineCycles"), debugMachineCycles);
 	config->Write(wxT("debugSim"), debugSim);
+	config->Write(wxT("debugSimIndeterminate"), debugSim);
 	delete config;
 }
 
@@ -39,6 +40,7 @@ void LogsimOptions::Load()
 	config->Read(wxT("continuousRate"), &continuousRate);
 	config->Read(wxT("debugMachineCycles"), &debugMachineCycles);
 	config->Read(wxT("debugSim"), &debugSim);
+	config->Read(wxT("debugSimIndeterminate"), &debugSim);
 	delete config;
 }
 
@@ -51,6 +53,7 @@ void LogsimOptions::ResetOptions()
 	continuousRate = 50;
 	debugMachineCycles = false;
 	debugSim = false;
+	debugSimIndeterminate = true;
 }
 
 OptionsDialog::OptionsDialog(LogsimOptions* options_in, wxWindow* parent, wxWindowID id, const wxString& title) :
@@ -116,6 +119,9 @@ OptionsDialog::OptionsDialog(LogsimOptions* options_in, wxWindow* parent, wxWind
 	debugSimCtrl = new wxCheckBox(this, OPTIONS_DEBUG_SIMULATION_ID, _("Print simulation debug information"));
 	debugSimCtrl->SetValue(options->debugSim);
 	debugBox->Add(debugSimCtrl, 0, wxALIGN_CENTER_VERTICAL, 10);
+	debugSimIndeterminateCtrl = new wxCheckBox(this, OPTIONS_DEBUG_SIMINDET_ID, _("Show warnings about indeterminate D-type behaviour"));
+	debugSimIndeterminateCtrl->SetValue(options->debugSimIndeterminate);
+	debugBox->Add(debugSimIndeterminateCtrl, 0, wxALIGN_CENTER_VERTICAL, 10);
 	rightSizer->Add(debugBox, 0, wxEXPAND | wxALL, 10);
 
 	optionsSizer->Add(leftSizer, 1, wxEXPAND | wxALL, 0);
@@ -193,6 +199,11 @@ void OptionsDialog::OnOK(wxCommandEvent& event)
 	if (debugSimCtrl->IsChecked() != options->debugSim)
 	{
 		options->debugSim = debugSimCtrl->IsChecked();
+		changedSomething = true;
+	}
+	if (debugSimIndeterminateCtrl->IsChecked() != options->debugSimIndeterminate)
+	{
+		options->debugSimIndeterminate = debugSimIndeterminateCtrl->IsChecked();
 		changedSomething = true;
 	}
 	if (changedSomething)

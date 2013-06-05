@@ -20,7 +20,7 @@ public:
 	double xScaleMin, xScaleMax;
 	int sigHeightMin, sigHeightMax;
 	int continuousRate;
-	bool debugMachineCycles, debugSim;
+	bool debugMachineCycles, debugSim, debugSimIndeterminate;
 	ObserverSubject optionsChanged;
 
 	void ResetOptions();
@@ -39,6 +39,7 @@ private:
 	wxSpinCtrl* continuousRateCtrl;
 	wxCheckBox* debugMachineCyclesCtrl;
 	wxCheckBox* debugSimCtrl;
+	wxCheckBox* debugSimIndeterminateCtrl;
 public:
 	OptionsDialog(LogsimOptions* options_in, wxWindow* parent, wxWindowID id, const wxString& title);
 	void OnOK(wxCommandEvent& event);
