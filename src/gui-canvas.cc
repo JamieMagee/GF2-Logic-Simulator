@@ -238,12 +238,12 @@ void GLCanvasMonitorTrace::DrawName(MyGLCanvas *canvas, const wxRect& visibleReg
 	if (xOffset < visibleRegion.x+xBgName && c->mmz()->getsamplecount(monId))
 	{
 		glColor4f(0.0, 0.0, 0.0, 0.4);
-		DrawGlutText(xBgName, yCentre-5, monName, GLUT_BITMAP_HELVETICA_12);
+		DrawGlutText(xBgName, yCentre-4, monName, GLUT_BITMAP_HELVETICA_12);
 	}
 	else
 	{
 		glColor4f(0.0, 0.0, 0.0, 1.0);
-		DrawGlutText(xOffset-monNameWidth-5, yCentre-5, monName, GLUT_BITMAP_HELVETICA_12);
+		DrawGlutText(xOffset-monNameWidth-5, yCentre-4, monName, GLUT_BITMAP_HELVETICA_12);
 	}
 }
 

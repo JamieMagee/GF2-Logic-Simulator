@@ -48,12 +48,12 @@ void LogsimOptions::ResetOptions()
 {
 	xScaleMin = 2;
 	xScaleMax = 40;
-	sigHeightMin = 50;
-	sigHeightMax = 200;
+	sigHeightMin = 40;
+	sigHeightMax = 150;
 	continuousRate = 50;
 	debugMachineCycles = false;
 	debugSim = false;
-	debugSimIndeterminate = true;
+	debugSimIndeterminate = false;
 }
 
 OptionsDialog::OptionsDialog(LogsimOptions* options_in, wxWindow* parent, wxWindowID id, const wxString& title) :
@@ -77,10 +77,10 @@ OptionsDialog::OptionsDialog(LogsimOptions* options_in, wxWindow* parent, wxWind
 	xScaleMaxCtrl->SetRange(2,1000);
 	xScaleMaxCtrl->SetValue(options->xScaleMax);
 	sigHeightMinCtrl = new wxSpinCtrl(this, OPTIONS_SIGHEIGHT_MIN_ID);
-	sigHeightMinCtrl->SetRange(30,1000);
+	sigHeightMinCtrl->SetRange(8,1000);
 	sigHeightMinCtrl->SetValue(options->sigHeightMin);
 	sigHeightMaxCtrl = new wxSpinCtrl(this, OPTIONS_SIGHEIGHT_MAX_ID);
-	sigHeightMaxCtrl->SetRange(30,1000);
+	sigHeightMaxCtrl->SetRange(8,1000);
 	sigHeightMaxCtrl->SetValue(options->sigHeightMax);
 
 	tracesSizer->Add(new wxStaticText(this, wxID_ANY, _("Min horizontal scale (pixels per cycle):")), wxGBPosition(row,0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxALL | wxALIGN_RIGHT, 1);
