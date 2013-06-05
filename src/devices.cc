@@ -435,7 +435,13 @@ void devices::executedevices (bool& ok, monitor* mmz)
     if (debugging)
       cout << "machine cycle # " << machinecycle << endl;
     steadystate = true;
+    bool loggedSignals = false;
     for (d = netz->devicelist (); d != NULL; d = d->next) {
+	  if (d->kind==aclock && mmz && !loggedSignals)
+	  {
+        mmz->recordsignals(true);
+        loggedSignals = true;
+      }
       switch (d->kind) {
         case aswitch:  execswitch (d);           break;
         case aclock:   execclock (d);            break;
@@ -451,8 +457,6 @@ void devices::executedevices (bool& ok, monitor* mmz)
       if (debugging)
         showdevice (d);
     }
-    if (mmz)
-        mmz->recordsignals(true);
     if (machinecycle==1) maxmachinecycles = 20 + 2*count;
   } while ((! steadystate) && (machinecycle < maxmachinecycles));
   if (debugging)
