@@ -322,6 +322,7 @@ void devices::execdtype (devlink d, int cycles)
 			{
 				cout << "Warning: indeterminate output for D-type " << nmz->getnamestring(d->id) << ", input changed during hold time" << endl;
 			}
+			d->holdCountdown = 0;
 		}
 		else
 		{
@@ -345,6 +346,7 @@ void devices::execdtype (devlink d, int cycles)
 		else
 		{
 			d->memory = (rand()%2 ? high : low);
+			d->holdCountdown = 0;
 			if (debuggingIndeterminate)
 			{
 				if (d->steadyCounter==0)

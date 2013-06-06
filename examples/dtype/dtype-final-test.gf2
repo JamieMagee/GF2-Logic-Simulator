@@ -1,0 +1,59 @@
+/*
+This circuit shows the effect of a change in the input signal
+around the rising clock edge for the final version of the logic
+simulator. This is slightly different to dtype-random-determinate.gf2
+due to the double buffering of output signal states, which changed the
+gate propagation delay. Gate type has been changed from OR to AND. 
+
+With double-buffering, the following timings are always true:
+AND rising edge delayed by 1, falling edge delayed by 2
+OR  rising edge delayed by 2, falling edge delayed by 1
+*/
+
+DEVICES
+SWITCH R:0;
+SWITCH S:0;
+
+CLOCK data1:1;
+DTYPE D1;
+AND clk1:1;
+
+CLOCK clk2:1;
+DTYPE D2;
+AND data2:1;
+
+CLOCK clk3:1;
+DTYPE D3;
+
+END
+
+CONNECTIONS
+clk1.I1 = data1;
+D1.DATA = data1;
+D1.CLK = clk1;
+D1.SET = S;
+D1.CLEAR = R;
+
+data2.I1 = clk2;
+D2.DATA = data2;
+D2.CLK = clk2;
+D2.SET = S;
+D2.CLEAR = R;
+
+D3.DATA = clk3;
+D3.CLK = clk3;
+D3.SET = S;
+D3.CLEAR = R;
+
+END
+
+MONITORS
+data1;
+clk1;
+D1.Q;
+data2;
+clk2;
+D2.Q;
+clk3;
+D3.Q;
+END
