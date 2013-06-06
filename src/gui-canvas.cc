@@ -275,6 +275,9 @@ MyGLCanvas::MyGLCanvas(circuit* circ, LogsimOptions* options_in, wxWindow *paren
 	}
 	options->optionsChanged.Attach(this, &MyGLCanvas::OnOptionsChanged);
 	SetScrollRate(1,1);
+
+	// From http://wiki.wxwidgets.org/WxGLCanvas: to avoid flashing on MSW
+	SetBackgroundStyle(wxBG_STYLE_CUSTOM);
 }
 
 MyGLCanvas::~MyGLCanvas()
