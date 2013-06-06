@@ -82,7 +82,14 @@ Our logic simulator is able to simulate any number of circuits which include the
 
 It uses files written in the language as specified in our EBNF in Appendix~\ref{sec:EBNF}, with the file extension \texttt{.gf2} and have MIME type \texttt{text/plain}. Errors in a definition file are reported fully to the user upon reading a definition file, and give unique error codes for each different type of error. There is no limit on the number of devices in a network (except for that implied by the available memory of the computer). There may also be an unlimited number of monitors. For a complete guide on how to operate our logic simulator, please see the user guide in Appendix~\ref{sec:guide}.
 
-For the structure of our logic simulator we made use of modularisation through the use of object oriented programming. The logic circuit is internally represented using the network class, in addition to the devices class which stores details about the properties of each device. Names of devices are represented internally by a unique integer. The names class handles the storage of names as they are read in, as well as storing a list of reserved names upon instantiation. When a file is opened, it is read by the parser class, by creating an instance of the scanner class which reads through the definition file character, by character, building them up into symbols which are returned to the parser. Depending on the order of the symbols that were read in, the parser can create devices, connections or monitors (or throw errors). Once the entire definition file has been read in, the gui class interprets commands issued by the user and makes appropriate calls to the network, monitor and devices classes. 
+For the structure of our logic simulator we made use of modularisation through the use of object oriented programming. The logic circuit is internally represented using the network class, in addition to the devices class which stores details about the properties of each device. Names of devices are represented internally by a unique integer. The names class handles the storage of names as they are read in, as well as storing a list of reserved names upon instantiation. When a file is opened, it is read by the parser class, by creating an instance of the scanner class which reads through the definition file character, by character, building them up into symbols which are returned to the parser. Depending on the order of the symbols that were read in, the parser can create devices, connections or monitors (or throw errors). Once the entire definition file has been read in, the gui class interprets commands issued by the user and makes appropriate calls to the network, monitor and devices classes. Figure~\ref{fig:deps} shows the dependencies for \texttt{parser.cc}
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=.65\textwidth]{parserdeps.png}
+ \caption{Dependency diagram for \texttt{parser.cc}}
+ \label{fig:deps}
+\end{figure}
 
 \section{Development Style}
 
@@ -106,22 +113,29 @@ During the maintenance phase of the project we divided up the tasks and tackled 
 
 \textbf{Continuous Simulation:} M Jackson
 
-While the tasks were split up, and the person assigned to the task contributed the majority of the code, the power of \texttt{git} allowed other members of the team to contribute easily.
+While the tasks were split up, and the person assigned to the task contributed the majority of the code, the power of \texttt{git} allowed other members of the team to contribute easily. The GUI provided by the webservice GitHub, as seen in Figure~\ref{fig:github} also allowed us to track issues and feature requests, as well as providing a user friendly manner in which to manage our repository.
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=.79\textwidth]{github}
+ \caption{The GUI provided by GitHub}
+ \label{fig:github}
+\end{figure}
 
 Overall I believe our team worked efficiently, and as a result we were able to achieve all the requirements of the client within the deadlines we were set.
 
 \section{My Contribution}
 
-I took on responsibility for writing the names and scanner classes. In addition, I wrote approximately 25\% of the parser class. the names class stores a list of all the words used within a definition file, and methods to manipulate them. It is initialised with only the reserved words, but can be populated as a definition file is read. the scanner class reads through the definition file, character by character, and is able to return complete symbols to the parser. It is able to return the internal representation of a symbol, the type of symbol and optionally the value. The parser class analyses the definition file as it is read in according to the rules laid out in our EBNF. It is then able to create devices, connections and monitors that are laid out in the definition file. I wrote the \texttt{newConnection, monitorList} and \texttt{newMonitor} methods. The \texttt{newConnection} and \texttt{newMonitor} methods deal with reading in a connection and monitor respectively, and creating them using the network and monitor classes respectively. The \texttt{monitorList} class deals with reading in an entire \texttt{MONITOR} block, as defined by our EBNF, which can be seen in Appendix~\ref{sec:EBNF}
+I took on responsibility for writing the names and scanner classes. In addition, I wrote approximately 25\% of the parser class. The names class stores a list of all the words used within a definition file, and methods to manipulate them. It is initialised with only the reserved words, but can be populated as a definition file is read. The scanner class reads through the definition file, character by character, and is able to return complete symbols to the parser. It is able to return the internal representation of a symbol, the type of symbol and optionally the value. The parser class analyses the definition file as it is read in according to the rules laid out in our EBNF. It is then able to create devices, connections and monitors that are laid out in the definition file. I wrote the \texttt{newConnection, monitorList} and \texttt{newMonitor} methods. The \texttt{newConnection} and \texttt{newMonitor} methods deal with reading in a connection and monitor respectively, and creating them using the network and monitor classes respectively. The \texttt{monitorList} class deals with reading in an entire \texttt{MONITOR} block, as defined by our EBNF, which can be seen in Appendix~\ref{sec:EBNF}
 
 Once the majority of the software was written, I designed a definition file for each error and warning our logic simulator can throw and then wrote a shell script which would attempt to run each definition file, and record the output from our logic simulator. In addition to testing for errors, I wrote a shell script which would run through each of our test definition files, in Appendix~\ref{sec:examples}, and record the output. Both the shell scripts can be found in Appendix~\ref{sec:tests}.
 
-During the maintenance phase of the project, I undertook the task to implement a non-zero hold time for d-type flip flops, as well as randomising the order of execution of devices. the non-deterministic characteristics of d-types required editing of the devices class, specifically the \texttt{execdtype} method. Randomising the order of execution of devices was implemented in the network class, and required reading the values from the existing devices list, shuffling the list (while still retaining clocks at the end of the list) and writing it back.
+During the maintenance phase of the project, I undertook the task to implement a non-zero hold time for d-type flip flops, as well as randomising the order of execution of devices. The non-deterministic characteristics of d-types required editing of the devices class, specifically the \texttt{execdtype} method. Randomising the order of execution of devices was implemented in the network class, and required reading the values from the existing devices list, shuffling the list (while still retaining clocks at the end of the list) and writing it back.
 
 \section{Testing}
 
-We used two main tests of testing - unit and system testing - both of which are industry standard practices. For our unit testing, Martin wrote an errors class which compared the actual output from various units of code, to the expected output. For system testing I wrote a shell script which passed definition files to the logic simulator and recorded the output in a text file. There were two variations on the shell script: One which ran known good definition files and therefore had to input the commands to run the simulation in addition to recording the output; Another which ran known bad definition files and only expected parsing errors which it recorded. An example of the output produced by the the test shell script is as follows:
-\pagebreak
+We used two main tests of testing - unit and system testing - both of which are industry standard practices. For our unit testing, Martin wrote an errors class which compared the actual output from various units of code, to the expected output. For system testing I wrote a shell script which passed definition files to the logic simulator and recorded the output in a text file. There were two variations on the shell script: one which ran known good definition files and therefore had to input the commands to run the simulation in addition to recording the output; another which ran known bad definition files and only expected parsing errors which it recorded. An example of the output produced by the the test shell script is as follows:
+
 \begin{verbatim}
 processing sipo.gf2...
 Logic Simulator: interactive command interface
@@ -145,6 +159,12 @@ Error 0x000C: Connection must start with the name of a device
 Unconnected Input : G1.I1
 There is 1 error
 \end{verbatim}
+
+We tried to follow best practices by having a different team member, than the member that wrote the code, write the tests. I wrote the names and scanner classes, and Martin wrote the tests for them. Tim implemented the majority of the parser, and I wrote the definition files to test them and later a shell script to run through every definition file in a folder.
+
+For usability testing, we observed the demonstrator during the software testing for the second interim report. During the maintenance phase we then implemented the changes that were suggest, such as correcting the error messages to make sure that they line up correctly with the error produced.
+
+During the maintenance phase, I tested the changes to the d-type flip-flops by printing out the state of the d-type. This allowed us to check whether the output was deterministic or non deterministic.
 
 
 \section{Conclusions}
@@ -236,7 +256,7 @@ All supplied definition files and circuit diagrams were written and designed by 
  \label{fig:example-sipo}
 \end{figure}
 
-\textbf{NB} The software used to draw the circuit diagram does not support the same style of D flip-flop used in the definition file, and Fig. \ref{fig:example-sipo} was the closest achievable.
+\textbf{NB} The software used to draw the circuit diagram does not support the same style of D flip-flop used in the definition file, and Fig.~\ref{fig:example-sipo} was the closest achievable.
 
 \subsection{Gated D Latch}
 
@@ -251,7 +271,7 @@ All supplied definition files and circuit diagrams were written and designed by 
  \label{fig:example-dlatch}
 \end{figure}
 
-\textbf{NB} The software used to draw the circuit diagram does not support the NAND gates with one input. Therefore the NAND gate G1 was substituted for a NOT gate as can be seen in Fig. \ref{fig:example-dlatch}.
+\textbf{NB} The software used to draw the circuit diagram does not support the NAND gates with one input. Therefore the NAND gate G1 was substituted for a NOT gate as can be seen in Fig.~\ref{fig:example-dlatch}.
 
 \subsection{Signal Generator Example}
 
@@ -266,7 +286,7 @@ All supplied definition files and circuit diagrams were written and designed by 
  \label{fig:example-siggen}
 \end{figure}
 
-\textbf{NB} The software used to draw the circuit diagram does not support the AND gates with four inputs. Therefore three AND gates with two inputs each were substituted for the single AND gate, A1, with four inputs as can be seen in Fig. \ref{fig:example-siggen}.
+\textbf{NB} The software used to draw the circuit diagram does not support the AND gates with four inputs. Therefore three AND gates with two inputs each were substituted for the single AND gate, A1, with four inputs as can be seen in Fig.~\ref{fig:example-siggen}.
 
 \pagebreak
 
