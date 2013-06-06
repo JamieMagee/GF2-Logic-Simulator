@@ -1,6 +1,6 @@
 /*
-This circuit demonstrates one case of randomised device order working,
-and two problems with it.
+This circuit demonstrates one case where the initial implementation using
+randomised device order works, and two problems with it.
 
 When run with randomised device order:
 For D1, rising data edge is always one machinecycle after the rising clock edge.

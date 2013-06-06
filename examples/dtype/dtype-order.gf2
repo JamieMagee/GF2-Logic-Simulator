@@ -1,6 +1,7 @@
-/* Demonstration of effect of device declaration order on D-type behaviour
-   With the original code, D1 is high, D2 is low. Outcome is random for both
-   D1 and D2 with both the randomised device order implementation and the final implementation of the D-type maintenance modifications. */
+/* Demonstration of the effect of device declaration order on D-type behaviour
+   With the original code, D1 is always high, D2 is always low. 
+   Outcome is random for both D1 and D2 with both the randomised device order
+   implementation and the final implementation of the D-type maintenance modifications. */
 
 DEVICES
 SWITCH R:0;

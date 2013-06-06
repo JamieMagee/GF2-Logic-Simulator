@@ -6,8 +6,8 @@ due to the double buffering of output signal states, which changed the
 gate propagation delay. Gate type has been changed from OR to AND. 
 
 With double-buffering, the following timings are always true:
-AND rising edge delayed by 1, falling edge delayed by 2
-OR  rising edge delayed by 2, falling edge delayed by 1
+AND gate: rising edge delayed by 1, falling edge delayed by 2
+OR  gate: rising edge delayed by 2, falling edge delayed by 1
 */
 
 DEVICES

@@ -1,0 +1,43 @@
+/* An example circuit that causes the simulator to fail with the error message "Error: network is oscillating" */
+
+/* Lots of gates connected in series */
+
+/* This is the same as oscillating.gf2, but with the order of declaration reversed */
+
+DEVICES
+CLOCK CLK1:5;
+AND G13:1;
+AND G12:1;
+AND G11:1;
+AND G10:1;
+AND G9:1;
+AND G8:1;
+AND G7:1;
+AND G6:1;
+AND G5:1;
+AND G4:1;
+AND G3:1;
+AND G2:1;
+AND G1:1;
+END
+
+CONNECTIONS
+G1.I1 = CLK1;
+G2.I1 = G1;
+G3.I1 = G2;
+G4.I1 = G3;
+G5.I1 = G4;
+G6.I1 = G5;
+G7.I1 = G6;
+G8.I1 = G7;
+G9.I1 = G8;
+G10.I1 = G9;
+G11.I1 = G10;
+G12.I1 = G11;
+G13.I1 = G12;
+END
+
+MONITORS
+CLK1;
+G12;
+END
