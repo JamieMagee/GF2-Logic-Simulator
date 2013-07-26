@@ -1,11 +1,13 @@
 language: cpp
 
-compiler: gcc
+compiler: 
+- gcc
+- clang
 
 before_install:
-  - sudo apt-get update
-  - sudo apt-get upgrade -y
-  - sudo apt-get install libglew-dev libwxgtk2.8-dev freeglut3-dev
+  - sudo apt-get -qq update
+  - sudo apt-get -qq upgrade
+  - sudo apt-get -qq install libglew-dev libwxgtk2.8-dev freeglut3-dev
   
 before_script: cd src
 
@@ -17,6 +19,8 @@ script:
 - sed -i '/^#define USE_GUI/ s.^.//.' logsim.cc
 - make logsim
 - cd ../examples
+- "export DISPLAY=:99.0"
+- "sh -e /etc/init.d/xvfb start"
 - ./test.sh
 - cat test.txt
 - cd errors
