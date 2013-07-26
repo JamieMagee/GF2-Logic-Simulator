@@ -1,0 +1,11 @@
+language: cpp
+
+compiler: gcc
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install glew libwxgtk2.8-dev libwxgtk2.8-dbg libglut3-dev
+  
+before_script: cd src
+
+script: make logsim
