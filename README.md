@@ -1,4 +1,4 @@
-IIA GF2 Software
+IIA GF2 Software [![Build Status](https://travis-ci.org/JamieMagee/GF2-Logic-Simulator.png)](https://travis-ci.org/JamieMagee/GF2-Logic-Simulator)
 =================
 Team 8 - Martin Jackson (mj380), Tim Hillel (th389) and Jamie Magee (jam96)
 ![Logic Simulator](/report2/jam96/simulation.png)
