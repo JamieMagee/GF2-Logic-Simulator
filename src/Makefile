@@ -1,6 +1,6 @@
 OPENGL_LIBS = -lglut -lGL -lGLU
 
-CXX = $(shell wx-config --cxx)
+#CXX = $(shell wx-config --cxx)
 
 SRC = $(wildcard *.cc)
 
