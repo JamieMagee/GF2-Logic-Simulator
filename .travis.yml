@@ -8,4 +8,7 @@ before_install:
   
 before_script: cd src
 
-script: make logsim
+script: 
+- make logsim
+- make runtests
+- ./runtests
