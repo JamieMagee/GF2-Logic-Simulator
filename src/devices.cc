@@ -482,6 +482,7 @@ void devices::executedevices (bool& ok, monitor* mmz)
         case xorgate:  execxorgate (d);          break;
         case dtype:    execdtype (d, machinecycle);break;   
         case siggen:   execsiggen (d);           break;
+        case baddevice:				 break;
       }
       if (machinecycle==1) count++;
       if (debugging)
