@@ -3,9 +3,9 @@ language: cpp
 compiler: gcc
 
 before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get upgrade -qq
-  - sudo apt-get install libglew-dev libwxgtk2.8-dev freeglut3-dev -qq
+  - sudo apt-get update
+  - sudo apt-get upgrade -y
+  - sudo apt-get install libglew-dev libwxgtk2.8-dev freeglut3-dev
   
 before_script: cd src
 
