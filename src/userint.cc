@@ -243,8 +243,9 @@ void userint::continuecmd (void)
 	ncycles = maxcycles - cyclescompleted;
       cout << "Continuing for " << ncycles << " cycles" << endl;
       runnetwork (ncycles);
-    } else
-      cout << "Error: nothing to continue!" << endl;
+    } 
+  else 
+    cout << "Error: nothing to continue!" << endl;
 }
 
 
