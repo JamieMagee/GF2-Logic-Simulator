@@ -207,7 +207,7 @@ void DevicesListBox::OnDeviceSelectionChanged()
 
 	for (int i=0; i<devs.size(); i++)
 	{
-		if (devs[i].d = selectedDev->Get())
+		if (devs[i].d == selectedDev->Get())
 		{
 			SetSelection(i);
 			return;
