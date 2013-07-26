@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "" > error.txt
+echo "" > test.txt
 for f in *.gf2
 do
 	echo "processing $f..."
