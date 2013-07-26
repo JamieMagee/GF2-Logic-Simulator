@@ -135,7 +135,7 @@ bool error::anyErrors()
 		}
 		return 0;
 	}
-	if (errorCount == 1)
+	else if (errorCount == 1)
 	{
 		if (warningCount == 0)
 		{
@@ -151,7 +151,7 @@ bool error::anyErrors()
 		}
 		return 1;
 	}
-	if (errorCount > 1)
+	else if (errorCount > 1)
 	{
 		if (warningCount == 0)
 		{
@@ -167,4 +167,5 @@ bool error::anyErrors()
 		}
 		return 1;
 	}
+	else return 0;
 }
