@@ -244,8 +244,10 @@ void userint::continuecmd (void)
       cout << "Continuing for " << ncycles << " cycles" << endl;
       runnetwork (ncycles);
     } 
-  else 
+  else
+  {
     cout << "Error: nothing to continue!" << endl;
+  }
 }
 
 
