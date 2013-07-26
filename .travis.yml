@@ -18,7 +18,7 @@ script:
 - make logsim
 - cd ../examples
 - ./test.sh
-- cat text.txt
+- cat test.txt
 - cd errors
-- ./errors.sh
-- cat errors.txt
+- ./error.sh
+- cat error.txt
