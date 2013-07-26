@@ -3,8 +3,9 @@ language: cpp
 compiler: gcc
 
 before_install:
-  - sudo apt-get update
-  - sudo apt-get install libglew-dev libwxgtk2.8-dev freeglut3-dev
+  - sudo apt-get update -qq
+  - sudo apt-get upgrade -qq
+  - sudo apt-get install libglew-dev libwxgtk2.8-dev freeglut3-dev -qq
   
 before_script: cd src
 
@@ -12,3 +13,12 @@ script:
 - make logsim
 - make runtests
 - ./runtests
+- make clean
+- sed -i '/^#define USE_GUI/ s.^.//.' logsim.cc
+- make logsim
+- cd ../examples
+- ./test.sh
+- cat text.txt
+- cd errors
+- ./errors.sh
+- cat errors.txt
