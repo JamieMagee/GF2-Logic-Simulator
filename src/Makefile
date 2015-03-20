@@ -15,7 +15,7 @@ T_OBJECTS = runtests.o tests.o names.o scanner.o
 .SUFFIXES:	.o .cc
 
 .cc.o :
-	$(CXX) -c `wx-config --cxxflags` -g -o $@ $<
+	$(CXX) -c `wx-config --cxxflags` $(CFLAGS) -g -o $@ $<
 
 all:    logsim guitest
 
