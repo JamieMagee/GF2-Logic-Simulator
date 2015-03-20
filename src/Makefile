@@ -1,6 +1,6 @@
 OPENGL_LIBS = -lglut -lGL -lGLU
 
-#CXX = $(shell wx-config --cxx)
+CFLAGS = -Wall -Werror -Wextra -pedantic
 
 SRC = $(wildcard *.cc)
 
@@ -20,13 +20,13 @@ T_OBJECTS = runtests.o tests.o names.o scanner.o
 all:    logsim guitest
 
 logsim:	$(L_OBJECTS)
-	$(CXX) -o logsim $(L_OBJECTS) `wx-config --libs --gl_libs` $(OPENGL_LIBS)
+	$(CXX) -o logsim $(CFLAGS) $(L_OBJECTS) `wx-config --libs --gl_libs` $(OPENGL_LIBS)
 
 guitest: $(G_OBJECTS)
-	 $(CXX) -o guitest $(G_OBJECTS) `wx-config --libs --gl_libs` $(OPENGL_LIBS)
+	 $(CXX) -o guitest $(CFLAGS) $(G_OBJECTS) `wx-config --libs --gl_libs` $(OPENGL_LIBS)
 
 runtests: $(T_OBJECTS)
-	$(CXX) -o runtests $(T_OBJECTS) `wx-config --libs --gl_libs` $(OPENGL_LIBS)
+	$(CXX) -o runtests $(CFLAGS) $(T_OBJECTS) `wx-config --libs --gl_libs` $(OPENGL_LIBS)
 
 observer-test: observer-test.cc observer.h
 
