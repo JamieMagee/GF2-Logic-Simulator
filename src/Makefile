@@ -1,6 +1,6 @@
 OPENGL_LIBS = -lglut -lGL -lGLU
 
-CFLAGS = -Wall -Wextra -pedantic -std=c++1y 
+CFLAGS = -Wall -Wextra -pedantic -std=c++0x 
 
 SRC = $(wildcard *.cc)
 
